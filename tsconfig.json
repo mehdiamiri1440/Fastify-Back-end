@@ -1,0 +1,38 @@
+{
+  "extends": "@tsconfig/node18/tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "Fragment",
+    "strict": true,
+    "lib": ["es2022"],
+    "target": "es2022",
+    "noImplicitAny": true,
+    "module": "es2022",
+    "allowJs": false,
+    "checkJs": false,
+    "outDir": "dist",
+    "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "importsNotUsedAsValues": "remove",
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      // "$models/*": ["./src/models/*"],
+      // "$services/*": ["./src/services/*"],
+      // "$plugins/*": ["./src/plugins/*"],
+      // "$authentication/*": ["./src/authentication/*"],
+      // "$utils/*": ["./src/utils/*"],
+      "$src/*": ["./src/*"]
+    }
+  },
+  "ts-node": {
+    // It is faster to skip typechecking.
+    // Remove if you want ts-node to do typechecking.
+    "transpileOnly": true,
+    "swc": true
+  }
+}
