@@ -6,7 +6,18 @@
   "type": "module",
   "scripts": {
     "start": "node --loader ts-paths-esm-loader src/app.ts",
-    "dev:watch": "node --watch --loader ts-paths-esm-loader src/app.ts"
+    "dev": "node --loader ts-paths-esm-loader src/app.ts",
+    "dev:watch": "node --watch --loader ts-paths-esm-loader src/app.ts",
+    "format": "prettier --loglevel=error --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "lint:quiet": "eslint . --quiet",
+    "check": "tsc --noEmit",
+    "ci": "npm run format:check && npm run lint:quiet && npm run check",
+    "test": "node --test -r dotenv/config --loader ts-paths-esm-loader ./test/*",
+    "test:human": "node --test --test-reporter=spec -r dotenv/config --loader ts-paths-esm-loader ./test/*",
+    "//": "this is a workaround for docker build. it will not run husky install in docker build",
+    "prepare": "if [ -d .git ]; then husky install; fi"
   },
   "keywords": [],
   "author": "",
@@ -29,6 +40,14 @@
     "typeorm": "^0.3.12"
   },
   "devDependencies": {
-    "@types/qs": "^6.9.7"
+    "@types/qs": "^6.9.7",
+    "@typescript-eslint/eslint-plugin": "^5.55.0",
+    "@typescript-eslint/parser": "^5.55.0",
+    "dotenv": "^16.0.3",
+    "eslint": "^8.36.0",
+    "husky": "^8.0.3",
+    "pino-pretty": "^10.0.0",
+    "prettier": "^2.8.4",
+    "undici": "^5.21.0"
   }
 }

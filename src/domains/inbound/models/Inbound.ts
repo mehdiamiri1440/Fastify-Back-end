@@ -1,27 +1,28 @@
-import { User } from "$src/domains/user/models/User.js";
+import { User } from '$src/domains/user/models/User.js';
+import type { Relation } from 'typeorm';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
   ManyToOne,
   OneToMany,
-  CreateDateColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
-  DeleteDateColumn,
-} from "typeorm";
-import { InboundImage } from "./InboundImage.js";
-import { InboundProduct } from "./InboundProduct.js";
+} from 'typeorm';
+import { InboundImage } from './InboundImage.js';
+import { InboundProduct } from './InboundProduct.js';
 
 enum InboundType {
-  NEW = "new",
-  RETURNED = "returned",
+  NEW = 'new',
+  RETURNED = 'returned',
 }
 
 enum InboundStatus {
-  PRE_DELIVERY = "pre_delivery",
-  LOAD = "load",
-  SORTING = "sorting",
-  SORTED = "sorted",
+  PRE_DELIVERY = 'pre_delivery',
+  LOAD = 'load',
+  SORTING = 'sorting',
+  SORTED = 'sorted',
 }
 
 @Entity()
@@ -29,10 +30,10 @@ export class Inbound {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: "enum", enum: InboundType })
+  @Column({ type: 'enum', enum: InboundType })
   type!: InboundType;
 
-  @Column({ type: "enum", enum: InboundStatus })
+  @Column({ type: 'enum', enum: InboundStatus })
   status!: InboundStatus;
 
   @Column()
@@ -57,8 +58,8 @@ export class Inbound {
   deletedAt!: Date;
 
   @OneToMany(() => InboundImage, (image) => image.inbound)
-  images!: InboundImage[];
+  images!: Relation<InboundImage[]>;
 
   @OneToMany(() => InboundProduct, (product) => product.inbound)
-  products!: InboundProduct[];
+  products!: Relation<InboundProduct[]>;
 }

@@ -1,23 +1,23 @@
-import { ASN } from "../src/domains/inbound/models/Inbound.js";
+import { ASN } from '../src/domains/inbound/models/Inbound.js';
 
-import { AppDataSource } from "$src/infra/data-source.js";
-import * as Filter from "$src/infra/filter.js";
-import { ListQueryOptions } from "$src/infra/list-schema-querystring.js";
-import * as Order from "$src/infra/order.js";
-import { FastifyPluginAsyncTypebox } from "@fastify/type-provider-typebox";
-import { Type } from "@sinclair/typebox";
+import { AppDataSource } from '$src/infra/data-source.js';
+import * as Filter from '$src/infra/filter.js';
+import { ListQueryOptions } from '$src/infra/list-schema-querystring.js';
+import * as Order from '$src/infra/order.js';
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { Type } from '@sinclair/typebox';
 
 const AsnRepo = AppDataSource.getRepository(ASN);
 
 const plugin: FastifyPluginAsyncTypebox = async function (fastify, _opts) {
   fastify.route({
-    method: "GET",
-    url: "/",
+    method: 'GET',
+    url: '/',
     schema: {
       querystring: ListQueryOptions({
-        orderable: ["id", "name"],
-        filterable: ["name"],
-        searchable: ["name"],
+        orderable: ['id', 'name'],
+        filterable: ['name'],
+        searchable: ['name'],
       }),
     },
     handler: async (req) => {
@@ -46,15 +46,15 @@ const plugin: FastifyPluginAsyncTypebox = async function (fastify, _opts) {
   });
 
   fastify.route({
-    method: "POST",
-    url: "/",
+    method: 'POST',
+    url: '/',
     schema: {
       body: Type.Object({
         // name length must be between 3 and 255 characters
         name: Type.String({
           minLength: 3,
           maxLength: 255,
-          pattern: "^[a-zA-Z0-9 ]+$",
+          pattern: '^[a-zA-Z0-9 ]+$',
         }),
         customerId: Type.Number(),
       }),

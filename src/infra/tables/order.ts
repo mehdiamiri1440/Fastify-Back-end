@@ -1,4 +1,4 @@
-import { FastifyRequest } from "fastify";
+import { FastifyRequest } from 'fastify';
 
 export function from(req: FastifyRequest) {
   const { query } = req;
@@ -12,6 +12,6 @@ export function from(req: FastifyRequest) {
   }
 
   return {
-    [orderBy ?? "id"]: order ?? "desc",
+    [orderBy ?? 'id']: order ?? 'desc',
   };
 }

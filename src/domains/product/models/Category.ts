@@ -1,4 +1,4 @@
-import { User } from "$src/domains/user/models/User.js";
+import { User } from '$src/domains/user/models/User.js';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -7,7 +7,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-} from "typeorm";
+} from 'typeorm';
 
 @Entity()
 export class Category {

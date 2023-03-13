@@ -1,11 +1,11 @@
-import { Category } from "./Category.js";
-import { Color } from "./Color.js";
-import { Size } from "./Size.js";
-import { Brand } from "./Brand.js";
-import { Unit } from "./Unit.js";
-import { TaxType } from "./TaxType.js";
-import { User } from "$src/domains/user/models/User.js";
-import { ProductSalePrice } from "./ProductSalePrice.js";
+import { Category } from './Category.js';
+import { Color } from './Color.js';
+import { Size } from './Size.js';
+import { Brand } from './Brand.js';
+import { Unit } from './Unit.js';
+import { TaxType } from './TaxType.js';
+import { User } from '$src/domains/user/models/User.js';
+import { ProductSalePrice } from './ProductSalePrice.js';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -15,7 +15,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-} from "typeorm";
+} from 'typeorm';
 
 @Entity()
 export class Product {

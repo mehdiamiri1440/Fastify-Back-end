@@ -1,5 +1,5 @@
-import { User } from "$src/domains/user/models/User.js";
-import { Product } from "./Product.js";
+import { User } from '$src/domains/user/models/User.js';
+import { Product } from './Product.js';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -8,7 +8,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-} from "typeorm";
+} from 'typeorm';
+
+type Safe<T> = T;
 
 @Entity()
 export class ProductSalePrice {
@@ -16,7 +18,7 @@ export class ProductSalePrice {
   id!: number;
 
   @ManyToOne(() => Product, (product) => product.salePrices)
-  product!: Product;
+  product!: Safe<Product>;
 
   @Column()
   price!: number;

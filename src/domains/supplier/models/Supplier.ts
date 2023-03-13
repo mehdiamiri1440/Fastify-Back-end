@@ -1,4 +1,4 @@
-import { User } from "$src/domains/user/models/User.js";
+import { User } from '$src/domains/user/models/User.js';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -7,8 +7,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-} from "typeorm";
-import { Language } from "./Language.js";
+} from 'typeorm';
+import { Language } from './Language.js';
 // import { SupplierLogoFile } from "./SupplierLogoFile.js";
 
 @Entity()

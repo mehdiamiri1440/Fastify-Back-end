@@ -1,5 +1,5 @@
-import { FastifyRequest } from "fastify";
-import { FindOptionsWhere, ILike } from "typeorm";
+import { FastifyRequest } from 'fastify';
+import { FindOptionsWhere, ILike } from 'typeorm';
 
 function toTypeOrmFilter(obj: any) {
   for (const key in obj) {
@@ -8,14 +8,14 @@ function toTypeOrmFilter(obj: any) {
       delete obj[key];
     } else if (value.like) {
       obj[key] = ILike(value.like);
-    } else if (typeof value === "object") {
+    } else if (typeof value === 'object') {
       toTypeOrmFilter(value);
     }
   }
 }
 
 export function merge(
-  filters: (FindOptionsWhere<any> | undefined)[]
+  filters: (FindOptionsWhere<any> | undefined)[],
 ): FindOptionsWhere<any> {
   const merged: FindOptionsWhere<any> = {};
   for (const filter of filters) {

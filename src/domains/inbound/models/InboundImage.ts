@@ -1,4 +1,4 @@
-import { User } from "$src/domains/user/models/User.js";
+import { User } from '$src/domains/user/models/User.js';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -7,8 +7,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-} from "typeorm";
-import { Inbound } from "./Inbound.js";
+} from 'typeorm';
+import type { Relation } from 'typeorm';
+import { Inbound } from './Inbound.js';
 
 @Entity()
 export class InboundImage {
@@ -16,7 +17,7 @@ export class InboundImage {
   id!: number;
 
   @ManyToOne(() => Inbound, (inbound) => inbound.images)
-  inbound!: Inbound;
+  inbound!: Relation<Inbound>;
 
   @Column()
   fileId!: string;

@@ -1,5 +1,5 @@
-import { User } from "$src/domains/user/models/User.js";
-import { Bin } from "$src/domains/warehouse/models/Bin.js";
+import { User } from '$src/domains/user/models/User.js';
+import { Bin } from '$src/domains/warehouse/models/Bin.js';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -8,8 +8,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-} from "typeorm";
-import { InboundProduct } from "./InboundProduct";
+} from 'typeorm';
+import { InboundProduct } from './InboundProduct.js';
+import type { Relation } from 'typeorm';
 
 @Entity()
 export class InboundProductSort {
@@ -17,7 +18,7 @@ export class InboundProductSort {
   id!: number;
 
   @ManyToOne(() => InboundProduct, (product) => product.sorts)
-  inboundProduct!: InboundProduct;
+  inboundProduct!: Relation<InboundProduct>;
 
   @ManyToOne(() => Bin)
   bin!: Bin;

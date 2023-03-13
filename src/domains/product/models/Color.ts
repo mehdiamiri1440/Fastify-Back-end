@@ -1,4 +1,4 @@
-import { User } from "$src/domains/user/models/User.js";
+import { User } from '$src/domains/user/models/User.js';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   ManyToOne,
-} from "typeorm";
+} from 'typeorm';
 
 @Entity()
 export class Color {
@@ -17,7 +17,7 @@ export class Color {
   @Column({ unique: true, length: 4 })
   name!: string;
 
-  @Column({ type: "int" })
+  @Column({ type: 'int' })
   code!: number;
 
   @ManyToOne(() => User, { nullable: false })

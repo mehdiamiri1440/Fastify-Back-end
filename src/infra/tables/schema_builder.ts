@@ -1,4 +1,4 @@
-import { Type } from "@sinclair/typebox";
+import { Type } from '@sinclair/typebox';
 
 export interface Options {
   orderable: string[];
@@ -12,25 +12,25 @@ export function ListQueryOptions<T>(options: Options) {
     pageSize: Type.Optional(Type.Number({ default: 10 })),
     order: Type.Optional(
       Type.String({
-        enum: ["asc", "desc"],
-      })
+        enum: ['asc', 'desc'],
+      }),
     ),
     orderBy: Type.Optional(
       Type.String({
         enum: options.orderable,
-      })
+      }),
     ),
     ...Object.fromEntries(
       options.filterable.map((x) => [
         `filter.${x}`,
         Type.Optional(Type.String()),
-      ])
+      ]),
     ),
     ...Object.fromEntries(
       options.searchable.map((x) => [
         `filter.${x}.like`,
         Type.Optional(Type.String()),
-      ])
+      ]),
     ),
   };
 

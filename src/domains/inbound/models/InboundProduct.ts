@@ -1,18 +1,19 @@
-import { Product } from "$src/domains/product/models/Product.js";
-import { Supplier } from "$src/domains/supplier/models/Supplier.js";
-import { User } from "$src/domains/user/models/User.js";
+import { Product } from '$src/domains/product/models/Product.js';
+import { Supplier } from '$src/domains/supplier/models/Supplier.js';
+import { User } from '$src/domains/user/models/User.js';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
   ManyToOne,
   OneToMany,
-  CreateDateColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
-  DeleteDateColumn,
-} from "typeorm";
-import { Inbound } from "./Inbound";
-import { InboundProductSort } from "./InboundProductSort.js";
+} from 'typeorm';
+import { Inbound } from './Inbound.js';
+import { InboundProductSort } from './InboundProductSort.js';
+import type { Relation } from 'typeorm';
 
 @Entity()
 export class InboundProduct {
@@ -20,7 +21,7 @@ export class InboundProduct {
   id!: number;
 
   @ManyToOne(() => Inbound, (inbound) => inbound.products)
-  inbound!: Inbound;
+  inbound!: Relation<Inbound>;
 
   @ManyToOne(() => Supplier, { nullable: true })
   supplier!: Supplier;
@@ -35,7 +36,7 @@ export class InboundProduct {
   price!: number;
 
   @ManyToOne(() => Product)
-  product!: Product;
+  product!: Relation<Product>;
 
   @ManyToOne(() => User)
   creator!: User;
@@ -50,5 +51,5 @@ export class InboundProduct {
   deletedAt!: Date;
 
   @OneToMany(() => InboundProductSort, (sort) => sort.inboundProduct)
-  sorts!: InboundProductSort[];
+  sorts!: Relation<InboundProductSort[]>;
 }

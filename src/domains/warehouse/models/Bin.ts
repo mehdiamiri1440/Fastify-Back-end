@@ -1,4 +1,4 @@
-import { User } from "$src/domains/user/models/User.js";
+import { User } from '$src/domains/user/models/User.js';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -7,13 +7,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-} from "typeorm";
-import { Warehouse } from "./Warehouse.js";
+} from 'typeorm';
+import { Warehouse } from './Warehouse.js';
 
 enum BinProperty {
-  HOLDING = "holding",
-  NORMAL = "normal",
-  DAMAGE = "damage",
+  HOLDING = 'holding',
+  NORMAL = 'normal',
+  DAMAGE = 'damage',
 }
 
 @Entity()
@@ -30,7 +30,7 @@ export class Bin {
   // @ManyToOne(() => Size, (size) => size.bins)
   // size!: Size;
 
-  @Column({ type: "enum", enum: BinProperty })
+  @Column({ type: 'enum', enum: BinProperty })
   property!: BinProperty;
 
   @Column({ unique: true, nullable: true })
