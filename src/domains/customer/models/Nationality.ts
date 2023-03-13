@@ -1,31 +1,23 @@
 import { User } from "$src/domains/user/models/User.js";
-import { Bin } from "$src/domains/warehouse/models/Bin.js";
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  ManyToOne,
 } from "typeorm";
-import { InboundProduct } from "./InboundProduct";
 
 @Entity()
-export class InboundProductSort {
+export class Nationality {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => InboundProduct, (product) => product.sorts)
-  inboundProduct!: InboundProduct;
+  @Column({ unique: true, length: 4 })
+  title!: string;
 
-  @ManyToOne(() => Bin)
-  bin!: Bin;
-
-  @Column()
-  quantity!: number;
-
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: false })
   creator!: User;
 
   @CreateDateColumn()
@@ -35,5 +27,5 @@ export class InboundProductSort {
   updatedAt!: Date;
 
   @DeleteDateColumn()
-  deletedAt!: Date;
+  deletedAt?: Date;
 }

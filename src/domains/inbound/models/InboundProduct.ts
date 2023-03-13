@@ -1,3 +1,5 @@
+import { Product } from "$src/domains/product/models/Product.js";
+import { Supplier } from "$src/domains/supplier/models/Supplier.js";
 import { User } from "$src/domains/user/models/User.js";
 import {
   Entity,
@@ -21,7 +23,7 @@ export class InboundProduct {
   inbound!: Inbound;
 
   @ManyToOne(() => Supplier, { nullable: true })
-  supplier: Supplier;
+  supplier!: Supplier;
 
   @Column()
   quantity!: number;
@@ -33,7 +35,7 @@ export class InboundProduct {
   price!: number;
 
   @ManyToOne(() => Product)
-  product: Product;
+  product!: Product;
 
   @ManyToOne(() => User)
   creator!: User;
