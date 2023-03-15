@@ -1,4 +1,4 @@
-import { User } from '$src/domains/user/models/User.js';
+import { User } from '$src/domains/user/models/User';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
 } from 'typeorm';
-import { Warehouse } from './Warehouse.js';
+import { Warehouse } from './Warehouse';
 
 enum BinProperty {
   HOLDING = 'holding',

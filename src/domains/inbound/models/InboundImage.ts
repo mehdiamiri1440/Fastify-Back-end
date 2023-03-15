@@ -1,4 +1,4 @@
-import { User } from '$src/domains/user/models/User.js';
+import { User } from '$src/domains/user/models/User';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -9,7 +9,7 @@ import {
   DeleteDateColumn,
 } from 'typeorm';
 import type { Relation } from 'typeorm';
-import { Inbound } from './Inbound.js';
+import { Inbound } from './Inbound';
 
 @Entity()
 export class InboundImage {

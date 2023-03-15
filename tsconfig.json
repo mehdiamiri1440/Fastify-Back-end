@@ -8,7 +8,7 @@
     "lib": ["es2022"],
     "target": "es2022",
     "noImplicitAny": true,
-    "module": "es2022",
+    "module": "CommonJS",
     "allowJs": false,
     "checkJs": false,
     "outDir": "dist",
@@ -21,11 +21,6 @@
     "rootDir": ".",
     "baseUrl": ".",
     "paths": {
-      // "$models/*": ["./src/models/*"],
-      // "$services/*": ["./src/services/*"],
-      // "$plugins/*": ["./src/plugins/*"],
-      // "$authentication/*": ["./src/authentication/*"],
-      // "$utils/*": ["./src/utils/*"],
       "$src/*": ["./src/*"]
     }
   },

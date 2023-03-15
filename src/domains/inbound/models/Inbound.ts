@@ -1,4 +1,4 @@
-import { User } from '$src/domains/user/models/User.js';
+import { User } from '$src/domains/user/models/User';
 import type { Relation } from 'typeorm';
 import {
   Column,
@@ -10,8 +10,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { InboundImage } from './InboundImage.js';
-import { InboundProduct } from './InboundProduct.js';
+import { InboundImage } from './InboundImage';
+import { InboundProduct } from './InboundProduct';
 
 enum InboundType {
   NEW = 'new',

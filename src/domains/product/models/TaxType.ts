@@ -1,4 +1,4 @@
-import { User } from '$src/domains/user/models/User.js';
+import { User } from '$src/domains/user/models/User';
 import {
   Entity,
   PrimaryGeneratedColumn,

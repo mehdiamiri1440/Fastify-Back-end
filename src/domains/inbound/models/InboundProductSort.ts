@@ -1,5 +1,5 @@
-import { User } from '$src/domains/user/models/User.js';
-import { Bin } from '$src/domains/warehouse/models/Bin.js';
+import { User } from '$src/domains/user/models/User';
+import { Bin } from '$src/domains/warehouse/models/Bin';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
 } from 'typeorm';
-import { InboundProduct } from './InboundProduct.js';
+import { InboundProduct } from './InboundProduct';
 import type { Relation } from 'typeorm';
 
 @Entity()

@@ -1,29 +1,35 @@
-import { models } from '$src/domains/index.js';
-import { FastifyPluginCallback } from 'fastify/types/plugin.js';
-import { DataSource } from 'typeorm/data-source/DataSource.js';
+import { models } from '$src/domains/index';
+import assert from 'assert';
+import { FastifyPluginCallback } from 'fastify/types/plugin';
+import { EntityTarget, ObjectLiteral } from 'typeorm';
+import { DataSource } from 'typeorm/data-source/DataSource';
+
+const { DB_URL, DB_ENABLE_LOGGING, DB_DROP_SCHEMA } = process.env;
+
+assert(DB_URL, 'DB_URL env is required');
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
-  host: 'localhost',
-  port: 5432,
-  username: 'user',
-  password: 'pass',
-  database: 'inventory',
+  url: DB_URL,
   synchronize: true,
-
-  logging: true,
-  logger: 'advanced-console',
-  dropSchema: true,
+  logging: DB_ENABLE_LOGGING === 'true',
+  dropSchema: DB_DROP_SCHEMA === 'true',
   entities: models,
   subscribers: [],
   migrations: [],
+  connectTimeoutMS: 10000,
 });
 
-await AppDataSource.initialize();
+export const repo = <T extends ObjectLiteral>(model: EntityTarget<T>) => {
+  return AppDataSource.getRepository<T>(model);
+};
 
 const plugin: FastifyPluginCallback = async (fastify, opts, done) => {
+  await AppDataSource.initialize();
+
   fastify.addHook('onClose', async (fastify, done) => {
-    await AppDataSource.close();
+    await AppDataSource.destroy();
+    done();
   });
 
   done();

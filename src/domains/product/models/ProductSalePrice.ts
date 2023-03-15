@@ -1,5 +1,5 @@
-import { User } from '$src/domains/user/models/User.js';
-import { Product } from './Product.js';
+import { User } from '$src/domains/user/models/User';
+import { Product } from './Product';
 import {
   Entity,
   PrimaryGeneratedColumn,

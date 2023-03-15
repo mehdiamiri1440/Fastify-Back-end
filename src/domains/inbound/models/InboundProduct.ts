@@ -1,6 +1,6 @@
-import { Product } from '$src/domains/product/models/Product.js';
-import { Supplier } from '$src/domains/supplier/models/Supplier.js';
-import { User } from '$src/domains/user/models/User.js';
+import { Product } from '$src/domains/product/models/Product';
+import { Supplier } from '$src/domains/supplier/models/Supplier';
+import { User } from '$src/domains/user/models/User';
 import {
   Column,
   CreateDateColumn,
@@ -11,8 +11,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Inbound } from './Inbound.js';
-import { InboundProductSort } from './InboundProductSort.js';
+import { Inbound } from './Inbound';
+import { InboundProductSort } from './InboundProductSort';
 import type { Relation } from 'typeorm';
 
 @Entity()

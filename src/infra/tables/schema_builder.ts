@@ -7,9 +7,9 @@ export interface Options {
 }
 
 export function ListQueryOptions<T>(options: Options) {
-  const fields = {
-    page: Type.Optional(Type.Number({ default: 1 })),
-    pageSize: Type.Optional(Type.Number({ default: 10 })),
+  return Type.Object({
+    page: Type.Number({ default: 1 }),
+    pageSize: Type.Number({ default: 10 }),
     order: Type.Optional(
       Type.String({
         enum: ['asc', 'desc'],
@@ -32,7 +32,5 @@ export function ListQueryOptions<T>(options: Options) {
         Type.Optional(Type.String()),
       ]),
     ),
-  };
-
-  return fields;
+  });
 }
