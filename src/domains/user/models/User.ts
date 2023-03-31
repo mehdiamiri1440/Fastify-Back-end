@@ -7,23 +7,24 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
 } from 'typeorm';
-// import { Role } from "./Role.js";
+import { Role } from './Role';
+type Safe<T> = T;
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
+  @Column({ nullable: false })
   firstName!: string;
 
-  @Column()
+  @Column({ nullable: false })
   lastName!: string;
 
-  // @ManyToOne(() => Role)
-  // role!: Role;
+  @ManyToOne(() => Role)
+  role!: Safe<Role>;
 
-  @Column()
+  @Column({ nullable: false })
   nif!: number;
 
   @Column({ unique: true, nullable: true })
@@ -32,16 +33,13 @@ export class User {
   @Column({ unique: true, nullable: true })
   phoneNumber?: string;
 
-  @Column()
+  @Column({ nullable: false })
   password!: string;
 
   @Column({ nullable: true })
   position?: string;
 
-  @Column()
-  description!: string;
-
-  @Column()
+  @Column({ nullable: false })
   isActive!: boolean;
 
   @CreateDateColumn()
