@@ -5,6 +5,8 @@ import { usersAuth } from '$src/authentication/users';
 import { Type } from '@sinclair/typebox';
 import { User } from '../user/models/User';
 import { repo } from '$src/databases/typeorm';
+import { ListQueryOptions } from '$src/infra/tables/schema_builder';
+import { TableQueryBuilder } from '$src/infra/tables/Table';
 const Users = repo(User);
 
 const { TOKEN_TTL_SECONDS } = process.env;
@@ -35,6 +37,21 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       );
 
       return { token };
+    },
+  });
+  app.route({
+    method: 'GET',
+    url: '/',
+    onRequest: usersAuth,
+    schema: {
+      querystring: ListQueryOptions({
+        filterable: ['title'],
+        orderable: ['title'],
+        searchable: ['title'],
+      }),
+    },
+    async handler(req) {
+      return new TableQueryBuilder(Users, req).exec();
     },
   });
   app.route({
