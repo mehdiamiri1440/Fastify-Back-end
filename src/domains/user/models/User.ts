@@ -7,11 +7,12 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
 } from 'typeorm';
+import { UserType } from '../schemas/user.schema';
 import { Role } from './Role';
 type Safe<T> = T;
 
 @Entity()
-export class User {
+export class User implements UserType {
   @PrimaryGeneratedColumn()
   id!: number;
 
