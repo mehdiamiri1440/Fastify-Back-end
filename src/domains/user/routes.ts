@@ -34,7 +34,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   });
 
   app.register(import('./routes/users'), { prefix: '/users' });
-  
+  app.register(import('./routes/roles'), { prefix: '/roles' });
 };
 
 export default plugin;
