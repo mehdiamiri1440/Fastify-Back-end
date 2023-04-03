@@ -1,13 +1,6 @@
 import { ResponseShape } from '$src/infra/Response';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import assert from 'assert';
-import { usersAuth } from '$src/authentication/users';
-import { Type } from '@sinclair/typebox';
-import { User } from '../user/models/User';
-import { repo } from '$src/databases/typeorm';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
-import { TableQueryBuilder } from '$src/infra/tables/Table';
-const Users = repo(User);
 
 const { TOKEN_TTL_SECONDS } = process.env;
 
@@ -39,7 +32,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       return { token };
     },
   });
-  
+
   app.register(import('./routes/users'), { prefix: '/users' });
   
 };

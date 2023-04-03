@@ -1,6 +1,5 @@
 import { ResponseShape } from '$src/infra/Response';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import assert from 'assert';
 import { usersAuth } from '$src/authentication/users';
 import { Type } from '@sinclair/typebox';
 import { User } from '../../user/models/User';
@@ -9,15 +8,14 @@ import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 const Users = repo(User);
 
-
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
-
   app.route({
     method: 'GET',
     url: '/',
     onRequest: usersAuth,
     schema: {
+      tags: ['users'],
       querystring: ListQueryOptions({
         filterable: ['title'],
         orderable: ['title'],
@@ -33,6 +31,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/',
     onRequest: usersAuth,
     schema: {
+      tags: ['users'],
       body: Type.Object({
         firstName: Type.String(),
         lastName: Type.String(),
