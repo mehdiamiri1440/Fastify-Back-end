@@ -28,8 +28,8 @@ export class User implements UserType {
   @Column({ nullable: false })
   nif!: number;
 
-  @Column({ unique: true, nullable: true })
-  email?: string;
+  @Column({ unique: true, nullable: false })
+  email!: string;
 
   @Column({ unique: true, nullable: true })
   phoneNumber?: string;

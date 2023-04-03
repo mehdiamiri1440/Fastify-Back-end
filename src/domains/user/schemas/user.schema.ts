@@ -5,7 +5,7 @@ export const UserSchema = Type.Object({
   lastName: Type.String(),
   role: Type.Any(),
   nif: Type.Number(),
-  email: Type.Optional(Type.String()),
+  email: Type.String(),
   phoneNumber: Type.Optional(Type.String()),
   password: Type.String(),
   position: Type.Optional(Type.String()),

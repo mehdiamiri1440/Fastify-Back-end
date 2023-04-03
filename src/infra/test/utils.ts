@@ -9,6 +9,7 @@ async function createTestUser() {
     lastName: 'l',
     nif: 6,
     password: 'pass',
+    email: 'hi@email.e',
     description: 'desc',
     isActive: true,
   });
