@@ -1,7 +1,13 @@
 import { ResponseShape } from '$src/infra/Response';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import assert from 'assert';
+import { Type } from '@sinclair/typebox';
+import { User } from './models/User';
+import { RolePermission } from '$src/domains/user/models/RolePermission';
+import { repo } from '$src/databases/typeorm';
 
+const Users = repo(User);
+const RolePermissions = repo(RolePermission);
 const { TOKEN_TTL_SECONDS } = process.env;
 
 if (TOKEN_TTL_SECONDS) {
@@ -18,17 +24,34 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/login',
     schema: {
       tags: ['Auth'],
+      body: Type.Object({
+        email: Type.String(),
+        password: Type.String(),
+      }),
     },
-    async handler() {
+    async handler(req) {
+      const user = await Users.findOne({
+        where: { email: req.body.email, password: req.body.password },
+        relations: ['role'],
+      });
+      if (!user) {
+        return 'error';
+      }
+      const { id } = user.role;
+      const permissions = await RolePermissions.findBy({ role: { id } });
+      const permission_codes: string[] = [];
+      for (const index in permissions) {
+        permission_codes[parseInt(index)] = permissions[index].permission;
+      }
       const token = app.jwt.sign(
         {
-          id: 1,
+          id: user.id,
+          scope: permission_codes.join(' '),
         },
         {
           expiresIn: TTL,
         },
       );
-
       return { token };
     },
   });
