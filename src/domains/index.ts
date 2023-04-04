@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/ban-types */
-import { readdirSync } from 'node:fs';
+import { readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { getMetadataArgsStorage } from 'typeorm';
 
@@ -19,6 +19,9 @@ function loadDomainModels(domainName: string) {
   const directory = new URL(
     `file://${process.cwd()}/src/domains/${domainName}/models`,
   );
+
+  const exist = existsSync(directory);
+  if (!exist) return [];
 
   const entities = readdirSync(directory, { withFileTypes: true });
   const files = entities
