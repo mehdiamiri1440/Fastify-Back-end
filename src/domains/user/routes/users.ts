@@ -17,6 +17,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     onRequest: usersAuth,
     schema: {
       tags: ['users'],
+      security: [
+        {
+          Bearer: [],
+        },
+      ],
       querystring: ListQueryOptions({
         filterable: ['title'],
         orderable: ['title'],
@@ -33,6 +38,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     onRequest: usersAuth,
     schema: {
       tags: ['users'],
+      security: [
+        {
+          Bearer: [],
+        },
+      ],
       body: UserSchema,
     },
     async handler(req) {
@@ -45,6 +55,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     onRequest: usersAuth,
     schema: {
       tags: ['users'],
+      security: [
+        {
+          Bearer: [],
+        },
+      ],
       body: UserSchema,
       params: Type.Object({
         id: Type.Number(),
@@ -60,6 +75,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     onRequest: usersAuth,
     schema: {
       tags: ['users'],
+      security: [
+        {
+          Bearer: [],
+        },
+      ],
       params: Type.Object({
         id: Type.Number(),
       }),
