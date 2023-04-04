@@ -92,6 +92,30 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
   app.route({
+    method: 'PUT',
+    url: '/:id/is-active',
+    onRequest: usersAuth,
+    schema: {
+      tags: ['roles'],
+      security: [
+        {
+          Bearer: [],
+        },
+      ],
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      body: Type.Object({
+        isActive: Type.Boolean(),
+      }),
+    },
+    async handler(req) {
+      const { id } = req.params;
+      const { isActive } = req.body;
+      return await Roles.update({ id }, { isActive });
+    },
+  });
+  app.route({
     method: 'GET',
     url: '/:id/permissions',
     onRequest: usersAuth,

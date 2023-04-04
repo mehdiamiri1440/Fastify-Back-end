@@ -22,6 +22,9 @@ export class Role implements RoleType {
   @ManyToOne(() => User)
   creator!: Safe<User>;
 
+  @Column({ nullable: false })
+  isActive!: boolean;
+
   @CreateDateColumn({ nullable: false })
   createdAt!: Date;
 

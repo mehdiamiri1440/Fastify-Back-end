@@ -88,6 +88,30 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       return await Users.delete({ id: req.params.id });
     },
   });
+  app.route({
+    method: 'PUT',
+    url: '/:id/is-active',
+    onRequest: usersAuth,
+    schema: {
+      tags: ['users'],
+      security: [
+        {
+          Bearer: [],
+        },
+      ],
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      body: Type.Object({
+        isActive: Type.Boolean(),
+      }),
+    },
+    async handler(req) {
+      const { id } = req.params;
+      const { isActive } = req.body;
+      return await Users.update({ id }, { isActive });
+    },
+  });
 };
 
 export default plugin;
