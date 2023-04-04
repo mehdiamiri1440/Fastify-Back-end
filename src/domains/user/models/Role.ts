@@ -8,10 +8,11 @@ import {
   DeleteDateColumn,
 } from 'typeorm';
 import { User } from './User';
+import { RoleType } from '$src/domains/user/schemas/role.schema';
 type Safe<T> = T;
 
 @Entity()
-export class Role {
+export class Role implements RoleType {
   @PrimaryGeneratedColumn()
   id!: number;
 
