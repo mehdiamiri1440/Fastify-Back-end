@@ -5,6 +5,7 @@ const config = JSON.parse(readFileSync('./.swcrc', 'utf-8'));
 
 module.exports = {
   testEnvironment: 'node',
+  setupFiles: ['dotenv/config'],
   transform: {
     '^.+\\.(t|j)sx?$': ['@swc/jest', config],
   },

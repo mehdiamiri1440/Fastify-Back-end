@@ -6,12 +6,18 @@ variables:
   POSTGRES_PASSWORD: password
   POSTGRES_USER: user
   POSTGRES_DB: inventory
+  MINIO_ROOT_USER: minio
+  MINIO_ROOT_PASSWORD: minio123
 
 test:
   stage: test
   image: node:18
   services:
     - postgres:15.2
+    - name: minio/minio
+      alias: minio
+      command: ['server', '/data']
+
   script:
     - npm install
     - npm run format:check
@@ -20,7 +26,8 @@ test:
     - npm run test
   variables:
     DB_URL: postgres://user:password@postgres:5432/inventory
-
+    DB_DROP_SCHEMA: 'true'
+    S3_URI: http://minio:minio123@minio:9000/
   except:
     - tags
 
