@@ -7,7 +7,9 @@ import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { RoleSchema, RoleType } from '$src/domains/user/schemas/role.schema';
 import { Type } from '@sinclair/typebox';
+import { RolePermission } from '../models/RolePermission';
 const Roles = repo(Role);
+const RolePermissions = repo(RolePermission);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
@@ -67,6 +69,85 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     async handler(req) {
       return await Roles.delete({ id: req.params.id });
+    },
+  });
+  app.route({
+    method: 'GET',
+    url: '/:id/permissions',
+    onRequest: usersAuth,
+    schema: {
+      tags: ['roles'],
+      security: [
+        {
+          Bearer: [],
+        },
+      ],
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      querystring: ListQueryOptions({
+        filterable: ['permission'],
+        orderable: ['permission'],
+        searchable: ['permission'],
+      }),
+    },
+    async handler(req) {
+      const role_id: number = req.params.id;
+      return new TableQueryBuilder(RolePermissions, req)
+        .where(() => {
+          return { role: { id: role_id } };
+        })
+        .exec();
+    },
+  });
+  app.route({
+    method: 'POST',
+    url: '/:id/permissions/:code',
+    onRequest: usersAuth,
+    schema: {
+      tags: ['roles'],
+      security: [
+        {
+          Bearer: [],
+        },
+      ],
+      params: Type.Object({
+        id: Type.Number(),
+        code: Type.String(),
+      }),
+    },
+    async handler(req) {
+      const role_id: number = req.params.id;
+      const permission: string = req.params.code;
+      return await RolePermissions.save({
+        permission: permission,
+        role: { id: role_id },
+      });
+    },
+  });
+  app.route({
+    method: 'DELETE',
+    url: '/:id/permissions/:code',
+    onRequest: usersAuth,
+    schema: {
+      tags: ['roles'],
+      security: [
+        {
+          Bearer: [],
+        },
+      ],
+      params: Type.Object({
+        id: Type.Number(),
+        code: Type.String(),
+      }),
+    },
+    async handler(req) {
+      const role_id: number = req.params.id;
+      const permission: string = req.params.code;
+      return await RolePermissions.delete({
+        permission: permission,
+        role: { id: role_id },
+      });
     },
   });
 };
