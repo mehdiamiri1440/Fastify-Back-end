@@ -5,7 +5,7 @@ import { Role } from '../../user/models/Role';
 import { repo } from '$src/databases/typeorm';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
-import { RoleSchema, RoleType } from '$src/domains/user/schemas/role.schema';
+import { InputRoleSchema, InputRoleType } from '$src/domains/user/schemas/role.schema';
 import { Type } from '@sinclair/typebox';
 import { RolePermission } from '../models/RolePermission';
 const Roles = repo(Role);
@@ -49,10 +49,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           Bearer: [],
         },
       ],
-      body: RoleSchema,
+      body: InputRoleSchema,
     },
     async handler(req) {
-      return await Roles.save(req.body as RoleType);
+      return await Roles.save(req.body as InputRoleType);
     },
   });
   app.route({
@@ -66,13 +66,13 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           Bearer: [],
         },
       ],
-      body: RoleSchema,
+      body: InputRoleSchema,
       params: Type.Object({
         id: Type.Number(),
       }),
     },
     async handler(req) {
-      return await Roles.update({ id: req.params.id }, req.body as RoleType);
+      return await Roles.update({ id: req.params.id }, req.body as InputRoleType);
     },
   });
   app.route({
