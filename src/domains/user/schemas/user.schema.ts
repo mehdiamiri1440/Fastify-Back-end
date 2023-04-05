@@ -5,7 +5,7 @@ export const UserObject = {
   id: Type.Number(),
   firstName: Type.String({ minLength: 1 }),
   lastName: Type.String({ minLength: 1 }),
-  role: Type.Object({ id: Type.Number() }),
+  role: Type.Union([Type.Object({}), Type.Number()]),
   nif: Type.RegEx(
     /^(X(-|\.)?0?\d{7}(-|\.)?[A-Z]|[A-Z](-|\.)?\d{7}(-|\.)?[0-9A-Z]|\d{8}(-|\.)?[A-Z])$/,
   ),

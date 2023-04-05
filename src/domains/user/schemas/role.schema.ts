@@ -5,7 +5,7 @@ export const RoleObject = {
     id: Type.Number(),
     title: Type.String({ minLength: 1 }),
     isActive: Type.Boolean(),
-    creator: Type.Object({ id: Type.Number() }),
+    creator: Type.Union([Type.Object({}), Type.Number()]),
     createdAt: Type.Union([Type.Date(), Type.String({ format: 'date-time' })]),
     updatedAt: Type.Union([Type.Date(), Type.String({ format: 'date-time' })]),
     deletedAt: Type.Optional(
@@ -20,7 +20,7 @@ export const RoleExample: RoleType = {
     id: 1,
     title: 'Admin',
     isActive: true,
-    creator: { id: 1 },
+    creator: 1,
     createdAt: '2000-05-05 02-03-04',
     updatedAt: '2000-05-05 02-03-04',
     deletedAt: null,
