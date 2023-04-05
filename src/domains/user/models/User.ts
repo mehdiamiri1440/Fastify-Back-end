@@ -43,6 +43,9 @@ export class User implements UserType {
   @Column({ nullable: false })
   isActive!: boolean;
 
+  @ManyToOne(() => User)
+  creator!: Safe<User>;
+
   @CreateDateColumn()
   createdAt!: Date;
 
