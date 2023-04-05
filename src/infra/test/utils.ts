@@ -1,18 +1,16 @@
 import { repo } from '$src/databases/typeorm';
 import { User } from '$src/domains/user/models/User';
 import fastify, { FastifyInstance, InjectOptions } from 'fastify';
+import {
+  UserExample,
+  InputUserExample,
+} from '$src/domains/user/schemas/user.schema';
+import { Role } from '$src/domains/user/models/Role';
+import { InputRoleExample } from '$src/domains/user/schemas/role.schema';
 
 async function createTestUser() {
-  await repo(User).save({
-    id: 1,
-    firstName: 'd',
-    lastName: 'l',
-    nif: 6,
-    password: 'pass',
-    email: 'hi@email.e',
-    description: 'desc',
-    isActive: true,
-  });
+  await repo(Role).save(InputRoleExample);
+  await repo(User).save(InputUserExample);
 }
 
 export class TestUser {
@@ -23,7 +21,8 @@ export class TestUser {
     await createTestUser();
     const token = app.jwt.sign(
       {
-        id: 1,
+        id: UserExample.id,
+        scope: 'create read update delete',
       },
       {
         expiresIn: 1000,
