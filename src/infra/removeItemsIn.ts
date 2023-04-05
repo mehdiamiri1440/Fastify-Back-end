@@ -1,6 +1,7 @@
 export default function (items: string[], in_: any) {
+  const res = JSON.parse(JSON.stringify(in_));
   for (const index in items) {
-    delete in_[items[index]];
+    delete res[items[index]];
   }
-  return in_;
+  return res;
 }
