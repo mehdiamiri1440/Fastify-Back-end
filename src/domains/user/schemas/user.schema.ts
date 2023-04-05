@@ -3,19 +3,21 @@ import removeItemsIn from '$src/infra/removeItemsIn';
 
 export const UserObject = {
   id: Type.Number(),
-  firstName: Type.String(),
-  lastName: Type.String(),
+  firstName: Type.String({ minLength: 1 }),
+  lastName: Type.String({ minLength: 1 }),
   role: Type.Object({ id: Type.Number() }),
-  nif: Type.Number(),
-  email: Type.String(),
+  nif: Type.RegEx(
+    /^(X(-|\.)?0?\d{7}(-|\.)?[A-Z]|[A-Z](-|\.)?\d{7}(-|\.)?[0-9A-Z]|\d{8}(-|\.)?[A-Z])$/,
+  ),
+  email: Type.String({ format: 'email' }),
   phoneNumber: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   password: Type.String(),
   position: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   isActive: Type.Boolean(),
-  createdAt: Type.Union([Type.Date(), Type.String()]),
-  updatedAt: Type.Union([Type.Date(), Type.String()]),
+  createdAt: Type.Union([Type.Date({ format: 'date' }), Type.String()]),
+  updatedAt: Type.Union([Type.Date({ format: 'date' }), Type.String()]),
   deletedAt: Type.Optional(
-    Type.Union([Type.Date(), Type.String(), Type.Null()]),
+    Type.Union([Type.Date(), Type.String({ format: 'date' }), Type.Null()]),
   ),
 };
 export const UserSchema = Type.Object(UserObject);
@@ -27,13 +29,13 @@ export const UserExample: UserType = {
   firstName: 'Daniel',
   lastName: 'Soheil',
   role: { id: 1 },
-  nif: 252021,
+  nif: 'B-6116622G',
   email: 'daniel@sohe.ir',
   password: 'hackme',
   position: 'Developer',
   isActive: true,
-  createdAt: 'YYYY-MM-DD HH-mm-ss',
-  updatedAt: 'YYYY-MM-DD HH-mm-ss',
+  createdAt: '2000-05-05 02-03-04',
+  updatedAt: '2000-05-05 02-03-04',
   deletedAt: null,
 };
 

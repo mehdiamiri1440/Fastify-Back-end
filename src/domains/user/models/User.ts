@@ -26,7 +26,7 @@ export class User implements UserType {
   role!: Safe<Role>;
 
   @Column({ nullable: false })
-  nif!: number;
+  nif!: string;
 
   @Column({ unique: true, nullable: false })
   email!: string;
