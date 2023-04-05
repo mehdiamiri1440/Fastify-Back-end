@@ -6,10 +6,10 @@ export const RoleObject = {
     title: Type.String({ minLength: 1 }),
     isActive: Type.Boolean(),
     creator: Type.Object({ id: Type.Number() }),
-    createdAt: Type.Union([Type.Date({ format: 'date' }), Type.String()]),
-    updatedAt: Type.Union([Type.Date({ format: 'date' }), Type.String()]),
+    createdAt: Type.Union([Type.Date(), Type.String({ format: 'date-time' })]),
+    updatedAt: Type.Union([Type.Date(), Type.String({ format: 'date-time' })]),
     deletedAt: Type.Optional(
-        Type.Union([Type.Date(), Type.String({ format: 'date' }), Type.Null()]),
+        Type.Union([Type.Date(), Type.String({ format: "date-time" }), Type.Null()]),
     ),
 };
 export const RoleSchema = Type.Object(RoleObject);

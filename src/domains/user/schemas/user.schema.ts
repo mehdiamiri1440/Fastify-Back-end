@@ -14,8 +14,8 @@ export const UserObject = {
   password: Type.String(),
   position: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   isActive: Type.Boolean(),
-  createdAt: Type.Union([Type.Date({ format: 'date' }), Type.String()]),
-  updatedAt: Type.Union([Type.Date({ format: 'date' }), Type.String()]),
+  createdAt: Type.Union([Type.Date(), Type.String({ format: 'date' })]),
+  updatedAt: Type.Union([Type.Date(), Type.String({ format: 'date' })]),
   deletedAt: Type.Optional(
     Type.Union([Type.Date(), Type.String({ format: 'date' }), Type.Null()]),
   ),
