@@ -5,7 +5,10 @@ import { User } from '../../user/models/User';
 import { repo } from '$src/databases/typeorm';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
-import { UserSchema, UserType } from '$src/domains/user/schemas/user.schema';
+import {
+  InputUserSchema,
+  InputUserType,
+} from '$src/domains/user/schemas/user.schema';
 const Users = repo(User);
 import { Type } from '@sinclair/typebox';
 
@@ -43,10 +46,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           Bearer: [],
         },
       ],
-      body: UserSchema,
+      body: InputUserSchema,
     },
     async handler(req) {
-      return await Users.save(req.body as UserType);
+      return await Users.save(req.body as InputUserType);
     },
   });
   app.route({
@@ -60,13 +63,16 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           Bearer: [],
         },
       ],
-      body: UserSchema,
+      body: InputUserSchema,
       params: Type.Object({
         id: Type.Number(),
       }),
     },
     async handler(req) {
-      return await Users.update({ id: req.params.id }, req.body as UserType);
+      return await Users.update(
+        { id: req.params.id },
+        req.body as InputUserType,
+      );
     },
   });
   app.route({

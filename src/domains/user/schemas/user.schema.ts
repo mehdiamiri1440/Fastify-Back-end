@@ -1,21 +1,24 @@
 import { Type, Static } from '@sinclair/typebox';
 import removeItemsIn from '$src/infra/removeItemsIn';
 
-export const UserSchema = Type.Object({
+export const UserObject = {
   id: Type.Number(),
   firstName: Type.String(),
   lastName: Type.String(),
   role: Type.Object({ id: Type.Number() }),
   nif: Type.Number(),
   email: Type.String(),
-  phoneNumber: Type.Optional(Type.String()),
+  phoneNumber: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   password: Type.String(),
-  position: Type.Optional(Type.String()),
+  position: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   isActive: Type.Boolean(),
   createdAt: Type.Union([Type.Date(), Type.String()]),
   updatedAt: Type.Union([Type.Date(), Type.String()]),
-  deletedAt: Type.Union([Type.Date(), Type.String(), Type.Null()]),
-});
+  deletedAt: Type.Optional(
+    Type.Union([Type.Date(), Type.String(), Type.Null()]),
+  ),
+};
+export const UserSchema = Type.Object(UserObject);
 
 export type UserType = Static<typeof UserSchema>;
 
@@ -41,19 +44,20 @@ export const InputUserRemove: string[] = [
   'deletedAt',
 ];
 
-export const InputUserSchema = removeItemsIn(InputUserRemove, UserSchema);
+export const InputUserSchema = Type.Object(
+  removeItemsIn(InputUserRemove, UserObject),
+);
 export type InputUserType = Static<typeof InputUserSchema>;
 export const InputUserExample: InputUserType = removeItemsIn(
   InputUserRemove,
   UserExample,
 );
 
-export const OutputUserRemove: string[] = [
-  'password',
-  'deletedAt',
-];
+export const OutputUserRemove: string[] = ['password', 'deletedAt'];
 
-export const OutputUserSchema = removeItemsIn(OutputUserRemove, UserSchema);
+export const OutputUserSchema = Type.Object(
+  removeItemsIn(OutputUserRemove, UserObject),
+);
 export type OutputUserType = Static<typeof OutputUserSchema>;
 export const OutputUserExample: OutputUserType = removeItemsIn(
   OutputUserRemove,
