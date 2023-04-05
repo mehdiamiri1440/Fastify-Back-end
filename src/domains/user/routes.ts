@@ -5,6 +5,7 @@ import { Type } from '@sinclair/typebox';
 import { User } from './models/User';
 import { RolePermission } from '$src/domains/user/models/RolePermission';
 import { repo } from '$src/databases/typeorm';
+import { usersAuth } from '$src/authentication/users';
 
 const Users = repo(User);
 const RolePermissions = repo(RolePermission);
@@ -58,6 +59,25 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
   app.register(import('./routes/users'), { prefix: '/users' });
   app.register(import('./routes/roles'), { prefix: '/roles' });
+  app.route({
+    method: 'GET',
+    url: '/whoami',
+    onRequest: usersAuth,
+    schema: {
+      tags: ['Auth'],
+      security: [
+        {
+          Bearer: [],
+        },
+      ],
+    },
+    async handler(req) {
+      return await Users.findOne({
+        where: { id: req.user.id },
+        loadRelationIds: true,
+      });
+    },
+  });
 };
 
 export default plugin;
