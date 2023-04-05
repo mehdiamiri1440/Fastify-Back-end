@@ -34,8 +34,8 @@ export const UserExample: UserType = {
   password: 'hackme',
   position: 'Developer',
   isActive: true,
-  createdAt: '2000-05-05 02-03-04',
-  updatedAt: '2000-05-05 02-03-04',
+  createdAt: '2023-04-05T08:06:10.804Z',
+  updatedAt: '2023-04-05T08:06:10.804Z',
   deletedAt: null,
 };
 
