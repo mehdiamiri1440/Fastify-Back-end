@@ -23,6 +23,7 @@ let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
 let userdata: InputUserType | undefined;
 let roledata: InputRoleType | undefined;
+let rpdata: InputRoleType | undefined;
 
 beforeAll(async () => {
   app = await createTestFastifyApp();
@@ -38,6 +39,9 @@ beforeAll(async () => {
   roledata = {
     ...InputRoleExample,
     title: 'testRole',
+  };
+  rpdata = {
+    permission: 'testPermission',
   };
 });
 
@@ -209,6 +213,69 @@ it('should update role', async () => {
   expect(response.json()).toMatchObject({
     data: {
       generatedMaps: expect.any(Array),
+      raw: expect.any(Array),
+      affected: 1,
+    },
+    meta: {},
+  });
+});
+
+it('should add permission to role', async () => {
+  assert(app);
+  assert(user);
+  assert(roledata);
+
+  const response = await user.inject({
+    method: 'POST',
+    url: '/roles/' + roledata.id + '/permissions/testPermission',
+  });
+  expect(response.json()).toMatchObject({
+    data: {
+      role: { id: roledata.id },
+      permission: 'testPermission',
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+      deletedAt: null,
+    },
+    meta: {},
+  });
+});
+
+it('should return all permissions added to role', async () => {
+  assert(app);
+  assert(user);
+  assert(roledata);
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/roles/' + roledata.id + '/permissions',
+  });
+
+  expect(response.json().data).toMatchObject(
+    expect.arrayContaining([
+      expect.objectContaining({
+        role: roledata.id,
+        permission: 'testPermission',
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        deletedAt: null,
+      }),
+    ]),
+  );
+});
+
+it('should delete permission of role', async () => {
+  assert(app);
+  assert(user);
+  assert(roledata);
+
+  const response = await user.inject({
+    method: 'DELETE',
+    url: '/roles/' + roledata.id + '/permissions/testPermission',
+  });
+
+  expect(response.json()).toMatchObject({
+    data: {
       raw: expect.any(Array),
       affected: 1,
     },
