@@ -42,6 +42,7 @@ export const InputRoleExample: InputRoleType = removeItemsIn(
     InputRoleRemove,
     RoleExample,
 );
+Object.seal(InputRoleExample)
 
 export const OutputRoleRemove: string[] = ['deletedAt'];
 
@@ -53,3 +54,4 @@ export const OutputRoleExample: OutputRoleType = removeItemsIn(
     OutputRoleRemove,
     RoleExample,
 );
+Object.seal(OutputRoleExample)

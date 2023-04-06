@@ -57,6 +57,7 @@ export const InputUserExample: InputUserType = removeItemsIn(
   InputUserRemove,
   UserExample,
 );
+Object.seal(InputUserExample)
 
 export const OutputUserRemove: string[] = ['password', 'deletedAt'];
 
@@ -68,3 +69,4 @@ export const OutputUserExample: OutputUserType = removeItemsIn(
   OutputUserRemove,
   UserExample,
 );
+Object.seal(OutputUserExample)

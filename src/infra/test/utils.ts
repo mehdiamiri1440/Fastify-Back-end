@@ -9,8 +9,9 @@ import { Role } from '$src/domains/user/models/Role';
 import { InputRoleExample } from '$src/domains/user/schemas/role.schema';
 
 async function createTestUser() {
-  await repo(Role).save(InputRoleExample);
-  await repo(User).save(InputUserExample);
+  await repo(Role).save({...InputRoleExample});
+
+  return await repo(User).save({...InputUserExample});
 }
 
 export class TestUser {
@@ -18,10 +19,9 @@ export class TestUser {
   #app: FastifyInstance;
 
   static async create(app: FastifyInstance) {
-    await createTestUser();
     const token = app.jwt.sign(
       {
-        id: UserExample.id,
+        id: (await createTestUser()).id,
         scope: 'create read update delete',
       },
       {
