@@ -6,7 +6,10 @@ import assert from 'assert';
 import fastify, { FastifyInstance } from 'fastify';
 import routes from './routes';
 import { AppDataSource } from '$src/databases/typeorm';
+import { Nationality } from './models/Nationality';
+import { repo } from '$src/databases/typeorm';
 
+const Nationalities = repo(Nationality);
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
 
@@ -22,50 +25,24 @@ afterAll(async () => {
   await app?.close();
 });
 
-it('should create a nationality', async () => {
-  assert(app);
-  assert(user);
-
-  const response = await user.inject({
-    method: 'POST',
-    url: '/nationalities',
-    payload: {
-      title: 'EN',
-    },
-  });
-
-  expect(response.json()).toMatchObject({
-    data: {
-      createdAt: expect.any(String),
-      creator: expect.objectContaining({ id: 1 }),
-      deletedAt: null,
-      title: 'EN',
-      updatedAt: expect.any(String),
-    },
-    meta: {},
-  });
-});
-
 it('should return all nationalities', async () => {
   assert(app);
   assert(user);
 
+  const ndata = await Nationalities.save({ title: 'SPN' });
+
   const response = await user.inject({
     method: 'GET',
     url: '/nationalities',
-    payload: {
-      title: 'EN',
-    },
   });
 
   expect(response.json()).toMatchObject({
     data: [
       {
+        ...ndata,
         createdAt: expect.any(String),
-        creator: 1,
-        deletedAt: null,
-        title: 'EN',
         updatedAt: expect.any(String),
+        deletedAt: null,
       },
     ],
     meta: {},

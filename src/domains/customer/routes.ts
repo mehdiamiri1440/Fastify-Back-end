@@ -4,10 +4,9 @@ import { ResponseShape } from '$src/infra/Response';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { Type } from '@sinclair/typebox';
-import { Nationality as _Nationality } from './models/Nationality';
+import { Nationality } from './models/Nationality';
 
-const Nationality = repo(_Nationality);
+const Nationalities = repo(Nationality);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
@@ -23,29 +22,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      return new TableQueryBuilder(Nationality, req).exec();
-    },
-  });
-
-  app.route({
-    method: 'POST',
-    url: '/nationalities',
-    onRequest: usersAuth,
-    schema: {
-      body: Type.Object({
-        title: Type.String(),
-      }),
-    },
-    async handler(req) {
-      const { title } = req.body;
-      const { user } = req;
-
-      const entity = await Nationality.save({
-        title,
-        creator: user,
-      });
-
-      return entity;
+      return new TableQueryBuilder(Nationalities, req).exec();
     },
   });
 };
