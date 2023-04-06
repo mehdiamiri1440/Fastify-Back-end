@@ -196,7 +196,25 @@ it('should update role', async () => {
   });
 });
 
+it('should delete role', async () => {
+  assert(app);
+  assert(user);
+  assert(roledata);
 
+  const response = await user.inject({
+    method: 'DELETE',
+    url: '/roles/' + roledata.id,
+    payload: {...roledata},
+  });
+
+  expect(response.json()).toMatchObject({
+    data: {
+      raw: expect.any(Array),
+      affected: 1,
+    },
+    meta: {},
+  });
+});
 
 it('should return a user that logged in', async () => {
   assert(app);
