@@ -12,10 +12,17 @@ import {
   UserType,
   UserExample,
 } from './schemas/user.schema';
+import {
+  InputRoleType,
+  InputRoleExample,
+  RoleType,
+  RoleExample,
+} from './schemas/role.schema';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
 let userdata: InputUserType | undefined
+let roledata: InputRoleType | undefined
 
 beforeAll(async () => {
   app = await createTestFastifyApp();
@@ -27,6 +34,10 @@ beforeAll(async () => {
     ...InputUserExample,
     email: 'other@email.example',
     phoneNumber: '+989303590056'
+  }
+  roledata = {
+    ...InputRoleExample,
+    title: 'testRole',
   }
 });
 
@@ -114,6 +125,28 @@ it('should delete user', async () => {
     data: {
       raw: expect.any(Array),
       affected: 1,
+    },
+    meta: {},
+  });
+});
+
+it('should create a role', async () => {
+  assert(app);
+  assert(user);
+  assert(roledata);
+
+  const response = await user.inject({
+    method: 'POST',
+    url: '/roles',
+    payload: roledata,
+  });
+  roledata.id = response.json().data.id
+  expect(response.json()).toMatchObject({
+    data: {
+      ...roledata,
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+      deletedAt: null,
     },
     meta: {},
   });
