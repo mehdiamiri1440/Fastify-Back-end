@@ -20,6 +20,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
                 orderable: ['title'],
                 searchable: ['title'],
             }),
+            tags: ['suppliers'],
+            security: [
+                {
+                    Bearer: [],
+                },
+            ],
         },
         async handler(req) {
             return new TableQueryBuilder(Languages, req).exec();
