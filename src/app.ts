@@ -62,6 +62,7 @@ const app: FastifyPluginCallback = async (fastify, options, done) => {
       await fastify.register(import('./domains/user/routes'));
 
       await fastify.register(import('./domains/customer/routes'));
+      await fastify.register(import('./domains/supplier/routes'));
     },
     {
       prefix: '/api/v1',
