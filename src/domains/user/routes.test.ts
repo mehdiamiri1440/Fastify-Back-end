@@ -152,6 +152,29 @@ it('should create a role', async () => {
   });
 });
 
+
+it('should return all roles', async () => {
+  assert(app);
+  assert(user);
+  assert(roledata);
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/roles',
+  });
+
+  expect(response.json().data).toMatchObject(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ...roledata,
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+          deletedAt: null,
+        }),
+      ]),
+  );
+});
+
 it('should return a user that logged in', async () => {
   assert(app);
   assert(user);
