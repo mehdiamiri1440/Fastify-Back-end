@@ -15,6 +15,7 @@ import {
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
+let userdata: InputUserType | undefined
 
 beforeAll(async () => {
   app = await createTestFastifyApp();
@@ -22,6 +23,11 @@ beforeAll(async () => {
   await app.register(routes);
   await app.ready();
   user = await TestUser.create(app);
+  userdata = {
+    ...InputUserExample,
+    email: 'other@email.example',
+    phoneNumber: '+989303590056'
+  }
 });
 
 afterAll(async () => {
@@ -31,14 +37,14 @@ afterAll(async () => {
 it('should create a user', async () => {
   assert(app);
   assert(user);
+  assert(userdata);
 
-  const userdata: InputUserType = InputUserExample;
   const response = await user.inject({
     method: 'POST',
     url: '/users',
     payload: userdata,
   });
-
+  userdata.id = response.json().data.id
   expect(response.json()).toMatchObject({
     data: {
       ...userdata,
@@ -53,20 +59,62 @@ it('should create a user', async () => {
 it('should return all users', async () => {
   assert(app);
   assert(user);
+  assert(userdata);
 
-  const userdata: UserType = UserExample;
   const response = await user.inject({
     method: 'GET',
     url: '/users',
   });
 
+  expect(response.json().data).toMatchObject(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ...userdata,
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+          deletedAt: null,
+        }),
+      ]),
+  );
+});
+
+it('should update user', async () => {
+  assert(app);
+  assert(user);
+  assert(userdata);
+
+  const response = await user.inject({
+    method: 'PUT',
+    url: '/users/' + userdata.id,
+    payload: {...userdata, firstName: 'NotDaniel'},
+  });
+
   expect(response.json()).toMatchObject({
-    data: [{
-      ...userdata,
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String),
-      deletedAt: null,
-    },],
+    data: {
+      generatedMaps: expect.any(Array),
+      raw: expect.any(Array),
+      affected: 1,
+    },
+    meta: {},
+  });
+});
+
+it('should delete user', async () => {
+  assert(app);
+  assert(user);
+  assert(userdata);
+
+  const response = await user.inject({
+    method: 'DELETE',
+    url: '/users/' + userdata.id,
+    payload: {...userdata},
+  });
+
+  expect(response.json()).toMatchObject({
+    data: {
+      raw: expect.any(Array),
+      affected: 1,
+    },
     meta: {},
   });
 });
@@ -75,7 +123,6 @@ it('should return a user that logged in', async () => {
   assert(app);
   assert(user);
 
-  const userdata: UserType = UserExample;
   const response = await user.inject({
     method: 'GET',
     url: '/whoami',
@@ -83,7 +130,7 @@ it('should return a user that logged in', async () => {
 
   expect(response.json()).toMatchObject({
     data: {
-      ...userdata,
+      ...UserExample,
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
       deletedAt: null,
