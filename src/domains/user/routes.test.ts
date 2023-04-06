@@ -21,8 +21,8 @@ import {
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
-let userdata: InputUserType | undefined
-let roledata: InputRoleType | undefined
+let userdata: InputUserType | undefined;
+let roledata: InputRoleType | undefined;
 
 beforeAll(async () => {
   app = await createTestFastifyApp();
@@ -33,12 +33,12 @@ beforeAll(async () => {
   userdata = {
     ...InputUserExample,
     email: 'other@email.example',
-    phoneNumber: '+989303590056'
-  }
+    phoneNumber: '+989303590056',
+  };
   roledata = {
     ...InputRoleExample,
     title: 'testRole',
-  }
+  };
 });
 
 afterAll(async () => {
@@ -55,7 +55,7 @@ it('should create a user', async () => {
     url: '/users',
     payload: userdata,
   });
-  userdata.id = response.json().data.id
+  userdata.id = response.json().data.id;
   expect(response.json()).toMatchObject({
     data: {
       ...userdata,
@@ -78,14 +78,14 @@ it('should return all users', async () => {
   });
 
   expect(response.json().data).toMatchObject(
-      expect.arrayContaining([
-        expect.objectContaining({
-          ...userdata,
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
-          deletedAt: null,
-        }),
-      ]),
+    expect.arrayContaining([
+      expect.objectContaining({
+        ...userdata,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        deletedAt: null,
+      }),
+    ]),
   );
 });
 
@@ -97,7 +97,7 @@ it('should update user', async () => {
   const response = await user.inject({
     method: 'PUT',
     url: '/users/' + userdata.id,
-    payload: {...userdata, firstName: 'NotDaniel'},
+    payload: { ...userdata, firstName: 'DanielEdited' },
   });
 
   expect(response.json()).toMatchObject({
@@ -118,7 +118,7 @@ it('should deactive user', async () => {
   const response = await user.inject({
     method: 'PUT',
     url: '/users/' + userdata.id,
-    payload: {...userdata, isActive: false},
+    payload: { ...userdata, isActive: false },
   });
 
   expect(response.json()).toMatchObject({
@@ -139,7 +139,7 @@ it('should delete user', async () => {
   const response = await user.inject({
     method: 'DELETE',
     url: '/users/' + userdata.id,
-    payload: {...userdata},
+    payload: { ...userdata },
   });
 
   expect(response.json()).toMatchObject({
@@ -161,7 +161,7 @@ it('should create a role', async () => {
     url: '/roles',
     payload: roledata,
   });
-  roledata.id = response.json().data.id
+  roledata.id = response.json().data.id;
   expect(response.json()).toMatchObject({
     data: {
       ...roledata,
@@ -172,7 +172,6 @@ it('should create a role', async () => {
     meta: {},
   });
 });
-
 
 it('should return all roles', async () => {
   assert(app);
@@ -185,14 +184,14 @@ it('should return all roles', async () => {
   });
 
   expect(response.json().data).toMatchObject(
-      expect.arrayContaining([
-        expect.objectContaining({
-          ...roledata,
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
-          deletedAt: null,
-        }),
-      ]),
+    expect.arrayContaining([
+      expect.objectContaining({
+        ...roledata,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        deletedAt: null,
+      }),
+    ]),
   );
 });
 
@@ -204,7 +203,7 @@ it('should update role', async () => {
   const response = await user.inject({
     method: 'PUT',
     url: '/roles/' + roledata.id,
-    payload: {...roledata, title: 'testRoleEdited'},
+    payload: { ...roledata, title: 'testRoleEdited' },
   });
 
   expect(response.json()).toMatchObject({
@@ -225,7 +224,7 @@ it('should deactive role', async () => {
   const response = await user.inject({
     method: 'PUT',
     url: '/roles/' + roledata.id,
-    payload: {...roledata, isActive: false},
+    payload: { ...roledata, isActive: false },
   });
 
   expect(response.json()).toMatchObject({
@@ -246,7 +245,7 @@ it('should delete role', async () => {
   const response = await user.inject({
     method: 'DELETE',
     url: '/roles/' + roledata.id,
-    payload: {...roledata},
+    payload: { ...roledata },
   });
 
   expect(response.json()).toMatchObject({
