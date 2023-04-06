@@ -110,6 +110,27 @@ it('should update user', async () => {
   });
 });
 
+it('should deactive user', async () => {
+  assert(app);
+  assert(user);
+  assert(userdata);
+
+  const response = await user.inject({
+    method: 'PUT',
+    url: '/users/' + userdata.id,
+    payload: {...userdata, isActive: false},
+  });
+
+  expect(response.json()).toMatchObject({
+    data: {
+      generatedMaps: expect.any(Array),
+      raw: expect.any(Array),
+      affected: 1,
+    },
+    meta: {},
+  });
+});
+
 it('should delete user', async () => {
   assert(app);
   assert(user);
@@ -184,6 +205,27 @@ it('should update role', async () => {
     method: 'PUT',
     url: '/roles/' + roledata.id,
     payload: {...roledata, title: 'testRoleEdited'},
+  });
+
+  expect(response.json()).toMatchObject({
+    data: {
+      generatedMaps: expect.any(Array),
+      raw: expect.any(Array),
+      affected: 1,
+    },
+    meta: {},
+  });
+});
+
+it('should deactive role', async () => {
+  assert(app);
+  assert(user);
+  assert(roledata);
+
+  const response = await user.inject({
+    method: 'PUT',
+    url: '/roles/' + roledata.id,
+    payload: {...roledata, isActive: false},
   });
 
   expect(response.json()).toMatchObject({
