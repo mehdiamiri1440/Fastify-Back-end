@@ -175,6 +175,29 @@ it('should return all roles', async () => {
   );
 });
 
+it('should update role', async () => {
+  assert(app);
+  assert(user);
+  assert(roledata);
+
+  const response = await user.inject({
+    method: 'PUT',
+    url: '/roles/' + roledata.id,
+    payload: {...roledata, title: 'testRoleEdited'},
+  });
+
+  expect(response.json()).toMatchObject({
+    data: {
+      generatedMaps: expect.any(Array),
+      raw: expect.any(Array),
+      affected: 1,
+    },
+    meta: {},
+  });
+});
+
+
+
 it('should return a user that logged in', async () => {
   assert(app);
   assert(user);
