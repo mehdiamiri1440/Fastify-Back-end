@@ -14,7 +14,7 @@
     "lint:quiet": "eslint . --quiet",
     "check": "tsc --noEmit",
     "ci": "npm run format:check && npm run lint:quiet && npm run check",
-    "test": "DOTENV_CONFIG_PATH=.env.test jest --setupFiles=dotenv/config"
+    "test": "DOTENV_CONFIG_PATH=.env.test jest --setupFiles=dotenv/config --runInBand"
   },
   "keywords": [],
   "author": "",
