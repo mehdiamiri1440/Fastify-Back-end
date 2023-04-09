@@ -14,37 +14,37 @@ let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
 
 beforeAll(async () => {
-    app = await createTestFastifyApp();
-    await AppDataSource.synchronize();
-    await app.register(routes);
-    await app.ready();
-    user = await TestUser.create(app);
+  app = await createTestFastifyApp();
+  await AppDataSource.synchronize();
+  await app.register(routes);
+  await app.ready();
+  user = await TestUser.create(app);
 });
 
 afterAll(async () => {
-    await app?.close();
+  await app?.close();
 });
 
 it('should return all languages', async () => {
-    assert(app);
-    assert(user);
+  assert(app);
+  assert(user);
 
-    const ldata = await Languages.save({ title: 'SPN' });
+  const ldata = await Languages.save({ title: 'SPN' });
 
-    const response = await user.inject({
-        method: 'GET',
-        url: '/languages',
-    });
+  const response = await user.inject({
+    method: 'GET',
+    url: '/languages',
+  });
 
-    expect(response.json()).toMatchObject({
-        data: [
-            {
-                ...ldata,
-                createdAt: expect.any(String),
-                updatedAt: expect.any(String),
-                deletedAt: null,
-            },
-        ],
-        meta: {},
-    });
+  expect(response.json()).toMatchObject({
+    data: [
+      {
+        ...ldata,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        deletedAt: null,
+      },
+    ],
+    meta: {},
+  });
 });

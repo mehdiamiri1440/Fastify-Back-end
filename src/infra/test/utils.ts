@@ -9,9 +9,9 @@ import { Role } from '$src/domains/user/models/Role';
 import { InputRoleExample } from '$src/domains/user/schemas/role.schema';
 
 async function createTestUser() {
-  await repo(Role).save({...InputRoleExample});
+  await repo(Role).save({ ...InputRoleExample });
 
-  return await repo(User).save({...InputUserExample});
+  return await repo(User).save({ ...InputUserExample });
 }
 
 export class TestUser {

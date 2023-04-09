@@ -9,28 +9,28 @@ import { Language } from './models/Language';
 const Languages = repo(Language);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
-    app.register(ResponseShape);
-    app.route({
-        method: 'GET',
-        url: '/languages',
-        onRequest: usersAuth,
-        schema: {
-            querystring: ListQueryOptions({
-                filterable: ['title'],
-                orderable: ['title'],
-                searchable: ['title'],
-            }),
-            tags: ['suppliers'],
-            security: [
-                {
-                    Bearer: [],
-                },
-            ],
+  app.register(ResponseShape);
+  app.route({
+    method: 'GET',
+    url: '/languages',
+    onRequest: usersAuth,
+    schema: {
+      querystring: ListQueryOptions({
+        filterable: ['title'],
+        orderable: ['title'],
+        searchable: ['title'],
+      }),
+      tags: ['suppliers'],
+      security: [
+        {
+          Bearer: [],
         },
-        async handler(req) {
-            return new TableQueryBuilder(Languages, req).exec();
-        },
-    });
+      ],
+    },
+    async handler(req) {
+      return new TableQueryBuilder(Languages, req).exec();
+    },
+  });
 };
 
 export default plugin;

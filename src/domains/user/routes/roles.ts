@@ -5,7 +5,10 @@ import { Role } from '../../user/models/Role';
 import { repo } from '$src/databases/typeorm';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
-import { InputRoleSchema, InputRoleType } from '$src/domains/user/schemas/role.schema';
+import {
+  InputRoleSchema,
+  InputRoleType,
+} from '$src/domains/user/schemas/role.schema';
 import { Type } from '@sinclair/typebox';
 import { RolePermission } from '../models/RolePermission';
 const Roles = repo(Role);
@@ -75,7 +78,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      return await Roles.update({ id: req.params.id }, req.body as InputRoleType);
+      return await Roles.update(
+        { id: req.params.id },
+        req.body as InputRoleType,
+      );
     },
   });
   app.route({
@@ -169,7 +175,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       const role_id: number = req.params.id;
       const permission: string = req.params.code;
-      const creator_id = req.user.id
+      const creator_id = req.user.id;
       return await RolePermissions.save({
         permission: permission,
         role: { id: role_id },
