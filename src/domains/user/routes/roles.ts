@@ -52,7 +52,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       body: InputRoleSchema,
     },
     async handler(req) {
-      return await Roles.save(req.body as InputRoleType);
+      return await Roles.save({
+        ...(req.body as InputRoleType),
+        creator: { id: req.user.id },
+      });
     },
   });
   app.route({
@@ -166,9 +169,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       const role_id: number = req.params.id;
       const permission: string = req.params.code;
+      const creator_id = req.user.id
       return await RolePermissions.save({
         permission: permission,
         role: { id: role_id },
+        creator: { id: creator_id },
       });
     },
   });

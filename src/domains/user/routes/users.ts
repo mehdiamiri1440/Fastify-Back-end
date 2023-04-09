@@ -49,7 +49,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       body: InputUserSchema,
     },
     async handler(req) {
-      return await Users.save(req.body as InputUserType);
+      return await Users.save({
+        ...(req.body as InputUserType),
+        creator: { id: req.user.id },
+      });
     },
   });
   app.route({
