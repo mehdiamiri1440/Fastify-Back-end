@@ -5,7 +5,7 @@ export const RoleObject = {
     id: Type.Number(),
     title: Type.String({ minLength: 1 }),
     isActive: Type.Boolean(),
-    creator: Type.Union([Type.Object({}), Type.Number()]),
+    creator: Type.Number(),
     createdAt: Type.Union([Type.Date(), Type.String({ format: 'date-time' })]),
     updatedAt: Type.Union([Type.Date(), Type.String({ format: 'date-time' })]),
     deletedAt: Type.Optional(
@@ -55,3 +55,10 @@ export const OutputRoleExample: OutputRoleType = removeItemsIn(
     RoleExample,
 );
 Object.seal(OutputRoleExample)
+
+export const ModelRoleRemove: string[] = ['creator'];
+
+export const ModelRoleSchema = Type.Object(
+    removeItemsIn(ModelRoleRemove, RoleObject),
+);
+export type ModelRoleType = Static<typeof ModelRoleSchema>;

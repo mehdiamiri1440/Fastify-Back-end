@@ -5,7 +5,7 @@ export const UserObject = {
   id: Type.Number(),
   firstName: Type.String({ minLength: 1 }),
   lastName: Type.String({ minLength: 1 }),
-  role: Type.Union([Type.Object({}), Type.Number()]),
+  role: Type.Number(),
   nif: Type.RegEx(
     /^(X(-|\.)?0?\d{7}(-|\.)?[A-Z]|[A-Z](-|\.)?\d{7}(-|\.)?[0-9A-Z]|\d{8}(-|\.)?[A-Z])$/,
   ),
@@ -14,7 +14,7 @@ export const UserObject = {
   password: Type.String(),
   position: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   isActive: Type.Boolean(),
-  creator: Type.Union([Type.Object({}), Type.Number()]),
+  creator: Type.Number(),
   createdAt: Type.Union([Type.Date(), Type.String({ format: 'date' })]),
   updatedAt: Type.Union([Type.Date(), Type.String({ format: 'date' })]),
   deletedAt: Type.Optional(
@@ -44,6 +44,7 @@ export const UserExample: UserType = {
 
 export const InputUserRemove: string[] = [
   'id',
+  'creator',
   'createdAt',
   'updatedAt',
   'deletedAt',
@@ -69,4 +70,11 @@ export const OutputUserExample: OutputUserType = removeItemsIn(
   OutputUserRemove,
   UserExample,
 );
-Object.seal(OutputUserExample)
+Object.seal(OutputUserExample);
+
+export const ModelUserRemove: string[] = ['role', 'creator'];
+
+export const ModelUserSchema = Type.Object(
+  removeItemsIn(ModelUserRemove, UserObject),
+);
+export type ModelUserType = Static<typeof ModelUserSchema>;
