@@ -1,6 +1,7 @@
 import createError from '@fastify/error';
 import assert from 'assert';
-import { FastifyPluginCallback } from 'fastify/types/plugin';
+import FastifySwagger from '@fastify/swagger';
+import { FastifyPluginAsync } from 'fastify/types/plugin';
 import { TypeORMError } from 'typeorm';
 
 const ENTITY_NOT_FOUND = createError(
@@ -9,7 +10,7 @@ const ENTITY_NOT_FOUND = createError(
   404,
 );
 
-const app: FastifyPluginCallback = async (fastify, options, done) => {
+const app: FastifyPluginAsync = async (fastify) => {
   const { JWT_SECRET } = process.env;
   assert(JWT_SECRET, 'JWT_SECRET env var not provided');
 
@@ -32,7 +33,7 @@ const app: FastifyPluginCallback = async (fastify, options, done) => {
 
   await fastify.register(import('./databases/typeorm'));
 
-  await fastify.register(import('@fastify/swagger'), {
+  await fastify.register(FastifySwagger, {
     openapi: {
       openapi: '3.0.0',
       components: {
@@ -68,8 +69,6 @@ const app: FastifyPluginCallback = async (fastify, options, done) => {
       prefix: '/api/v1',
     },
   );
-
-  done();
 };
 
 export default app;
