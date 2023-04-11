@@ -61,7 +61,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(import('./routes/roles'), { prefix: '/roles' });
   app.route({
     method: 'GET',
-    url: '/whoami',
+    url: '/users/me',
     onRequest: usersAuth,
     schema: {
       tags: ['Auth'],
