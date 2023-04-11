@@ -12,5 +12,4 @@ module.exports = {
   moduleNameMapper: {
     '$src/(.*)': '<rootDir>/src/$1',
   },
-  runner: 'jest-serial-runner',
 };
