@@ -330,7 +330,7 @@ it('should return a user that logged in', async () => {
 
   const response = await user.inject({
     method: 'GET',
-    url: '/whoami',
+    url: '/users/me',
   });
 
   expect(response.json()).toMatchObject({
