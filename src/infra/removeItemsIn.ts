@@ -1,7 +1,7 @@
-export default function (items: string[], in_: any) {
-  const res = JSON.parse(JSON.stringify(in_));
-  for (const index in items) {
-    delete res[items[index]];
+export default function (items: string[], input: any) {
+  const res = structuredClone(input);
+  for (const item of items) {
+    delete res[item];
   }
   return res;
 }

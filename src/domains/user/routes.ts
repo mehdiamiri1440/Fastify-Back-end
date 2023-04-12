@@ -43,14 +43,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }
       const { id } = user.role;
       const permissions = await RolePermissions.findBy({ role: { id } });
-      const permission_codes: string[] = [];
-      for (const index in permissions) {
-        permission_codes[parseInt(index)] = permissions[index].permission;
-      }
+      const scope = permissions.map((p) => p.permission).join(' ');
       const token = app.jwt.sign(
         {
           id: user.id,
-          scope: permission_codes.join(' '),
+          scope,
         },
         {
           expiresIn: TTL,
@@ -60,7 +57,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         access_token: token,
         token_type: 'bearer',
         expires_in: TTL,
-        scope: permission_codes.join(' '),
+        scope,
       });
     },
   });

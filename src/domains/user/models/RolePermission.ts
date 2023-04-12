@@ -10,7 +10,6 @@ import {
 } from 'typeorm';
 import { Role } from './Role';
 import { User } from './User';
-type Safe<T> = T;
 
 @Entity()
 @Unique(['role', 'permission'])
@@ -19,13 +18,13 @@ export class RolePermission {
   id!: number;
 
   @ManyToOne(() => Role)
-  role!: Safe<Role>;
+  role!: Role;
 
   @Column({ nullable: false })
   permission!: string;
 
   @ManyToOne(() => User)
-  creator!: Safe<User>;
+  creator!: User;
 
   @CreateDateColumn({ nullable: false })
   createdAt!: Date;

@@ -9,7 +9,6 @@ import {
 } from 'typeorm';
 import { ModelUserType } from '../schemas/user.schema';
 import { Role } from './Role';
-type Safe<T> = T;
 
 @Entity()
 export class User implements ModelUserType {
@@ -23,7 +22,7 @@ export class User implements ModelUserType {
   lastName!: string;
 
   @ManyToOne(() => Role)
-  role!: Safe<Role>;
+  role!: Role;
 
   @Column({ nullable: false })
   nif!: string;
@@ -31,20 +30,20 @@ export class User implements ModelUserType {
   @Column({ unique: true, nullable: false })
   email!: string;
 
-  @Column({ unique: true, nullable: true })
-  phoneNumber?: string;
+  @Column({ type: 'string', unique: true, nullable: true })
+  phoneNumber?: string | null;
 
   @Column({ nullable: false })
   password!: string;
 
-  @Column({ nullable: true })
-  position?: string;
+  @Column({ type: 'string', nullable: true })
+  position?: string | null;
 
   @Column({ nullable: false })
   isActive!: boolean;
 
   @ManyToOne(() => User)
-  creator!: Safe<User>;
+  creator!: User;
 
   @CreateDateColumn()
   createdAt!: Date;

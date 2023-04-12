@@ -52,11 +52,14 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     async handler(req) {
       // validating role
-      const role_ = await Roles.findOneBy({ id: req.body.role });
-      if (!role_) return 'error';
+      const role = await Roles.findOneBy({ id: req.body.role });
+      if (!role) return 'error';
+
+      const { ...rest } = req.body;
 
       return await Users.save({
-        ...req.body,
+        ...rest,
+        role,
         creator: { id: req.user.id },
       });
     },

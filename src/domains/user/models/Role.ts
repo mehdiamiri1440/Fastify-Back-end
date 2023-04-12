@@ -9,7 +9,6 @@ import {
 } from 'typeorm';
 import { User } from './User';
 import { ModelRoleType } from '$src/domains/user/schemas/role.schema';
-type Safe<T> = T;
 
 @Entity()
 export class Role implements ModelRoleType {
@@ -20,7 +19,7 @@ export class Role implements ModelRoleType {
   title!: string;
 
   @ManyToOne(() => User)
-  creator!: Safe<User>;
+  creator!: User;
 
   @Column({ nullable: false })
   isActive!: boolean;

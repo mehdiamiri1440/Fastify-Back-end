@@ -1,24 +1,18 @@
 import 'reflect-metadata';
 
+import { AppDataSource } from '$src/databases/typeorm';
 import { createTestFastifyApp, TestUser } from '$src/infra/test/utils';
+import permissions from '$src/permissions';
 import { afterAll, beforeAll, expect, it } from '@jest/globals';
 import assert from 'assert';
-import fastify, { FastifyInstance } from 'fastify';
+import { FastifyInstance } from 'fastify';
 import routes from './routes';
-import { AppDataSource } from '$src/databases/typeorm';
-import permissions from '$src/permissions';
+import { InputRoleExample, InputRoleType } from './schemas/role.schema';
 import {
-  InputUserType,
   InputUserExample,
-  UserType,
+  InputUserType,
   UserExample,
 } from './schemas/user.schema';
-import {
-  InputRoleType,
-  InputRoleExample,
-  RoleType,
-  RoleExample,
-} from './schemas/role.schema';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;

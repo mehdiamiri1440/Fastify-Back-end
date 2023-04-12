@@ -1,5 +1,5 @@
 import { Type, Static } from '@sinclair/typebox';
-import removeItemsIn from '$src/infra/removeItemsIn';
+import { omit } from 'lodash';
 
 export const UserObject = {
   id: Type.Number(),
@@ -42,39 +42,34 @@ export const UserExample: UserType = {
   deletedAt: null,
 };
 
-export const InputUserRemove: string[] = [
+const InputUserRemove = [
   'id',
   'creator',
   'createdAt',
   'updatedAt',
   'deletedAt',
-];
+] as const;
 
-export const InputUserSchema = Type.Object(
-  removeItemsIn(InputUserRemove, UserObject),
-);
+export const InputUserSchema = Type.Object(omit(UserObject, InputUserRemove));
 export type InputUserType = Static<typeof InputUserSchema>;
-export const InputUserExample: InputUserType = removeItemsIn(
-  InputUserRemove,
+
+export const InputUserExample: InputUserType = omit(
   UserExample,
+  InputUserRemove,
 );
 Object.seal(InputUserExample);
 
-export const OutputUserRemove: string[] = ['password', 'deletedAt'];
+const OutputUserRemove = ['password', 'deletedAt'] as const;
 
-export const OutputUserSchema = Type.Object(
-  removeItemsIn(OutputUserRemove, UserObject),
-);
+export const OutputUserSchema = Type.Object(omit(UserObject, OutputUserRemove));
 export type OutputUserType = Static<typeof OutputUserSchema>;
-export const OutputUserExample: OutputUserType = removeItemsIn(
-  OutputUserRemove,
+export const OutputUserExample: OutputUserType = omit(
   UserExample,
+  OutputUserRemove,
 );
 Object.seal(OutputUserExample);
 
-export const ModelUserRemove: string[] = ['role', 'creator'];
+const ModelUserRemove = ['role', 'creator'] as const;
 
-export const ModelUserSchema = Type.Object(
-  removeItemsIn(ModelUserRemove, UserObject),
-);
+export const ModelUserSchema = Type.Object(omit(UserObject, ModelUserRemove));
 export type ModelUserType = Static<typeof ModelUserSchema>;
