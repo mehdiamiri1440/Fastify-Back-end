@@ -13,7 +13,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'GET',
     url: '/languages',
-    onRequest: usersAuth,
     schema: {
       querystring: ListQueryOptions({
         filterable: ['title'],
@@ -21,11 +20,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         searchable: ['title'],
       }),
       tags: ['suppliers'],
-      security: [
-        {
-          Bearer: [],
-        },
-      ],
     },
     async handler(req) {
       return new TableQueryBuilder(Languages, req).exec();
