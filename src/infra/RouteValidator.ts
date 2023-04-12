@@ -2,7 +2,6 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import permissions from '$src/permissions';
 import fp from 'fastify-plugin';
 
-
 const plugin: FastifyPluginAsyncTypebox = async function (fastify) {
   await fastify.addHook('onRoute', (route) => {
     if (route.routePath !== '' && route.routePath !== '/*') {
