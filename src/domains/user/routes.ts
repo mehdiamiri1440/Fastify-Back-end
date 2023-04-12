@@ -8,6 +8,7 @@ import { repo } from '$src/databases/typeorm';
 import { usersAuth } from '$src/authentication/users';
 import { createError } from '@fastify/error';
 const aderr = createError('A4SD4D', 'access denied')
+import permissions from '$src/permissions'
 
 const Users = repo(User);
 const RolePermissions = repo(RolePermission);
@@ -92,7 +93,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       tags: ['permissions'],
     },
     async handler(req) {
-      return import('$src/permissions');
+      return permissions;
     },
   });
 };
