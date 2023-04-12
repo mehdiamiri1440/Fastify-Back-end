@@ -7,8 +7,8 @@ import { RolePermission } from '$src/domains/user/models/RolePermission';
 import { repo } from '$src/databases/typeorm';
 import { usersAuth } from '$src/authentication/users';
 import { createError } from '@fastify/error';
-const aderr = createError('A4SD4D', 'access denied')
-import permissions from '$src/permissions'
+const aderr = createError('A4SD4D', 'access denied');
+import permissions from '$src/permissions';
 
 const Users = repo(User);
 const RolePermissions = repo(RolePermission);
@@ -39,7 +39,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         relations: ['role'],
       });
       if (!user) {
-        return new aderr()
+        return new aderr();
       }
       const { id } = user.role;
       const permissions = await RolePermissions.findBy({ role: { id } });

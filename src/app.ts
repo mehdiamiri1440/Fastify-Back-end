@@ -65,7 +65,7 @@ const app: FastifyPluginAsync = async (fastify) => {
       let scopes: string[] = [];
       for (const index in route.schema.security) {
         if (route.schema.security[index].OAuth2 !== undefined) {
-          scopes = route.schema.security[index].OAuth2
+          scopes = route.schema.security[index].OAuth2;
         }
       }
       if (scopes.length <= 0) return;
@@ -79,7 +79,7 @@ const app: FastifyPluginAsync = async (fastify) => {
     }
   });
 
-  fastify.register(import('@fastify/formbody'))
+  fastify.register(import('@fastify/formbody'));
 
   await fastify.register(
     async () => {

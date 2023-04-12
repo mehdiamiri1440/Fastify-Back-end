@@ -7,7 +7,7 @@ import {
 } from '$src/domains/user/schemas/user.schema';
 import { Role } from '$src/domains/user/models/Role';
 import { InputRoleExample } from '$src/domains/user/schemas/role.schema';
-import permissions from '$src/permissions'
+import permissions from '$src/permissions';
 
 async function createTestUser() {
   await repo(Role).save({ ...InputRoleExample });

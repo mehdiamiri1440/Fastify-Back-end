@@ -24,7 +24,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       tags: ['users'],
       security: [
         {
-          OAuth2: ['user@user::list']
+          OAuth2: ['user@user::list'],
         },
       ],
       querystring: ListQueryOptions({
@@ -45,7 +45,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       tags: ['users'],
       security: [
         {
-          OAuth2: ['user@role::update']
+          OAuth2: ['user@role::update'],
         },
       ],
       body: InputUserSchema,
@@ -69,7 +69,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       tags: ['users'],
       security: [
         {
-          OAuth2: ['user@user::update']
+          OAuth2: ['user@user::update'],
         },
       ],
       body: InputUserSchema,
@@ -96,7 +96,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       tags: ['users'],
       security: [
         {
-          OAuth2: ['user@user::delete']
+          OAuth2: ['user@user::delete'],
         },
       ],
       params: Type.Object({
@@ -115,7 +115,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       tags: ['users'],
       security: [
         {
-          OAuth2: ['user@user::update']
+          OAuth2: ['user@user::update'],
         },
       ],
       params: Type.Object({

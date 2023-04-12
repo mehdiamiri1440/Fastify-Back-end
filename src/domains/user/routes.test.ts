@@ -6,7 +6,7 @@ import assert from 'assert';
 import fastify, { FastifyInstance } from 'fastify';
 import routes from './routes';
 import { AppDataSource } from '$src/databases/typeorm';
-import permissions from '$src/permissions'
+import permissions from '$src/permissions';
 import {
   InputUserType,
   InputUserExample,
