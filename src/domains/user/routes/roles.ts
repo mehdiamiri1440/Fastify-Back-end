@@ -38,7 +38,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      if (!(await isPermissionInPermissions('read', req.user.scope)))
+      if (!(await isPermissionInPermissions('user@role::list', req.user.scope)))
         return new aderr()
       return new TableQueryBuilder(Roles, req).exec();
     },
