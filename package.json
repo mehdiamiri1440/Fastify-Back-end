@@ -21,6 +21,7 @@
   "license": "ISC",
   "dependencies": {
     "@fastify/error": "^3.2.0",
+    "@fastify/formbody": "^7.4.0",
     "@fastify/jwt": "^6.7.0",
     "@fastify/multipart": "^7.5.0",
     "@fastify/swagger": "^8.3.1",

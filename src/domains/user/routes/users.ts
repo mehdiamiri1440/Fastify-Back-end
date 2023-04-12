@@ -19,12 +19,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'GET',
     url: '/',
-    onRequest: usersAuth,
+    onRequest: [usersAuth],
     schema: {
       tags: ['users'],
       security: [
         {
-          Bearer: [],
+          OAuth2: ['user@user::list']
         },
       ],
       querystring: ListQueryOptions({
@@ -40,12 +40,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/',
-    onRequest: usersAuth,
+    onRequest: [usersAuth],
     schema: {
       tags: ['users'],
       security: [
         {
-          Bearer: [],
+          OAuth2: ['user@role::update']
         },
       ],
       body: InputUserSchema,
@@ -56,7 +56,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       if (!role_) return 'error';
 
       return await Users.save({
-        ...(req.body as InputUserType),
+        ...req.body,
         creator: { id: req.user.id },
       });
     },
@@ -64,12 +64,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'PUT',
     url: '/:id',
-    onRequest: usersAuth,
+    onRequest: [usersAuth],
     schema: {
       tags: ['users'],
       security: [
         {
-          Bearer: [],
+          OAuth2: ['user@user::update']
         },
       ],
       body: InputUserSchema,
@@ -91,12 +91,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'DELETE',
     url: '/:id',
-    onRequest: usersAuth,
+    onRequest: [usersAuth],
     schema: {
       tags: ['users'],
       security: [
         {
-          Bearer: [],
+          OAuth2: ['user@user::delete']
         },
       ],
       params: Type.Object({
@@ -110,12 +110,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'PUT',
     url: '/:id/is-active',
-    onRequest: usersAuth,
+    onRequest: [usersAuth],
     schema: {
       tags: ['users'],
       security: [
         {
-          Bearer: [],
+          OAuth2: ['user@user::update']
         },
       ],
       params: Type.Object({

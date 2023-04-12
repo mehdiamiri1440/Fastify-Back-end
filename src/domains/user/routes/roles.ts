@@ -21,12 +21,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'GET',
     url: '/',
-    onRequest: usersAuth,
+    onRequest: [usersAuth],
     schema: {
       tags: ['roles'],
       security: [
         {
-          Bearer: [],
+          OAuth2: ['user@role::list']
         },
       ],
       querystring: ListQueryOptions({
@@ -44,12 +44,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/',
-    onRequest: usersAuth,
+    onRequest: [usersAuth],
     schema: {
       tags: ['roles'],
       security: [
         {
-          Bearer: [],
+          OAuth2: ['user@role::create']
         },
       ],
       body: InputRoleSchema,
@@ -64,12 +64,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'PUT',
     url: '/:id',
-    onRequest: usersAuth,
+    onRequest: [usersAuth],
     schema: {
       tags: ['roles'],
       security: [
         {
-          Bearer: [],
+          OAuth2: ['user@role::update']
         },
       ],
       body: InputRoleSchema,
@@ -87,12 +87,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'DELETE',
     url: '/:id',
-    onRequest: usersAuth,
+    onRequest: [usersAuth],
     schema: {
       tags: ['roles'],
       security: [
         {
-          Bearer: [],
+          OAuth2: ['user@role::delete']
         },
       ],
       params: Type.Object({
@@ -106,12 +106,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'PUT',
     url: '/:id/is-active',
-    onRequest: usersAuth,
+    onRequest: [usersAuth],
     schema: {
       tags: ['roles'],
       security: [
         {
-          Bearer: [],
+          OAuth2: ['user@role::active']
         },
       ],
       params: Type.Object({
@@ -130,12 +130,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'GET',
     url: '/:id/permissions',
-    onRequest: usersAuth,
+    onRequest: [usersAuth],
     schema: {
       tags: ['roles'],
       security: [
         {
-          Bearer: [],
+          OAuth2: ['user@role::list']
         },
       ],
       params: Type.Object({
@@ -159,12 +159,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/:id/permissions/:code',
-    onRequest: usersAuth,
+    onRequest: [usersAuth],
     schema: {
       tags: ['roles'],
       security: [
         {
-          Bearer: [],
+          OAuth2: ['user@user::create']
         },
       ],
       params: Type.Object({
@@ -186,12 +186,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'DELETE',
     url: '/:id/permissions/:code',
-    onRequest: usersAuth,
+    onRequest: [usersAuth],
     schema: {
       tags: ['roles'],
       security: [
         {
-          Bearer: [],
+          OAuth2: ['user@role::update']
         },
       ],
       params: Type.Object({

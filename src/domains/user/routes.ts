@@ -26,13 +26,13 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     schema: {
       tags: ['Auth'],
       body: Type.Object({
-        email: Type.String(),
+        username: Type.String(),
         password: Type.String(),
       }),
     },
     async handler(req) {
       const user = await Users.findOne({
-        where: { email: req.body.email, password: req.body.password },
+        where: { email: req.body.username, password: req.body.password },
         relations: ['role'],
       });
       if (!user) {
@@ -53,7 +53,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           expiresIn: TTL,
         },
       );
-      return { token };
+      return JSON.stringify({
+        access_token: token,
+        token_type: 'bearer',
+        expires_in: TTL,
+        scope: permission_codes.join(' '),
+      });
     },
   });
 
@@ -62,12 +67,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'GET',
     url: '/users/me',
-    onRequest: usersAuth,
+    onRequest: [usersAuth],
     schema: {
       tags: ['Auth'],
       security: [
         {
-          Bearer: [],
+          OAuth2: ['user@user::myinfo'],
         },
       ],
     },
