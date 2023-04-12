@@ -14,6 +14,8 @@ import { RolePermission } from '../models/RolePermission';
 const Roles = repo(Role);
 const RolePermissions = repo(RolePermission);
 import isPermissionInPermissions from '$src/infra/authorize';
+import { createError } from '@fastify/error';
+const aderr = createError('A4SD4D', 'access denied')
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
@@ -37,7 +39,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     async handler(req) {
       if (!(await isPermissionInPermissions('read', req.user.scope)))
-        return 'error';
+        return new aderr()
       return new TableQueryBuilder(Roles, req).exec();
     },
   });
