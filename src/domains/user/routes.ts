@@ -24,7 +24,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'POST',
     url: '/login',
     schema: {
-      tags: ['Auth'],
+      tags: ['login'],
       body: Type.Object({
         username: Type.String(),
         password: Type.String(),
@@ -69,7 +69,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/users/me',
     onRequest: [usersAuth],
     schema: {
-      tags: ['Auth'],
+      tags: ['users'],
       security: [
         {
           OAuth2: ['user@user::myinfo'],
