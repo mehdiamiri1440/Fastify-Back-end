@@ -6,6 +6,7 @@ import assert from 'assert';
 import fastify, { FastifyInstance } from 'fastify';
 import routes from './routes';
 import { AppDataSource } from '$src/databases/typeorm';
+import permissions from '$src/permissions'
 import {
   InputUserType,
   InputUserExample,
@@ -320,6 +321,21 @@ it('should delete role', async () => {
       raw: expect.any(Array),
       affected: 1,
     },
+    meta: {},
+  });
+});
+
+it('should return permissions', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/permissions',
+  });
+
+  expect(response.json()).toMatchObject({
+    data: permissions,
     meta: {},
   });
 });
