@@ -83,6 +83,16 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       });
     },
   });
+  app.route({
+    method: 'GET',
+    url: '/permissions',
+    schema: {
+      tags: ['permissions'],
+    },
+    async handler(req) {
+      return import('$src/permissions');
+    },
+  });
 };
 
 export default plugin;
