@@ -44,7 +44,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       tags: ['users'],
       security: [
         {
-          OAuth2: ['user@role::update'],
+          OAuth2: ['user@role::create'],
         },
       ],
       body: InputUserSchema,
