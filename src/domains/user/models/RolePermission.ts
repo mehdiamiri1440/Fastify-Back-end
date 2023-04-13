@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   Unique,
+  Relation,
 } from 'typeorm';
 import { Role } from './Role';
 import { User } from './User';
@@ -18,13 +19,13 @@ export class RolePermission {
   id!: number;
 
   @ManyToOne(() => Role)
-  role!: Role;
+  role!: Relation<Role>;
 
   @Column({ nullable: false })
   permission!: string;
 
   @ManyToOne(() => User)
-  creator!: User;
+  creator!: Relation<User>;
 
   @CreateDateColumn({ nullable: false })
   createdAt!: Date;

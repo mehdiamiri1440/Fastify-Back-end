@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  Relation,
 } from 'typeorm';
 import { User } from './User';
 import { ModelRoleType } from '$src/domains/user/schemas/role.schema';
@@ -19,7 +20,7 @@ export class Role implements ModelRoleType {
   title!: string;
 
   @ManyToOne(() => User)
-  creator!: User;
+  creator!: Relation<User>;
 
   @Column({ nullable: false })
   isActive!: boolean;

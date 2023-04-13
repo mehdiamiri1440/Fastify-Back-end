@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  Relation,
 } from 'typeorm';
 import { ModelUserType } from '../schemas/user.schema';
 import { Role } from './Role';
@@ -22,7 +23,7 @@ export class User implements ModelUserType {
   lastName!: string;
 
   @ManyToOne(() => Role)
-  role!: Role;
+  role!: Relation<Role>;
 
   @Column({ nullable: false })
   nif!: string;
@@ -43,7 +44,7 @@ export class User implements ModelUserType {
   isActive!: boolean;
 
   @ManyToOne(() => User)
-  creator!: User;
+  creator!: Relation<User>;
 
   @CreateDateColumn()
   createdAt!: Date;
