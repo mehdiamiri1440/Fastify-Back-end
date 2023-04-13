@@ -6,43 +6,45 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  Relation,
 } from 'typeorm';
-// import { Role } from "./Role.js";
+import { ModelUserType } from '../schemas/user.schema';
+import { Role } from './Role';
 
 @Entity()
-export class User {
+export class User implements ModelUserType {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
+  @Column({ nullable: false })
   firstName!: string;
 
-  @Column()
+  @Column({ nullable: false })
   lastName!: string;
 
-  // @ManyToOne(() => Role)
-  // role!: Role;
+  @ManyToOne(() => Role)
+  role!: Relation<Role>;
 
-  @Column()
-  nif!: number;
+  @Column({ nullable: false })
+  nif!: string;
 
-  @Column({ unique: true, nullable: true })
-  email?: string;
+  @Column({ unique: true, nullable: false })
+  email!: string;
 
-  @Column({ unique: true, nullable: true })
-  phoneNumber?: string;
+  @Column({ type: 'text', unique: true, nullable: true })
+  phoneNumber?: string | null;
 
-  @Column()
+  @Column({ nullable: false })
   password!: string;
 
-  @Column({ nullable: true })
-  position?: string;
+  @Column({ type: 'text', nullable: true })
+  position?: string | null;
 
-  @Column()
-  description!: string;
-
-  @Column()
+  @Column({ nullable: false })
   isActive!: boolean;
+
+  @ManyToOne(() => User)
+  creator!: Relation<User>;
 
   @CreateDateColumn()
   createdAt!: Date;

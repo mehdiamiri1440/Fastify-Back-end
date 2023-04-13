@@ -4,25 +4,25 @@ import { ResponseShape } from '$src/infra/Response';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { Nationality } from './models/Nationality';
+import { Language } from './models/Language';
 
-const Nationalities = repo(Nationality);
+const Languages = repo(Language);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
   app.route({
     method: 'GET',
-    url: '/nationalities',
+    url: '/languages',
     schema: {
       querystring: ListQueryOptions({
         filterable: ['title'],
         orderable: ['title'],
         searchable: ['title'],
       }),
-      tags: ['customers'],
+      tags: ['suppliers'],
     },
     async handler(req) {
-      return new TableQueryBuilder(Nationalities, req).exec();
+      return new TableQueryBuilder(Languages, req).exec();
     },
   });
 };

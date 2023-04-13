@@ -3,6 +3,7 @@ import assert from 'assert';
 import FastifySwagger from '@fastify/swagger';
 import { FastifyPluginAsync } from 'fastify/types/plugin';
 import { TypeORMError } from 'typeorm';
+import permissions from './permissions';
 
 const ENTITY_NOT_FOUND = createError(
   'ENTITY_NOT_FOUND',
@@ -38,9 +39,14 @@ const app: FastifyPluginAsync = async (fastify) => {
       openapi: '3.0.0',
       components: {
         securitySchemes: {
-          Bearer: {
-            type: 'http',
-            scheme: 'bearer',
+          OAuth2: {
+            type: 'oauth2',
+            flows: {
+              password: {
+                tokenUrl: 'http://localhost:3003/api/v1/login',
+                scopes: permissions,
+              },
+            },
           },
         },
       },
@@ -51,6 +57,9 @@ const app: FastifyPluginAsync = async (fastify) => {
     secret: JWT_SECRET,
   });
 
+  fastify.register(import('$src/infra/RouteValidator'));
+  fastify.register(import('@fastify/formbody'));
+
   await fastify.register(
     async () => {
       await fastify.register(import('@fastify/swagger-ui'), {
@@ -60,13 +69,9 @@ const app: FastifyPluginAsync = async (fastify) => {
         },
       });
 
-      await fastify.register(import('./domains/user/routes'), {
-        prefix: '/users',
-      });
+      await fastify.register(import('./domains/user/routes'));
 
-      await fastify.register(import('./domains/customer/routes'), {
-        prefix: '/customers',
-      });
+      await fastify.register(import('./domains/customer/routes'));
 
       await fastify.register(import('./domains/geo/routes'), {
         prefix: '/geo',
@@ -75,6 +80,7 @@ const app: FastifyPluginAsync = async (fastify) => {
       await fastify.register(import('./domains/document/routes'), {
         prefix: '/documents',
       });
+      await fastify.register(import('./domains/supplier/routes'));
     },
     {
       prefix: '/api/v1',

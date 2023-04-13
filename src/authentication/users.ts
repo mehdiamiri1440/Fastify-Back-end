@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare module '@fastify/jwt' {
   interface FastifyJWT {
-    payload: { id: number }; // payload type is used for signing and verifying
+    payload: { id: number; scope: string }; // payload type is used for signing and verifying
   }
 }
 

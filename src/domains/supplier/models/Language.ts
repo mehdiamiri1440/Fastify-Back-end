@@ -17,9 +17,6 @@ export class Language {
   @Column({ unique: true, length: 4 })
   title!: string;
 
-  @ManyToOne(() => User, { nullable: false })
-  creator!: User;
-
   @CreateDateColumn()
   createdAt!: Date;
 

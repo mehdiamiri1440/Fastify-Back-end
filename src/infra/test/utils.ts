@@ -1,16 +1,19 @@
 import { repo } from '$src/databases/typeorm';
 import { User } from '$src/domains/user/models/User';
 import fastify, { FastifyInstance, InjectOptions } from 'fastify';
+import {
+  UserExample,
+  InputUserExample,
+} from '$src/domains/user/schemas/user.schema';
+import { Role } from '$src/domains/user/models/Role';
+import { InputRoleExample } from '$src/domains/user/schemas/role.schema';
+import permissions from '$src/permissions';
 
 async function createTestUser() {
-  await repo(User).save({
-    id: 1,
-    firstName: 'd',
-    lastName: 'l',
-    nif: 6,
-    password: 'pass',
-    description: 'desc',
-    isActive: true,
+  return await repo(User).save({
+    ...InputUserExample,
+    role: await repo(Role).save({ ...InputRoleExample }),
+    creator: { id: UserExample.id },
   });
 }
 
@@ -19,10 +22,10 @@ export class TestUser {
   #app: FastifyInstance;
 
   static async create(app: FastifyInstance) {
-    await createTestUser();
     const token = app.jwt.sign(
       {
-        id: 1,
+        id: (await createTestUser()).id,
+        scope: Object.keys(permissions).join(' '),
       },
       {
         expiresIn: 1000,
