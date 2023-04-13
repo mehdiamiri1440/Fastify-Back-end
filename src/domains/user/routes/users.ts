@@ -6,9 +6,7 @@ import { Role } from '../../user/models/Role';
 import { repo } from '$src/databases/typeorm';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
-import {
-  InputUserSchema,
-} from '$src/domains/user/schemas/user.schema';
+import { InputUserSchema } from '$src/domains/user/schemas/user.schema';
 const Users = repo(User);
 const Roles = repo(Role);
 import { Type } from '@sinclair/typebox';
@@ -82,10 +80,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const role = await Roles.findOneBy({ id: req.body.role });
       if (!role) return 'error';
 
-      return await Users.update(
-        { id: req.params.id },
-        { ...req.body, role },
-      );
+      return await Users.update({ id: req.params.id }, { ...req.body, role });
     },
   });
   app.route({
