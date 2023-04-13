@@ -1,0 +1,74 @@
+const { HUB_API_ADDRESS, HUB_TOKEN } = process.env;
+import assert from 'assert';
+import { cityDto, numberDto, provinceDto, streetDto } from './dto';
+
+export async function getProvince(queryParams: URLSearchParams) {
+  assert(HUB_API_ADDRESS);
+  assert(HUB_TOKEN);
+
+  const response = await fetch(
+    `${HUB_API_ADDRESS}/geo/province?${queryParams}`,
+    {
+      method: 'GET',
+    },
+  );
+  if (!response.ok) {
+    throw new Error('can not fetch data');
+  }
+  const responseData = (await response.json()) as any;
+  return {
+    provinces: responseData.data.map(provinceDto),
+    meta: responseData.meta,
+  };
+}
+
+export async function getCities(queryParams: URLSearchParams) {
+  assert(HUB_API_ADDRESS);
+  assert(HUB_TOKEN);
+
+  const response = await fetch(`${HUB_API_ADDRESS}/geo/city?${queryParams}`, {
+    method: 'GET',
+  });
+  if (!response.ok) {
+    throw new Error('can not fetch data');
+  }
+  const responseData = (await response.json()) as any;
+  return {
+    cities: responseData.data.map(cityDto),
+    meta: responseData.meta,
+  };
+}
+
+export async function getStreets(queryParams: URLSearchParams) {
+  assert(HUB_API_ADDRESS);
+  assert(HUB_TOKEN);
+
+  const response = await fetch(`${HUB_API_ADDRESS}/geo/street?${queryParams}`, {
+    method: 'GET',
+  });
+  if (!response.ok) {
+    throw new Error('can not fetch data');
+  }
+  const responseData = (await response.json()) as any;
+  return {
+    streets: responseData.data.map(streetDto),
+    meta: responseData.meta,
+  };
+}
+
+export async function getNumber(queryParams: URLSearchParams) {
+  assert(HUB_API_ADDRESS);
+  assert(HUB_TOKEN);
+
+  const response = await fetch(`${HUB_API_ADDRESS}/geo/number?${queryParams}`, {
+    method: 'GET',
+  });
+  if (!response.ok) {
+    throw new Error('can not fetch data');
+  }
+  const responseData = (await response.json()) as any;
+  return {
+    numbers: responseData.data.map(numberDto),
+    meta: responseData.meta,
+  };
+}
