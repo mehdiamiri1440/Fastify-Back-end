@@ -31,13 +31,13 @@ export class User implements ModelUserType {
   @Column({ unique: true, nullable: false })
   email!: string;
 
-  @Column({ type: 'string', unique: true, nullable: true })
+  @Column({ type: 'text', unique: true, nullable: true })
   phoneNumber?: string | null;
 
   @Column({ nullable: false })
   password!: string;
 
-  @Column({ type: 'string', nullable: true })
+  @Column({ type: 'text', nullable: true })
   position?: string | null;
 
   @Column({ nullable: false })
