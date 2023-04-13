@@ -68,6 +68,10 @@ const app: FastifyPluginAsync = async (fastify) => {
         prefix: '/customers',
       });
 
+      await fastify.register(import('./domains/geo/routes'), {
+        prefix: '/geo',
+      });
+
       await fastify.register(import('./domains/document/routes'), {
         prefix: '/documents',
       });
