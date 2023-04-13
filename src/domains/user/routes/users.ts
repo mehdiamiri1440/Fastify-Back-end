@@ -10,6 +10,12 @@ import { InputUserSchema } from '$src/domains/user/schemas/user.schema';
 const Users = repo(User);
 const Roles = repo(Role);
 import { Type } from '@sinclair/typebox';
+import { createError } from '@fastify/error';
+const REFERENCE_NOT_FOUND = createError(
+  'REFERENCE_NOT_FOUND',
+  'reference not found',
+  404,
+);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
@@ -50,7 +56,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       // validating role
       const role = await Roles.findOneBy({ id: req.body.role });
-      if (!role) return 'error';
+      if (!role) throw REFERENCE_NOT_FOUND();
 
       return await Users.save({
         ...req.body,
@@ -78,7 +84,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       // validating role
       const role = await Roles.findOneBy({ id: req.body.role });
-      if (!role) return 'error';
+      if (!role) throw REFERENCE_NOT_FOUND();
 
       return await Users.update({ id: req.params.id }, { ...req.body, role });
     },
