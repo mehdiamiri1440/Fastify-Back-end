@@ -10,10 +10,9 @@ import { InputRoleExample } from '$src/domains/user/schemas/role.schema';
 import permissions from '$src/permissions';
 
 async function createTestUser() {
-  await repo(Role).save({ ...InputRoleExample });
-
   return await repo(User).save({
     ...InputUserExample,
+    role: await repo(Role).save({ ...InputRoleExample }),
     creator: { id: UserExample.id },
   });
 }
