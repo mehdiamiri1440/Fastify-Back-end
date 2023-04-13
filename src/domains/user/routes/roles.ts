@@ -8,10 +8,11 @@ import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { InputRoleSchema } from '$src/domains/user/schemas/role.schema';
 import { Type } from '@sinclair/typebox';
 import { RolePermission } from '../models/RolePermission';
-const Roles = repo(Role);
-const RolePermissions = repo(RolePermission);
 import isPermissionInPermissions from '$src/infra/authorize';
 import { createError } from '@fastify/error';
+
+const Roles = repo(Role);
+const RolePermissions = repo(RolePermission);
 const ACCESS_DENIED = createError('ACCESS_DENIED', 'you dont have access', 403);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {

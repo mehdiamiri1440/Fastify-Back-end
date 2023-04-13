@@ -7,10 +7,11 @@ import { repo } from '$src/databases/typeorm';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { InputUserSchema } from '$src/domains/user/schemas/user.schema';
-const Users = repo(User);
-const Roles = repo(Role);
 import { Type } from '@sinclair/typebox';
 import { createError } from '@fastify/error';
+
+const Users = repo(User);
+const Roles = repo(Role);
 const REFERENCE_NOT_FOUND = createError(
   'REFERENCE_NOT_FOUND',
   'reference not found',
