@@ -7,7 +7,6 @@ import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import {
   InputRoleSchema,
-  InputRoleType,
 } from '$src/domains/user/schemas/role.schema';
 import { Type } from '@sinclair/typebox';
 import { RolePermission } from '../models/RolePermission';
@@ -58,7 +57,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     async handler(req) {
       return await Roles.save({
-        ...(req.body as InputRoleType),
+        ...req.body,
         creator: { id: req.user.id },
       });
     },
@@ -82,7 +81,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       return await Roles.update(
         { id: req.params.id },
-        req.body as InputRoleType,
+        req.body,
       );
     },
   });

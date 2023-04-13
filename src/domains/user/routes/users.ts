@@ -8,7 +8,6 @@ import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import {
   InputUserSchema,
-  InputUserType,
 } from '$src/domains/user/schemas/user.schema';
 const Users = repo(User);
 const Roles = repo(Role);
@@ -55,10 +54,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const role = await Roles.findOneBy({ id: req.body.role });
       if (!role) return 'error';
 
-      const { ...rest } = req.body;
-
       return await Users.save({
-        ...rest,
+        ...req.body,
         role,
         creator: { id: req.user.id },
       });
@@ -82,12 +79,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     async handler(req) {
       // validating role
-      const role_ = await Roles.findOneBy({ id: req.body.role });
-      if (!role_) return 'error';
+      const role = await Roles.findOneBy({ id: req.body.role });
+      if (!role) return 'error';
 
       return await Users.update(
         { id: req.params.id },
-        req.body as InputUserType,
+        { ...req.body, role },
       );
     },
   });
