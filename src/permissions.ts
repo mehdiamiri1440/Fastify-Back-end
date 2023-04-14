@@ -15,4 +15,6 @@ export default {
   'user@role::update': 'with this permission you can edit role',
   'user@role::delete': 'with this permission you can delete role',
   'user@role::list': 'with this permission you can get list of roles',
+  'user@inbound::list': '',
+  'user@inbound::create': '',
 };

@@ -13,7 +13,7 @@ import {
 import { InboundImage } from './InboundImage';
 import { InboundProduct } from './InboundProduct';
 
-enum InboundType {
+export enum InboundType {
   NEW = 'new',
   RETURNED = 'returned',
 }
@@ -30,10 +30,17 @@ export class Inbound {
   @PrimaryGeneratedColumn()
   id!: number;
 
+  @Column()
+  code!: string;
+
   @Column({ type: 'enum', enum: InboundType })
   type!: InboundType;
 
-  @Column({ type: 'enum', enum: InboundStatus })
+  @Column({
+    type: 'enum',
+    enum: InboundStatus,
+    default: InboundStatus.PRE_DELIVERY,
+  })
   status!: InboundStatus;
 
   @Column()
@@ -47,6 +54,9 @@ export class Inbound {
 
   @ManyToOne(() => User)
   creator!: User;
+
+  @Column()
+  creatorId!: number;
 
   @CreateDateColumn()
   createdAt!: Date;

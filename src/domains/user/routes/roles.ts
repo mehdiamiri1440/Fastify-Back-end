@@ -1,19 +1,16 @@
-import { ResponseShape } from '$src/infra/Response';
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { usersAuth } from '$src/authentication/users';
-import { Role } from '../../user/models/Role';
 import { repo } from '$src/databases/typeorm';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
-import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { InputRoleSchema } from '$src/domains/user/schemas/role.schema';
+import { ResponseShape } from '$src/infra/Response';
+import { TableQueryBuilder } from '$src/infra/tables/Table';
+import { ListQueryOptions } from '$src/infra/tables/schema_builder';
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
+import { Role } from '../../user/models/Role';
 import { RolePermission } from '../models/RolePermission';
-import isPermissionInPermissions from '$src/infra/authorize';
-import { createError } from '@fastify/error';
 
 const Roles = repo(Role);
 const RolePermissions = repo(RolePermission);
-const ACCESS_DENIED = createError('ACCESS_DENIED', 'you dont have access', 403);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
@@ -36,8 +33,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      if (!(await isPermissionInPermissions('user@role::list', req.user.scope)))
-        throw new ACCESS_DENIED();
       return new TableQueryBuilder(Roles, req).exec();
     },
   });

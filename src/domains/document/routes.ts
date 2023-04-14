@@ -44,7 +44,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
       security: [
         {
-          Bearer: [],
+          OAuth2: [],
         },
       ],
     },
@@ -79,7 +79,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
       security: [
         {
-          Bearer: [],
+          OAuth2: [],
         },
       ],
     },
@@ -110,7 +110,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
       security: [
         {
-          Bearer: [],
+          OAuth2: [],
         },
       ],
     },
