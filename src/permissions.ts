@@ -23,4 +23,7 @@ export default {
   'configuration@category::list': 'with this permission you can get list of categories',
   'configuration@category::create': 'with this permission you can add new categoty',
   'configuration@category::update': 'with this permission you can edit category',
+  'configuration@color::list': 'with this permission you can get list of colors',
+  'configuration@color::create': 'with this permission you can add new color',
+  'configuration@color::update': 'with this permission you can edit existing color',
 };
