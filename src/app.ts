@@ -75,6 +75,8 @@ const app: FastifyPluginAsync = async (fastify) => {
 
       await fastify.register(import('./domains/customer/routes'));
 
+      await fastify.register(import('./domains/configuration/routes'));
+
       await fastify.register(import('./domains/geo/routes'), {
         prefix: '/geo',
       });
