@@ -29,4 +29,7 @@ export default {
   'configuration@brand::list': 'with this permission you can list of brands',
   'configuration@brand::create': 'with this permission you can add new brand',
   'configuration@brand::update': 'with this permission you can edit brand',
+  'configuration@shape::list': 'with this permission you can get list of shapes',
+  'configuration@shape::create': 'with this permission you can add new shape',
+  'configuration@shape::update': 'with this permission you can edit shape',
 };

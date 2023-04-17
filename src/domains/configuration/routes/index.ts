@@ -7,6 +7,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(import('./categories'), { prefix: '/categories' });
   app.register(import('./colors'), { prefix: '/colors' });
   app.register(import('./brands'), { prefix: '/brands' });
+  app.register(import('./shapes'), { prefix: '/shapes' });
 };
 
 export default plugin;
