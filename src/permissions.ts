@@ -26,4 +26,7 @@ export default {
   'configuration@color::list': 'with this permission you can get list of colors',
   'configuration@color::create': 'with this permission you can add new color',
   'configuration@color::update': 'with this permission you can edit existing color',
+  'configuration@brand::list': 'with this permission you can list of brands',
+  'configuration@brand::create': 'with this permission you can add new brand',
+  'configuration@brand::update': 'with this permission you can edit brand',
 };
