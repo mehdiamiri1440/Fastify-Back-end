@@ -20,4 +20,7 @@ export default {
   'configuration@unit::list': 'with this permission you can get list of units',
   'configuration@unit::create': 'with this permission you can add new unit',
   'configuration@unit::update': 'with this permission you can edit unit',
+  'configuration@category::list': 'with this permission you can get list of categories',
+  'configuration@category::create': 'with this permission you can add new categoty',
+  'configuration@category::update': 'with this permission you can edit category',
 };

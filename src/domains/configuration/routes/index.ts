@@ -4,6 +4,7 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
   app.register(import('./units'), { prefix: '/units' });
+  app.register(import('./categories'), { prefix: '/categories' });
 };
 
 export default plugin;
