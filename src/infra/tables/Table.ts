@@ -7,7 +7,7 @@ import { PaginatedResponse } from '$src/infra/tables/response';
 export class TableQueryBuilder {
   #repo: Repository<any>;
   #req: FastifyRequest;
-
+  #loadRelationIds = true;
   #whereBuilder: (req: FastifyRequest) => any = (req) => where.from(req);
   #relationBuilder: (req: FastifyRequest) => any = (req) => undefined;
   #orderBuilder: (req: FastifyRequest) => any = (req) => order.from(req);
@@ -24,6 +24,7 @@ export class TableQueryBuilder {
 
   relation(builder: (req: FastifyRequest) => any) {
     this.#relationBuilder = builder;
+    this.#loadRelationIds = false;
     return this;
   }
 
@@ -42,7 +43,7 @@ export class TableQueryBuilder {
       relations: this.#relationBuilder(req),
       skip: (page - 1) * pageSize,
       take: pageSize,
-      loadRelationIds: true,
+      loadRelationIds: this.#loadRelationIds,
     });
 
     return new PaginatedResponse(rows, {

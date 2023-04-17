@@ -82,7 +82,12 @@ const app: FastifyPluginAsync = async (fastify) => {
       await fastify.register(import('./domains/document/routes'), {
         prefix: '/documents',
       });
+
       await fastify.register(import('./domains/supplier/routes'));
+
+      await fastify.register(import('./domains/product/routes'), {
+        prefix: '/products',
+      });
     },
     {
       prefix: '/api/v1',
