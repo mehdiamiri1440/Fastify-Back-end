@@ -20,16 +20,22 @@ export default {
   'configuration@unit::list': 'with this permission you can get list of units',
   'configuration@unit::create': 'with this permission you can add new unit',
   'configuration@unit::update': 'with this permission you can edit unit',
-  'configuration@category::list': 'with this permission you can get list of categories',
-  'configuration@category::create': 'with this permission you can add new categoty',
-  'configuration@category::update': 'with this permission you can edit category',
-  'configuration@color::list': 'with this permission you can get list of colors',
+  'configuration@category::list':
+    'with this permission you can get list of categories',
+  'configuration@category::create':
+    'with this permission you can add new categoty',
+  'configuration@category::update':
+    'with this permission you can edit category',
+  'configuration@color::list':
+    'with this permission you can get list of colors',
   'configuration@color::create': 'with this permission you can add new color',
-  'configuration@color::update': 'with this permission you can edit existing color',
+  'configuration@color::update':
+    'with this permission you can edit existing color',
   'configuration@brand::list': 'with this permission you can list of brands',
   'configuration@brand::create': 'with this permission you can add new brand',
   'configuration@brand::update': 'with this permission you can edit brand',
-  'configuration@shape::list': 'with this permission you can get list of shapes',
+  'configuration@shape::list':
+    'with this permission you can get list of shapes',
   'configuration@shape::create': 'with this permission you can add new shape',
   'configuration@shape::update': 'with this permission you can edit shape',
 };
