@@ -6,7 +6,6 @@ import { Readable } from 'stream';
 export interface Options {
   bucketName: string;
   schema?: {
-    tags?: FastifySchema['tags'];
     security?: FastifySchema['security'];
   };
 }
@@ -31,7 +30,6 @@ const plugin: FastifyPluginAsync<Options> = async (
     method: 'GET',
     url: '/:filename',
     schema: {
-      tags: schema.tags,
       security: schema.security,
       params: {
         filename: {

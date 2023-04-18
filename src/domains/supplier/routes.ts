@@ -19,7 +19,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         orderable: ['title'],
         searchable: ['title'],
       }),
-      tags: ['suppliers'],
     },
     async handler(req) {
       return new TableQueryBuilder(Languages, req).exec();

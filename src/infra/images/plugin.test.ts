@@ -70,7 +70,6 @@ describe.skip('file plugin smoke test', () => {
   const options: Options = {
     bucketName: 'test-bucket',
     schema: {
-      tags: ['test'],
       security: [{ apiKey: [] }],
     },
   };

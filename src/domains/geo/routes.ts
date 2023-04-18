@@ -18,7 +18,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/provinces',
     schema: {
-      tags: ['Geo'],
       querystring: ListQueryOptions({
         filterable: [],
         orderable: ['id'],
@@ -60,7 +59,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/cities',
     schema: {
-      tags: ['Geo'],
       querystring: ListQueryOptions({
         filterable: [],
         orderable: ['id'],
@@ -112,7 +110,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/streets',
     schema: {
-      tags: ['Geo'],
       querystring: ListQueryOptions({
         filterable: [],
         orderable: ['id'],
@@ -162,7 +159,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/postal-codes',
     schema: {
-      tags: ['Geo'],
       querystring: ListQueryOptions({
         filterable: [],
         orderable: ['id'],
