@@ -1,33 +1,39 @@
-import { FastifyRequest } from 'fastify';
-import { Repository } from 'typeorm';
 import * as where from '$src/infra/tables/filter';
 import * as order from '$src/infra/tables/order';
 import { PaginatedResponse } from '$src/infra/tables/response';
+import { FastifyRequest } from 'fastify';
+import { FindOneOptions, Repository } from 'typeorm';
+
+export type WhereBuilder = (req: FastifyRequest) => FindOneOptions['where'];
+export type RelationBuilder = (
+  req: FastifyRequest,
+) => FindOneOptions['relations'];
+export type OrderBuilder = (req: FastifyRequest) => FindOneOptions['order'];
 
 export class TableQueryBuilder {
   #repo: Repository<any>;
   #req: FastifyRequest;
 
-  #whereBuilder: (req: FastifyRequest) => any = (req) => where.from(req);
-  #relationBuilder: (req: FastifyRequest) => any = (req) => undefined;
-  #orderBuilder: (req: FastifyRequest) => any = (req) => order.from(req);
+  #whereBuilder: WhereBuilder = (req) => where.from(req);
+  #relationBuilder: RelationBuilder = () => undefined;
+  #orderBuilder: OrderBuilder = (req) => order.from(req);
 
   constructor(repo: Repository<any>, req: FastifyRequest) {
     this.#repo = repo;
     this.#req = req;
   }
 
-  where(builder: (req: FastifyRequest) => any) {
+  where(builder: WhereBuilder) {
     this.#whereBuilder = builder;
     return this;
   }
 
-  relation(builder: (req: FastifyRequest) => any) {
+  relation(builder: RelationBuilder) {
     this.#relationBuilder = builder;
     return this;
   }
 
-  order(builder: (req: FastifyRequest) => any) {
+  order(builder: OrderBuilder) {
     this.#orderBuilder = builder;
     return this;
   }

@@ -72,3 +72,30 @@ export async function getNumber(queryParams: URLSearchParams) {
     meta: responseData.meta,
   };
 }
+
+export function getLikeFilter(keyValues: { key: string; value: string }[]) {
+  const filters = keyValues.map(
+    (keyValue) => `filter[${keyValue.key}][like]=%${keyValue.value}%`,
+  );
+
+  return filters.join('&');
+}
+
+export function generateQueryParamForPaginationAndOrder(query: {
+  page: number;
+  pageSize: number;
+  order: string;
+  orderBy: string;
+}) {
+  const queryParams = new URLSearchParams();
+  queryParams.append('page', `${query.page}`);
+  queryParams.append('size', `${query.pageSize}`);
+
+  const orderBy = query.orderBy;
+  const order = query.order;
+  if (!!order && !!orderBy) {
+    queryParams.append('order', `order[${orderBy}]=${order}`);
+  }
+
+  return queryParams;
+}

@@ -81,7 +81,7 @@ it.skip('should get first number', async () => {
 
   const response = await app.inject({
     method: 'GET',
-    url: '/postal_codes?page=1&pageSize=1',
+    url: '/postal-codes?page=1&pageSize=1',
   });
 
   expect(response.json()).toMatchObject({
