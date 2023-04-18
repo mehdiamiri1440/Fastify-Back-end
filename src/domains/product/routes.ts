@@ -4,6 +4,14 @@ import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { Product } from './models/Product';
+import { Type } from '@sinclair/typebox';
+import { createError } from '@fastify/error';
+
+const PRODUCT_NOT_FOUND = createError(
+  'PRODUCT_NOT_FOUND',
+  'product not found',
+  404,
+);
 
 const Products = repo(Product);
 
@@ -39,6 +47,22 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           category: true,
         }))
         .exec();
+    },
+  });
+
+  app.route({
+    method: 'GET',
+    url: '/:id',
+    schema: {
+      tags: ['Product'],
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+    },
+    async handler(req) {
+      const product = await Products.findOneBy({ id: req.params.id });
+      if (!product) throw PRODUCT_NOT_FOUND();
+      return product;
     },
   });
 };
