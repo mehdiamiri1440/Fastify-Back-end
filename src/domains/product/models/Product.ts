@@ -1,8 +1,8 @@
-import { Category } from './Category';
-import { Color } from './Color';
+import { Category } from '$src/domains/configuration/models/Category';
+import { Color } from '$src/domains/configuration/models/Color';
 import { Size } from './Size';
-import { Brand } from './Brand';
-import { Unit } from './Unit';
+import { Brand } from '$src/domains/configuration/models/Brand';
+import { Unit } from '$src/domains/configuration/models/Unit';
 import { TaxType } from './TaxType';
 import { User } from '$src/domains/user/models/User';
 import { ProductSalePrice } from './ProductSalePrice';
