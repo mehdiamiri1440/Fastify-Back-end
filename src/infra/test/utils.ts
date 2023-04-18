@@ -55,5 +55,7 @@ export async function createTestFastifyApp() {
   const app = fastify();
   await app.register(import('$src/databases/typeorm'));
   await app.register(import('@fastify/jwt'), { secret: 'test' });
+  await app.register(import('$src/infra/RouteValidator'));
+  await app.register(import('$src/infra/authorization'));
   return app;
 }
