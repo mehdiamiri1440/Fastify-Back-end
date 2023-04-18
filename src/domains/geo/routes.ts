@@ -1,10 +1,15 @@
 import { ResponseShape } from '$src/infra/Response';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import assert from 'assert';
 import { Response } from '$src/infra/Response';
-import { getCities, getNumber, getProvince, getStreets } from './service';
-const { HUB_API_ADDRESS, HUB_TOKEN } = process.env;
+import {
+  generateQueryParamForPaginationAndOrder,
+  getCities,
+  getLikeFilter,
+  getNumber,
+  getProvince,
+  getStreets,
+} from './service';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
@@ -20,33 +25,26 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         searchable: ['code', 'name'],
       }),
     },
-    async handler(req, rep) {
-      assert(HUB_API_ADDRESS);
-      assert(HUB_TOKEN);
-      const { page, pageSize, filter, order, orderBy } = req.query as {
-        page: number;
-        pageSize: number;
-        filter: any;
-        order: string;
-        orderBy: string;
-      };
-      const queryParams = new URLSearchParams();
-      queryParams.append('page', `${page}`);
-      queryParams.append('size', `${pageSize}`);
-      let filterHub = '';
-      if (filter?.code?.like)
-        filterHub = `filter[code][like]=%${filter.code.like}%`;
+    async handler(req) {
+      const { page, pageSize, filter, order, orderBy } = req.query;
+      const queryParams = generateQueryParamForPaginationAndOrder({
+        page,
+        pageSize,
+        order: order ?? 'desc',
+        orderBy: orderBy ?? 'id',
+      });
 
-      if (filter?.name?.like)
-        filterHub =
-          (filterHub ? `${filterHub}&` : ``) +
-          `filter[name][like]=%${filter.name.like}%`;
+      const filters = [];
 
-      let orderHub = '';
-      if (!!order && !!orderBy) {
-        orderHub = `order[${orderBy}]=${order}`;
-        queryParams.append('order', orderHub);
+      if (typeof filter?.code === 'object' && 'like' in filter.code) {
+        filters.push({ key: 'code', value: filter.code.like });
       }
+
+      if (typeof filter?.name === 'object' && 'like' in filter.name) {
+        filters.push({ key: 'name', value: filter.name.like });
+      }
+
+      const filterHub = getLikeFilter(filters);
 
       if (filterHub) queryParams.append('filter', filterHub);
       const { provinces, meta } = await getProvince(queryParams);
@@ -66,41 +64,39 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       querystring: ListQueryOptions({
         filterable: [],
         orderable: ['id'],
-        searchable: ['code', 'name', 'province_code'],
+        searchable: ['code', 'name', 'provinceCode'],
       }),
     },
     async handler(req, rep) {
-      assert(HUB_API_ADDRESS);
-      assert(HUB_TOKEN);
-      const { page, pageSize, filter, order, orderBy } = req.query as {
-        page: number;
-        pageSize: number;
-        filter: any;
-        order: string;
-        orderBy: string;
-      };
-      const queryParams = new URLSearchParams();
-      queryParams.append('page', `${page}`);
-      queryParams.append('size', `${pageSize}`);
-      let filterHub = '';
-      if (filter?.code?.like)
-        filterHub = `filter[code][like]=%${filter.code.like}%`;
+      const { page, pageSize, filter, order, orderBy } = req.query;
+      const queryParams = generateQueryParamForPaginationAndOrder({
+        page,
+        pageSize,
+        order: order ?? 'desc',
+        orderBy: orderBy ?? 'id',
+      });
 
-      if (filter?.name?.like)
-        filterHub =
-          (filterHub ? `${filterHub}&` : ``) +
-          `filter[name][like]=%${filter.name.like}%`;
+      const filters = [];
 
-      if (filter?.province_code?.like)
-        filterHub =
-          (filterHub ? `${filterHub}&` : ``) +
-          `${filterHub}&filter[GeoProvince.code][like]=%${filter.province_code.like}%`;
-
-      let orderHub = '';
-      if (!!order && !!orderBy) {
-        orderHub = `order[${orderBy}]=${order}`;
-        queryParams.append('order', orderHub);
+      if (typeof filter?.code === 'object' && 'like' in filter.code) {
+        filters.push({ key: 'code', value: filter.code.like });
       }
+
+      if (typeof filter?.name === 'object' && 'like' in filter.name) {
+        filters.push({ key: 'name', value: filter.name.like });
+      }
+
+      if (
+        typeof filter?.provinceCode === 'object' &&
+        filter?.provinceCode?.like
+      ) {
+        filters.push({
+          key: 'GeoProvince.code',
+          value: filter.provinceCode.like,
+        });
+      }
+
+      const filterHub = getLikeFilter(filters);
 
       if (filterHub) queryParams.append('filter', filterHub);
       const { cities, meta } = await getCities(queryParams);
@@ -120,41 +116,37 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       querystring: ListQueryOptions({
         filterable: [],
         orderable: ['id'],
-        searchable: ['code', 'name', 'city_code'],
+        searchable: ['code', 'name', 'cityCode'],
       }),
     },
     async handler(req, rep) {
-      assert(HUB_API_ADDRESS);
-      assert(HUB_TOKEN);
-      const { page, pageSize, filter, order, orderBy } = req.query as {
-        page: number;
-        pageSize: number;
-        filter: any;
-        order: string;
-        orderBy: string;
-      };
-      const queryParams = new URLSearchParams();
-      queryParams.append('page', `${page}`);
-      queryParams.append('size', `${pageSize}`);
-      let filterHub = '';
-      if (filter?.code?.like)
-        filterHub = `filter[code][like]=%${filter.code.like}%`;
+      const { page, pageSize, filter, order, orderBy } = req.query;
 
-      if (filter?.name?.like)
-        filterHub =
-          (filterHub ? `${filterHub}&` : ``) +
-          `filter[name][like]=%${filter.name.like}%`;
+      const queryParams = generateQueryParamForPaginationAndOrder({
+        page,
+        pageSize,
+        order: order ?? 'desc',
+        orderBy: orderBy ?? 'id',
+      });
 
-      if (filter?.city_code?.like)
-        filterHub =
-          (filterHub ? `${filterHub}&` : ``) +
-          `filter[GeoCity.code][like]=%${filter.city_code.like}%`;
+      const filters = [];
 
-      let orderHub = '';
-      if (!!order && !!orderBy) {
-        orderHub = `order[${orderBy}]=${order}`;
-        queryParams.append('order', orderHub);
+      if (typeof filter?.code === 'object' && 'like' in filter.code) {
+        filters.push({ key: 'code', value: filter.code.like });
       }
+
+      if (typeof filter?.name === 'object' && 'like' in filter.name) {
+        filters.push({ key: 'name', value: filter.name.like });
+      }
+
+      if (typeof filter?.cityCode === 'object' && 'like' in filter.cityCode) {
+        filters.push({
+          key: 'GeoCity.code',
+          value: filter.cityCode.like,
+        });
+      }
+
+      const filterHub = getLikeFilter(filters);
 
       if (filterHub) queryParams.append('filter', filterHub);
       const { streets, meta } = await getStreets(queryParams);
@@ -168,7 +160,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
   app.route({
     method: 'GET',
-    url: '/postal_codes',
+    url: '/postal-codes',
     schema: {
       tags: ['Geo'],
       querystring: ListQueryOptions({
@@ -177,38 +169,37 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         searchable: ['code', 'number', 'street_code'],
       }),
     },
-    async handler(req, rep) {
-      assert(HUB_API_ADDRESS);
-      assert(HUB_TOKEN);
-      const { page, pageSize, filter, order, orderBy } = req.query as {
-        page: number;
-        pageSize: number;
-        filter: any;
-        order: string;
-        orderBy: string;
-      };
-      const queryParams = new URLSearchParams();
-      queryParams.append('page', `${page}`);
-      queryParams.append('size', `${pageSize}`);
-      let filterHub = '';
-      if (filter?.code?.like)
-        filterHub = `filter[code][like]=%${filter.code.like}%`;
+    async handler(req) {
+      const { page, pageSize, filter, order, orderBy } = req.query;
 
-      if (filter?.number?.like)
-        filterHub =
-          (filterHub ? `${filterHub}&` : ``) +
-          `filter[number][like]=%${filter.number.like}%`;
+      const queryParams = generateQueryParamForPaginationAndOrder({
+        page,
+        pageSize,
+        order: order ?? 'desc',
+        orderBy: orderBy ?? 'id',
+      });
 
-      if (filter?.street_code?.like)
-        filterHub =
-          (filterHub ? `${filterHub}&` : ``) +
-          `filter[GeoStreet.code][like]=%${filter.street_code.like}%`;
+      const filters = [];
 
-      let orderHub = '';
-      if (!!order && !!orderBy) {
-        orderHub = `order[${orderBy}]=${order}`;
-        queryParams.append('order', orderHub);
+      if (typeof filter?.code === 'object' && 'like' in filter.code) {
+        filters.push({ key: 'code', value: filter.code.like });
       }
+
+      if (typeof filter?.name === 'object' && 'like' in filter.name) {
+        filters.push({ key: 'name', value: filter.name.like });
+      }
+
+      if (
+        typeof filter?.street_code === 'object' &&
+        'like' in filter.street_code
+      ) {
+        filters.push({
+          key: 'GeoStreet.code',
+          value: filter.street_code.like,
+        });
+      }
+
+      const filterHub = getLikeFilter(filters);
 
       if (filterHub) queryParams.append('filter', filterHub);
       const { numbers, meta } = await getNumber(queryParams);
