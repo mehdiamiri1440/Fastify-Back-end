@@ -25,7 +25,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/',
     onRequest: [usersAuth],
     schema: {
-      tags: ['users'],
       security: [
         {
           OAuth2: ['user@user::list'],
@@ -46,7 +45,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/',
     onRequest: [usersAuth],
     schema: {
-      tags: ['users'],
       security: [
         {
           OAuth2: ['user@role::create'],
@@ -71,7 +69,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:id',
     onRequest: [usersAuth],
     schema: {
-      tags: ['users'],
       security: [
         {
           OAuth2: ['user@user::update'],
@@ -95,7 +92,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:id',
     onRequest: [usersAuth],
     schema: {
-      tags: ['users'],
       security: [
         {
           OAuth2: ['user@user::delete'],
@@ -114,7 +110,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:id/is-active',
     onRequest: [usersAuth],
     schema: {
-      tags: ['users'],
       security: [
         {
           OAuth2: ['user@user::update'],

@@ -15,7 +15,6 @@ export interface Options {
   minio: Client | null;
   bucketName: string;
   schema?: {
-    tags?: FastifySchema['tags'];
     security?: FastifySchema['security'];
   };
 }
@@ -31,7 +30,6 @@ const plugin: FastifyPluginAsync<Options> = async (
     url: '/:filename',
 
     schema: {
-      tags: schema.tags,
       security: schema.security,
       params: {
         filename: {
@@ -71,7 +69,6 @@ const plugin: FastifyPluginAsync<Options> = async (
     url: '/',
     schema: {
       consumes: ['multipart/form-data'],
-      tags: schema.tags,
       security: schema.security,
       body: {
         type: 'object',
