@@ -18,10 +18,15 @@ async function main() {
     },
   });
 
-  await fastify.register(import('./src/app'));
+  const port = process.env.PORT ? Number(process.env.PORT) : 3003;
+  const appUrl = process.env.APP_URL ?? `http://localhost:${port}`;
+
+  await fastify.register(import('./src/app'), {
+    url: appUrl,
+  });
 
   await fastify.listen({
-    port: 3003,
+    port,
     host: '0.0.0.0',
   });
 }
