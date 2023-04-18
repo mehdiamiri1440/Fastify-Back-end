@@ -1,13 +1,16 @@
 import { repo } from '$src/databases/typeorm';
-import { User } from '$src/domains/user/models/User';
-import fastify, { FastifyInstance, InjectOptions } from 'fastify';
-import {
-  UserExample,
-  InputUserExample,
-} from '$src/domains/user/schemas/user.schema';
 import { Role } from '$src/domains/user/models/Role';
+import { User } from '$src/domains/user/models/User';
 import { InputRoleExample } from '$src/domains/user/schemas/role.schema';
+import {
+  InputUserExample,
+  UserExample,
+} from '$src/domains/user/schemas/user.schema';
 import permissions from '$src/permissions';
+import fastify, { FastifyInstance, InjectOptions } from 'fastify';
+import qs from 'qs';
+
+import type Ajv from 'ajv';
 
 async function createTestUser() {
   return await repo(User).save({
@@ -52,8 +55,22 @@ export class TestUser {
 }
 
 export async function createTestFastifyApp() {
-  const app = fastify();
+  const app = fastify({
+    querystringParser: (str) => qs.parse(str, { allowDots: true }),
+    pluginTimeout: 20000,
+    ajv: {
+      plugins: [
+        (ajv: Ajv) => {
+          ajv.addKeyword({ keyword: 'style' });
+          ajv.addKeyword({ keyword: 'explode' });
+          ajv.addKeyword({ keyword: 'allowReserved' });
+        },
+      ],
+    },
+  });
   await app.register(import('$src/databases/typeorm'));
   await app.register(import('@fastify/jwt'), { secret: 'test' });
+  await app.register(import('$src/infra/RouteValidator'));
+  await app.register(import('$src/infra/authorization'));
   return app;
 }

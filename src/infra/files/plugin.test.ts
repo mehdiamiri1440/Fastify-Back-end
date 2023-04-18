@@ -74,7 +74,6 @@ describe('file plugin smoke test', () => {
     minio: minio,
     bucketName: 'test-bucket',
     schema: {
-      tags: ['test'],
       security: [{ apiKey: [] }],
     },
   };

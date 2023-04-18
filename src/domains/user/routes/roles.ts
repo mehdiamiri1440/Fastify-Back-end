@@ -20,7 +20,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/',
     onRequest: [usersAuth],
     schema: {
-      tags: ['roles'],
       security: [
         {
           OAuth2: ['user@role::list'],
@@ -41,7 +40,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/',
     onRequest: [usersAuth],
     schema: {
-      tags: ['roles'],
       security: [
         {
           OAuth2: ['user@role::create'],
@@ -61,7 +59,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:id',
     onRequest: [usersAuth],
     schema: {
-      tags: ['roles'],
       security: [
         {
           OAuth2: ['user@role::update'],
@@ -81,7 +78,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:id',
     onRequest: [usersAuth],
     schema: {
-      tags: ['roles'],
       security: [
         {
           OAuth2: ['user@role::delete'],
@@ -100,7 +96,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:id/is-active',
     onRequest: [usersAuth],
     schema: {
-      tags: ['roles'],
       security: [
         {
           OAuth2: ['user@role::active'],
@@ -124,7 +119,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:id/permissions',
     onRequest: [usersAuth],
     schema: {
-      tags: ['roles'],
       security: [
         {
           OAuth2: ['user@role::list'],
@@ -153,7 +147,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:id/permissions/:code',
     onRequest: [usersAuth],
     schema: {
-      tags: ['roles'],
       security: [
         {
           OAuth2: ['user@user::create'],
@@ -180,7 +173,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:id/permissions/:code',
     onRequest: [usersAuth],
     schema: {
-      tags: ['roles'],
       security: [
         {
           OAuth2: ['user@role::update'],

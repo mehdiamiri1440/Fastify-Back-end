@@ -20,7 +20,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/',
     schema: {
-      tags: ['Inbound'],
       querystring: ListQueryOptions({
         filterable: ['code'],
         orderable: ['code'],
@@ -41,17 +40,17 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'POST',
     url: '/',
     schema: {
-      tags: ['Inbound'],
       body: Type.Object({
         type: Type.Enum(InboundType),
         products: Type.Array(
           Type.Object({
             productId: Type.Number(),
-            supplierId: Type.Number(),
+            supplierId: Type.Number(), // todo amake nullable
             basePrice: Type.Number(),
             quantity: Type.Number(),
           }),
         ),
+        driverId: Type.Number(), // nullable
       }),
       security: [
         {
