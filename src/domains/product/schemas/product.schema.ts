@@ -1,6 +1,6 @@
 import { Type } from '@sinclair/typebox';
 
-export const ProductSchema = {
+export const ProductSchema = Type.Object({
   id: Type.Number(),
   name: Type.String({ minLength: 1 }),
   basicQuantity: Type.Number(),
@@ -15,10 +15,12 @@ export const ProductSchema = {
   brand: Type.Union([Type.Number(), Type.Object({})]),
   color: Type.Union([Type.Number(), Type.Object({})]),
   category: Type.Union([Type.Number(), Type.Object({})]),
-  creatorId: Type.Number(),
+  creator: Type.Union([Type.Number(), Type.Object({})]),
   createdAt: Type.Union([Type.Date(), Type.String({ format: 'date' })]),
   updatedAt: Type.Union([Type.Date(), Type.String({ format: 'date' })]),
-  deletedAt: Type.Optional(
-    Type.Union([Type.Date(), Type.String({ format: 'date' }), Type.Null()]),
-  ),
-};
+  deletedAt: Type.Union([
+    Type.Date(),
+    Type.String({ format: 'date' }),
+    Type.Null(),
+  ]),
+});

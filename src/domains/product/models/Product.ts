@@ -6,6 +6,9 @@ import { Unit } from '$src/domains/configuration/models/Unit';
 import { TaxType } from './TaxType';
 import { User } from '$src/domains/user/models/User';
 import { ProductSalePrice } from './ProductSalePrice';
+import { Static } from '@sinclair/typebox';
+import { ProductSchema } from '../schemas/product.schema';
+
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -15,10 +18,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  Relation,
 } from 'typeorm';
 
 @Entity()
-export class Product {
+export class Product implements Static<typeof ProductSchema> {
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -44,25 +48,25 @@ export class Product {
   weight!: number;
 
   @ManyToOne(() => TaxType)
-  taxType!: TaxType;
+  taxType!: Relation<TaxType>;
 
   @ManyToOne(() => Size)
-  size!: Size;
+  size!: Relation<Size>;
 
   @ManyToOne(() => Unit)
-  unit!: Unit;
+  unit!: Relation<Unit>;
 
   @ManyToOne(() => Brand)
-  brand!: Brand;
+  brand!: Relation<Brand>;
 
   @ManyToOne(() => Color)
-  color!: Color;
+  color!: Relation<Color>;
 
   @ManyToOne(() => Category, (category) => category.id)
-  category!: Category;
+  category!: Relation<Category>;
 
   @ManyToOne(() => User)
-  creator!: User;
+  creator!: Relation<User>;
 
   @CreateDateColumn()
   createdAt!: Date;
