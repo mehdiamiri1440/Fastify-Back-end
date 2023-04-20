@@ -117,7 +117,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         where: { id: req.params.id },
         relations: ['taskType', 'category', 'unit', 'color'],
       });
-      if (!product) throw PRODUCT_NOT_FOUND();
+      if (!product) throw new PRODUCT_NOT_FOUND();
       return product;
     },
   });
@@ -131,16 +131,16 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     async handler(req) {
       const taxType = await TaxTypes.findOneBy({ id: req.body.taxTypeId });
-      if (!taxType) throw TAX_TYPE_NOT_FOUND();
+      if (!taxType) throw new TAX_TYPE_NOT_FOUND();
 
       const color = await Colors.findOneBy({ id: req.body.colorId });
-      if (!color) throw COLOR_NOT_FOUND();
+      if (!color) throw new COLOR_NOT_FOUND();
 
       const unit = await Units.findOneBy({ id: req.body.unitId });
-      if (!unit) throw UNIT_NOT_FOUND();
+      if (!unit) throw new UNIT_NOT_FOUND();
 
       const category = await Categories.findOneBy({ id: req.body.categoryId });
-      if (!category) throw CATEGORY_NOT_FOUND();
+      if (!category) throw new CATEGORY_NOT_FOUND();
 
       const newProduct = await Products.save({
         ...req.body,
@@ -167,19 +167,19 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       const productId = req.params.id;
       const product = await Products.findOne({ where: { id: productId } });
-      if (!product) throw PRODUCT_NOT_FOUND();
+      if (!product) throw new PRODUCT_NOT_FOUND();
 
       const taxType = await TaxTypes.findOneBy({ id: req.body.taxTypeId });
-      if (!taxType) throw TAX_TYPE_NOT_FOUND();
+      if (!taxType) throw new TAX_TYPE_NOT_FOUND();
 
       const color = await Colors.findOneBy({ id: req.body.colorId });
-      if (!color) throw COLOR_NOT_FOUND();
+      if (!color) throw new COLOR_NOT_FOUND();
 
       const unit = await Units.findOneBy({ id: req.body.unitId });
-      if (!unit) throw UNIT_NOT_FOUND();
+      if (!unit) throw new UNIT_NOT_FOUND();
 
       const category = await Categories.findOneBy({ id: req.body.categoryId });
-      if (!category) throw CATEGORY_NOT_FOUND();
+      if (!category) throw new CATEGORY_NOT_FOUND();
 
       await Products.update(
         { id: req.params.id },
