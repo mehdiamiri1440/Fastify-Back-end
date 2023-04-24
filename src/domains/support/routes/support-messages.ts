@@ -3,7 +3,7 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { MessageSchema } from '$src/domains/support/schemas/message.schema';
 import { Message } from '../models/Message';
-import { repo } from '$src/databases/typeorm';
+import { repo } from '$src/infra/utils/repo';
 
 const Messages = repo(Message);
 

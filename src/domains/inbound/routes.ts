@@ -1,13 +1,14 @@
-import { AppDataSource, repo } from '$src/databases/typeorm';
+import AppDataSource from '$src/DataSource';
 import { ResponseShape } from '$src/infra/Response';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';
+import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { Inbound, InboundType } from './models/Inbound';
 import { Type } from '@sinclair/typebox';
-import { InboundProduct } from './models/InboundProduct';
 import { Product } from '../product/models/Product';
 import { Supplier } from '../supplier/models/Supplier';
+import { Inbound, InboundType } from './models/Inbound';
+import { InboundProduct } from './models/InboundProduct';
 
 const Inbounds = repo(Inbound);
 const Products = repo(Product);

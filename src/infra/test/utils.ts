@@ -1,4 +1,4 @@
-import { repo } from '$src/databases/typeorm';
+import { repo } from '$src/infra/utils/repo';
 import { Role } from '$src/domains/user/models/Role';
 import { User } from '$src/domains/user/models/User';
 import fastify, { FastifyInstance, InjectOptions } from 'fastify';

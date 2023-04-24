@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-import { AppDataSource } from '$src/databases/typeorm';
+import AppDataSource from '$src/DataSource';
 import { createTestFastifyApp, TestUser } from '$src/infra/test/utils';
 import { afterAll, beforeAll, expect, it } from '@jest/globals';
 import assert from 'assert';

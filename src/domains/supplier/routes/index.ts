@@ -1,7 +1,7 @@
-import { repo } from '$src/databases/typeorm';
 import { ResponseShape } from '$src/infra/Response';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
+import { ListQueryOptions } from '$src/infra/tables/schema_builder';
+import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Language } from '../models/Language';
 

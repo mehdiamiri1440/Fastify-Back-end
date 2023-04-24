@@ -5,9 +5,9 @@ import { afterAll, beforeAll, expect, it } from '@jest/globals';
 import assert from 'assert';
 import fastify, { FastifyInstance } from 'fastify';
 import routes from './routes';
-import { AppDataSource } from '$src/databases/typeorm';
+import AppDataSource from '$src/DataSource';
 import { Nationality } from './models/Nationality';
-import { repo } from '$src/databases/typeorm';
+import { repo } from '$src/infra/utils/repo';
 
 const Nationalities = repo(Nationality);
 let app: FastifyInstance | undefined;
