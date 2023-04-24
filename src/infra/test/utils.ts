@@ -1,22 +1,26 @@
 import { repo } from '$src/databases/typeorm';
 import { Role } from '$src/domains/user/models/Role';
 import { User } from '$src/domains/user/models/User';
-import { InputRoleExample } from '$src/domains/user/schemas/role.schema';
-import {
-  InputUserExample,
-  UserExample,
-} from '$src/domains/user/schemas/user.schema';
-import permissions from '$src/permissions';
 import fastify, { FastifyInstance, InjectOptions } from 'fastify';
+import permissions from '$src/permissions';
 import qs from 'qs';
 
 import type Ajv from 'ajv';
 
 async function createTestUser() {
   return await repo(User).save({
-    ...InputUserExample,
-    role: await repo(Role).save({ ...InputRoleExample }),
-    creator: { id: UserExample.id },
+    firstName: 'tester',
+    lastName: 'tester',
+    role: await repo(Role).save({
+      title: 'tester',
+      isActive: true,
+    }),
+    nif: 'B-6116622G',
+    email: 't@est.er',
+    phoneNumber: '+989303590054',
+    password: 'hackme',
+    position: 'tester',
+    isActive: true,
   });
 }
 

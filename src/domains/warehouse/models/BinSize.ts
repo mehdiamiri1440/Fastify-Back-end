@@ -9,35 +9,24 @@ import {
   ManyToOne,
   Relation,
 } from 'typeorm';
-import { WarehouseSchema } from '$src/domains/warehouse/schemas/warehouse.schema';
-import { Static, Type } from '@sinclair/typebox';
+import { BinSizeSchema } from '$src/domains/warehouse/schemas/bin-size.schema';
+import { Type, Static } from '@sinclair/typebox';
 
-const WarehouseSchemaWithoutRelations = Type.Omit(WarehouseSchema, ['creator']);
+const BinSizeSchemaWithoutRelations = Type.Omit(BinSizeSchema, ['creator']);
 
 @Entity()
-export class Warehouse
-  implements Static<typeof WarehouseSchemaWithoutRelations>
-{
+export class BinSize implements Static<typeof BinSizeSchemaWithoutRelations> {
   @PrimaryGeneratedColumn()
   id!: number;
 
   @Column({ nullable: false })
-  name!: string;
-
-  @Column({ nullable: false })
-  province!: string;
-
-  @Column({ nullable: false })
-  city!: string;
-
-  @Column({ nullable: false })
-  street!: string;
-
-  @Column({ nullable: false })
-  postalCode!: string;
+  title!: string;
 
   @Column({ type: 'text', nullable: true })
-  description!: string | null;
+  width!: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  length!: string | null;
 
   @ManyToOne(() => User)
   creator!: Relation<User>;

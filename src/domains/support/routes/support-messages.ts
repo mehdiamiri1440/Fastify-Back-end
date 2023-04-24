@@ -13,7 +13,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'POST',
     url: '/',
     schema: {
-      tags: ['support-messages'],
       security: [
         {
           OAuth2: [],

@@ -9,10 +9,13 @@ import {
   Relation,
 } from 'typeorm';
 import { User } from './User';
-import { ModelRoleType } from '$src/domains/user/schemas/role.schema';
+import { RoleSchema } from '$src/domains/user/schemas/role.schema';
+import { Static, Type } from '@sinclair/typebox';
+
+const RoleSchemaWithoutRelations = Type.Omit(RoleSchema, ['creator']);
 
 @Entity()
-export class Role implements ModelRoleType {
+export class Role implements Static<typeof RoleSchemaWithoutRelations> {
   @PrimaryGeneratedColumn()
   id!: number;
 

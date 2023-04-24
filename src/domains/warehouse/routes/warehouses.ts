@@ -1,44 +1,46 @@
 import { ResponseShape } from '$src/infra/Response';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { Category } from '../models/Category';
+import { Warehouse } from '../models/Warehouse';
 import { repo } from '$src/databases/typeorm';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
-const Categories = repo(Category);
+const Warehouses = repo(Warehouse);
 import { Type } from '@sinclair/typebox';
-import { CategorySchema } from '$src/domains/configuration/schemas/category.schema';
+import { WarehouseSchema } from '../schemas/warehouse.schema';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
+
   app.route({
     method: 'GET',
     url: '/',
     schema: {
       security: [
         {
-          OAuth2: ['configuration@category::list'],
+          OAuth2: ['warehouse@warehouse::list'],
         },
       ],
       querystring: ListQueryOptions({
-        filterable: ['name'],
-        orderable: ['name'],
-        searchable: ['name'],
+        filterable: ['name', 'province', 'city', 'street', 'postalCode'],
+        orderable: ['name', 'province', 'city', 'street', 'postalCode'],
+        searchable: ['name', 'province', 'city', 'street', 'postalCode'],
       }),
     },
     async handler(req) {
-      return new TableQueryBuilder(Categories, req).exec();
+      return new TableQueryBuilder(Warehouses, req).exec();
     },
   });
+
   app.route({
     method: 'POST',
     url: '/',
     schema: {
       security: [
         {
-          OAuth2: ['configuration@category::create'],
+          OAuth2: ['warehouse@warehouse::create'],
         },
       ],
-      body: Type.Omit(CategorySchema, [
+      body: Type.Omit(WarehouseSchema, [
         'id',
         'creator',
         'createdAt',
@@ -47,22 +49,20 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ]),
     },
     async handler(req) {
-      return await Categories.save({
-        ...req.body,
-        creator: { id: req.user.id },
-      });
+      return await Warehouses.save(req.body);
     },
   });
+
   app.route({
     method: 'PUT',
     url: '/:id',
     schema: {
       security: [
         {
-          OAuth2: ['configuration@category::update'],
+          OAuth2: ['warehouse@warehouse::update'],
         },
       ],
-      body: Type.Omit(CategorySchema, [
+      body: Type.Omit(WarehouseSchema, [
         'id',
         'creator',
         'createdAt',
@@ -74,8 +74,26 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      const { id } = await Categories.findOneByOrFail({ id: req.params.id });
-      await Categories.update({ id }, req.body);
+      const { id } = await Warehouses.findOneByOrFail({ id: req.params.id });
+      await Warehouses.update({ id }, req.body);
+    },
+  });
+  app.route({
+    method: 'DELETE',
+    url: '/:id',
+    schema: {
+      security: [
+        {
+          OAuth2: ['warehouse@warehouse::delete'],
+        },
+      ],
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+    },
+    async handler(req) {
+      const { id } = await Warehouses.findOneByOrFail({ id: req.params.id });
+      await Warehouses.delete({ id });
     },
   });
 };

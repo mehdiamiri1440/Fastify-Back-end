@@ -14,7 +14,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/',
     schema: {
-      tags: ['shapes'],
       security: [
         {
           OAuth2: ['configuration@shape::list'],
@@ -34,7 +33,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'POST',
     url: '/',
     schema: {
-      tags: ['shapes'],
       security: [
         {
           OAuth2: ['configuration@shape::create'],
@@ -56,7 +54,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'PUT',
     url: '/:id',
     schema: {
-      tags: ['shapes'],
       security: [
         {
           OAuth2: ['configuration@shape::update'],
@@ -74,7 +71,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      return await Shapes.update({ id: req.params.id }, req.body);
+      const { id } = await Shapes.findOneByOrFail({ id: req.params.id });
+      await Shapes.update({ id }, req.body);
     },
   });
 };

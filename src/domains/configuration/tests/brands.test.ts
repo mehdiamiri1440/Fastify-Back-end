@@ -9,7 +9,7 @@ import routes from '../routes/brands';
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
 
-let brand_id: number;
+let brandId: number;
 
 beforeAll(async () => {
   app = await createTestFastifyApp();
@@ -41,7 +41,7 @@ it('should create a brand', async () => {
     },
     meta: {},
   });
-  brand_id = response.json().data.id;
+  brandId = response.json().data.id;
 });
 
 it('should get list of brands', async () => {
@@ -55,7 +55,7 @@ it('should get list of brands', async () => {
   expect(response.json().data).toMatchObject(
     expect.arrayContaining([
       expect.objectContaining({
-        id: brand_id,
+        id: brandId,
         name: 'test',
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
@@ -71,16 +71,9 @@ it('should update a brand', async () => {
 
   const response = await user.inject({
     method: 'PUT',
-    url: '/' + brand_id,
+    url: '/' + brandId,
     payload: { name: 'edit' },
   });
 
-  expect(response.json()).toMatchObject({
-    data: {
-      generatedMaps: expect.any(Array),
-      raw: expect.any(Array),
-      affected: 1,
-    },
-    meta: {},
-  });
+  expect(response.statusCode).toBe(200);
 });
