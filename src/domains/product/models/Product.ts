@@ -8,6 +8,7 @@ import { User } from '$src/domains/user/models/User';
 import { ProductSalePrice } from './ProductSalePrice';
 import { Static } from '@sinclair/typebox';
 import { ProductSchema } from '../schemas/product.schema';
+import { SupplierProduct } from '$src/domains/global/models/ProductSupplier';
 
 import {
   Entity,
@@ -49,6 +50,9 @@ export class Product implements Static<typeof ProductSchema> {
 
   @ManyToOne(() => TaxType)
   taxType!: Relation<TaxType>;
+
+  @ManyToOne(() => SupplierProduct)
+  productSuppliers!: Relation<SupplierProduct[]>;
 
   @ManyToOne(() => Size)
   size!: Relation<Size>;

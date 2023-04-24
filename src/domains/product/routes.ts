@@ -11,13 +11,28 @@ import { TaxType } from './models/TaxType';
 import { Color } from '../configuration/models/Color';
 import { Unit } from '../configuration/models/Unit';
 import { Category } from '../configuration/models/Category';
+import { Supplier } from '../supplier/models/Supplier';
+import { SupplierProduct } from '../global/models/ProductSupplier';
 
 import { ProductSchema } from './schemas/product.schema';
 
 import { createError } from '@fastify/error';
+import { In } from 'typeorm';
 const PRODUCT_NOT_FOUND = createError(
   'PRODUCT_NOT_FOUND',
   'product not found',
+  404,
+);
+
+const SUPPLIER_NOT_FOUND = createError(
+  'SUPPLIER_NOT_FOUND',
+  'supplier not found',
+  404,
+);
+
+const SUPPLIER_ALREADY_EXIST = createError(
+  'SUPPLIER_ALREADY_EXIST',
+  'supplier already exist',
   404,
 );
 
@@ -42,6 +57,8 @@ const TaxTypes = repo(TaxType);
 const Colors = repo(Color);
 const Units = repo(Unit);
 const Categories = repo(Category);
+const Suppliers = repo(Supplier);
+const SupplierProducts = repo(SupplierProduct);
 
 //remove unnecessary props and add post/update props
 const inputProductSchema = Type.Intersect([
@@ -73,7 +90,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
   app.route({
     method: 'GET',
-    url: '/products',
+    url: '/',
     schema: {
       tags: ['Product'],
       querystring: ListQueryOptions({
@@ -190,6 +207,48 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         where: { id: productId },
         relations: ['taskType', 'category', 'unit', 'color'],
       });
+    },
+  });
+
+  app.route({
+    method: 'POST',
+    url: '/:id/suppliers',
+    schema: {
+      tags: ['Product'],
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      body: Type.Record(Type.String(), Type.Number()),
+    },
+    async handler(req) {
+      const productId = req.params.id;
+      const product = await Products.findOneBy({ id: productId });
+      if (!product) throw new PRODUCT_NOT_FOUND();
+
+      const supplierReferenceCodes = req.body;
+      const supplierIds = Array.from(
+        new Set(Object.keys(supplierReferenceCodes)),
+      );
+      const suppliers = await Suppliers.findBy({ id: In(supplierIds) });
+      if (suppliers.length !== supplierIds.length)
+        throw new SUPPLIER_NOT_FOUND();
+
+      const existRelation = await SupplierProducts.createQueryBuilder(
+        'SupplierProduct',
+      )
+        .where('supplierId IN (:...supplierIds)', { supplierIds })
+        .where('productId = :productId', { productId })
+        .getOne();
+
+      if (existRelation) throw new SUPPLIER_ALREADY_EXIST();
+
+      return await SupplierProducts.insert(
+        suppliers.map((supplier) => ({
+          supplier,
+          product,
+          reference_code: supplierReferenceCodes[supplier.id],
+        })),
+      );
     },
   });
 };
