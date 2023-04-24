@@ -7,6 +7,7 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 
 import { Product } from './models/Product';
+import { ProductSalePrice } from './models/ProductSalePrice';
 import { TaxType } from './models/TaxType';
 import { Color } from '../configuration/models/Color';
 import { Unit } from '../configuration/models/Unit';
@@ -59,6 +60,7 @@ const Units = repo(Unit);
 const Categories = repo(Category);
 const Suppliers = repo(Supplier);
 const SupplierProducts = repo(SupplierProduct);
+const ProductSalePrices = repo(ProductSalePrice);
 
 //remove unnecessary props and add post/update props
 const inputProductSchema = Type.Intersect([
@@ -249,6 +251,48 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           reference_code: supplierReferenceCodes[supplier.id],
         })),
       );
+    },
+  });
+
+  app.route({
+    method: 'GET',
+    url: '/:id/sale-prices',
+    schema: {
+      tags: ['Product'],
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+    },
+    async handler(req) {
+      const productId = req.params.id;
+      const product = await Products.findOne({
+        where: { id: productId },
+        relations: ['salePrices'],
+      });
+      if (!product) throw new PRODUCT_NOT_FOUND();
+      const currentPrice = product.salePrices.pop();
+      return { currentPrice, history: product.salePrices };
+    },
+  });
+
+  app.route({
+    method: 'POST',
+    url: '/:id/sale-prices',
+    schema: {
+      tags: ['Product'],
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      body: Type.Object({ price: Type.Number() }),
+    },
+    async handler(req) {
+      const productId = req.params.id;
+      const product = await Products.findOne({
+        where: { id: productId },
+        relations: ['salePrices'],
+      });
+      if (!product) throw new PRODUCT_NOT_FOUND();
+      return await ProductSalePrices.insert({ product, price: req.body.price });
     },
   });
 };
