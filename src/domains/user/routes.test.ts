@@ -1,12 +1,11 @@
 import 'reflect-metadata';
-
-import { AppDataSource } from '$src/databases/typeorm';
+import AppDataSource from '$src/DataSource';
 import { createTestFastifyApp, TestUser } from '$src/infra/test/utils';
 import permissions from '$src/permissions';
 import { afterAll, beforeAll, expect, it } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance } from 'fastify';
-import { repo } from '$src/databases/typeorm';
+import { repo } from '$src/infra/utils/repo';
 import { Role } from './models/Role';
 import routes from './routes';
 

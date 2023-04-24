@@ -4,7 +4,7 @@ import assert from 'assert';
 import { Type } from '@sinclair/typebox';
 import { User } from '../models/User';
 import { RolePermission } from '$src/domains/user/models/RolePermission';
-import { repo } from '$src/databases/typeorm';
+import { repo } from '$src/infra/utils/repo';
 import { createError } from '@fastify/error';
 const ACCESS_DENIED = createError('ACCESS_DENIED', 'you dont have access', 403);
 import permissions from '$src/permissions';

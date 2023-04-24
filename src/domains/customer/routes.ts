@@ -1,4 +1,4 @@
-import { repo } from '$src/databases/typeorm';
+import { repo } from '$src/infra/utils/repo';
 import { ResponseShape } from '$src/infra/Response';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';

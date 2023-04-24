@@ -1,5 +1,5 @@
 import { usersAuth } from '$src/authentication/users';
-import { repo } from '$src/databases/typeorm';
+import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import contentDisposition from 'content-disposition';

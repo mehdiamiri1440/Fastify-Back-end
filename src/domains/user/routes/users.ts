@@ -2,7 +2,7 @@ import { ResponseShape } from '$src/infra/Response';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { User } from '../../user/models/User';
 import { Role } from '../../user/models/Role';
-import { repo } from '$src/databases/typeorm';
+import { repo } from '$src/infra/utils/repo';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { UserSchema } from '$src/domains/user/schemas/user.schema';
