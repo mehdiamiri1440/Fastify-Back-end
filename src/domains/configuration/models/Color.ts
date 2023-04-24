@@ -9,10 +9,13 @@ import {
   Relation,
 } from 'typeorm';
 import { User } from '$src/domains/user/models/User';
-import { Static } from '@sinclair/typebox';
 import { ColorSchema } from '$src/domains/configuration/schemas/color.schema';
+import { Static, Type } from '@sinclair/typebox';
+
+const ColorSchemaWithoutRelations = Type.Omit(ColorSchema, ['creator']);
+
 @Entity()
-export class Color implements Static<typeof ColorSchema> {
+export class Color implements Static<typeof ColorSchemaWithoutRelations> {
   @PrimaryGeneratedColumn()
   id!: number;
 

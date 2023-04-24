@@ -1,6 +1,5 @@
-import { usersAuth } from '$src/authentication/users';
 import { repo } from '$src/databases/typeorm';
-import { InputRoleSchema } from '$src/domains/user/schemas/role.schema';
+import { RoleSchema } from '$src/domains/user/schemas/role.schema';
 import { ResponseShape } from '$src/infra/Response';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';
@@ -18,7 +17,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'GET',
     url: '/',
-    onRequest: [usersAuth],
     schema: {
       security: [
         {
@@ -38,14 +36,19 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/',
-    onRequest: [usersAuth],
     schema: {
       security: [
         {
           OAuth2: ['user@role::create'],
         },
       ],
-      body: InputRoleSchema,
+      body: Type.Omit(RoleSchema, [
+        'id',
+        'creator',
+        'createdAt',
+        'updatedAt',
+        'deletedAt',
+      ]),
     },
     async handler(req) {
       return await Roles.save({
@@ -57,26 +60,31 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'PUT',
     url: '/:id',
-    onRequest: [usersAuth],
     schema: {
       security: [
         {
           OAuth2: ['user@role::update'],
         },
       ],
-      body: InputRoleSchema,
+      body: Type.Omit(RoleSchema, [
+        'id',
+        'creator',
+        'createdAt',
+        'updatedAt',
+        'deletedAt',
+      ]),
       params: Type.Object({
         id: Type.Number(),
       }),
     },
     async handler(req) {
-      return await Roles.update({ id: req.params.id }, req.body);
+      const { id } = await Roles.findOneByOrFail({ id: req.params.id });
+      await Roles.update({ id }, req.body);
     },
   });
   app.route({
     method: 'DELETE',
     url: '/:id',
-    onRequest: [usersAuth],
     schema: {
       security: [
         {
@@ -88,13 +96,13 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      return await Roles.delete({ id: req.params.id });
+      const { id } = await Roles.findOneByOrFail({ id: req.params.id });
+      await Roles.delete({ id });
     },
   });
   app.route({
     method: 'PUT',
     url: '/:id/is-active',
-    onRequest: [usersAuth],
     schema: {
       security: [
         {
@@ -109,15 +117,14 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      const { id } = req.params;
+      const { id } = await Roles.findOneByOrFail({ id: req.params.id });
       const { isActive } = req.body;
-      return await Roles.update({ id }, { isActive });
+      await Roles.update({ id }, { isActive });
     },
   });
   app.route({
     method: 'GET',
     url: '/:id/permissions',
-    onRequest: [usersAuth],
     schema: {
       security: [
         {
@@ -134,10 +141,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      const role_id: number = req.params.id;
+      const roleId: number = req.params.id;
       return new TableQueryBuilder(RolePermissions, req)
         .where(() => {
-          return { role: { id: role_id } };
+          return { role: { id: roleId } };
         })
         .exec();
     },
@@ -145,7 +152,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/:id/permissions/:code',
-    onRequest: [usersAuth],
     schema: {
       security: [
         {
@@ -158,20 +164,19 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      const role_id: number = req.params.id;
+      const roleId: number = req.params.id;
       const permission: string = req.params.code;
-      const creator_id = req.user.id;
+      const creatorId = req.user.id;
       return await RolePermissions.save({
         permission: permission,
-        role: { id: role_id },
-        creator: { id: creator_id },
+        role: { id: roleId },
+        creator: { id: creatorId },
       });
     },
   });
   app.route({
     method: 'DELETE',
     url: '/:id/permissions/:code',
-    onRequest: [usersAuth],
     schema: {
       security: [
         {
@@ -184,11 +189,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      const role_id: number = req.params.id;
+      const { id } = await Roles.findOneByOrFail({ id: req.params.id });
       const permission: string = req.params.code;
-      return await RolePermissions.delete({
+      await RolePermissions.delete({
         permission: permission,
-        role: { id: role_id },
+        role: { id },
       });
     },
   });

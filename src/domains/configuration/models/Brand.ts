@@ -11,9 +11,12 @@ import {
 import { User } from '$src/domains/user/models/User';
 import { Static } from '@sinclair/typebox';
 import { BrandSchema } from '$src/domains/configuration/schemas/brand.schema';
+import { Type } from '@sinclair/typebox';
+
+const BrandSchemaWithoutRelations = Type.Omit(BrandSchema, ['creator']);
 
 @Entity()
-export class Brand implements Static<typeof BrandSchema> {
+export class Brand implements Static<typeof BrandSchemaWithoutRelations> {
   @PrimaryGeneratedColumn()
   id!: number;
 

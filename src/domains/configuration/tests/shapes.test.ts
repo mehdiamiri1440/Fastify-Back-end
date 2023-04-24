@@ -9,7 +9,7 @@ import routes from '../routes/shapes';
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
 
-let shape_id: number;
+let shapeId: number;
 
 beforeAll(async () => {
   app = await createTestFastifyApp();
@@ -41,7 +41,7 @@ it('should create a shape', async () => {
     },
     meta: {},
   });
-  shape_id = response.json().data.id;
+  shapeId = response.json().data.id;
 });
 
 it('should get list of shapes', async () => {
@@ -55,7 +55,7 @@ it('should get list of shapes', async () => {
   expect(response.json().data).toMatchObject(
     expect.arrayContaining([
       expect.objectContaining({
-        id: shape_id,
+        id: shapeId,
         name: 'test',
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
@@ -71,16 +71,9 @@ it('should update a shape', async () => {
 
   const response = await user.inject({
     method: 'PUT',
-    url: '/' + shape_id,
+    url: '/' + shapeId,
     payload: { name: 'edit' },
   });
 
-  expect(response.json()).toMatchObject({
-    data: {
-      generatedMaps: expect.any(Array),
-      raw: expect.any(Array),
-      affected: 1,
-    },
-    meta: {},
-  });
+  expect(response.statusCode).toBe(200);
 });

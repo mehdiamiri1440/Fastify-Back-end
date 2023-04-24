@@ -1,8 +1,10 @@
 import { Type } from '@sinclair/typebox';
 
-export const ShapeSchema = Type.Object({
+export const BinSizeSchema = Type.Object({
   id: Type.Number(),
-  name: Type.String({ minLength: 1 }),
+  title: Type.String({ minLength: 1 }),
+  width: Type.Union([Type.String(), Type.Null()]),
+  length: Type.Union([Type.String(), Type.Null()]),
   creator: Type.Number(),
   createdAt: Type.Union([Type.Date(), Type.String({ format: 'date-time' })]),
   updatedAt: Type.Union([Type.Date(), Type.String({ format: 'date-time' })]),

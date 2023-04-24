@@ -14,7 +14,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/',
     schema: {
-      tags: ['brands'],
       security: [
         {
           OAuth2: ['configuration@brand::list'],
@@ -34,7 +33,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'POST',
     url: '/',
     schema: {
-      tags: ['brands'],
       security: [
         {
           OAuth2: ['configuration@brand::create'],
@@ -56,7 +54,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'PUT',
     url: '/:id',
     schema: {
-      tags: ['brands'],
       security: [
         {
           OAuth2: ['configuration@brand::update'],
@@ -74,7 +71,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      return await Brands.update({ id: req.params.id }, req.body);
+      const { id } = await Brands.findOneByOrFail({ id: req.params.id });
+      await Brands.update({ id }, req.body);
     },
   });
 };

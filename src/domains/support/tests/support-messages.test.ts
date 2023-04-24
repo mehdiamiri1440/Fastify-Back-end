@@ -9,8 +9,6 @@ import routes from '../routes/support-messages';
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
 
-let message_id: number;
-
 beforeAll(async () => {
   app = await createTestFastifyApp();
   await AppDataSource.synchronize();
@@ -42,5 +40,4 @@ it('should create a support message', async () => {
     },
     meta: {},
   });
-  message_id = response.json().data.id;
 });

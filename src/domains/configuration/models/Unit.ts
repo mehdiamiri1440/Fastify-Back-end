@@ -9,10 +9,13 @@ import {
   Relation,
 } from 'typeorm';
 import { User } from '$src/domains/user/models/User';
-import { Static } from '@sinclair/typebox';
 import { UnitSchema } from '$src/domains/configuration/schemas/unit.schema';
+import { Static, Type } from '@sinclair/typebox';
+
+const UnitSchemaWithoutRelations = Type.Omit(UnitSchema, ['creator']);
+
 @Entity()
-export class Unit implements Static<typeof UnitSchema> {
+export class Unit implements Static<typeof UnitSchemaWithoutRelations> {
   @PrimaryGeneratedColumn()
   id!: number;
 

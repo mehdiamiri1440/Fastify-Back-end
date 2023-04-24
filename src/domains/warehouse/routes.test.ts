@@ -2,34 +2,39 @@ import 'reflect-metadata';
 
 import { AppDataSource } from '$src/databases/typeorm';
 import { createTestFastifyApp, TestUser } from '$src/infra/test/utils';
-import permissions from '$src/permissions';
 import { afterAll, beforeAll, expect, it } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance } from 'fastify';
-import { repo } from '$src/databases/typeorm';
-import { Role } from './models/Role';
 import routes from './routes';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
 
-let userId: number;
-let roleId: number;
+let sizeId: number;
+let propertyId: number;
+let warehouseId: number;
+let binId: number;
 
-const userData = {
-  firstName: 'Daniel',
-  lastName: 'Soheil',
-  role: 1,
-  nif: 'B-6116622G',
-  email: 'daniel@sohe.ir',
-  phoneNumber: '+989303590055',
-  password: 'hackme',
-  position: 'Developer',
-  isActive: true,
+const sizeData = {
+  title: 'big',
+  length: '1',
+  width: '2',
 };
-const roleData = {
-  title: 'testRole',
-  isActive: true,
+const propertyData = {
+  title: 'normal',
+};
+const warehouseData = {
+  name: 'DI Warehouse',
+  province: 'P43',
+  city: 'C43.183',
+  street: 'S43.183.00057',
+  postalCode: '43894',
+  description: 'this is just for test',
+};
+const binData = {
+  name: 'DI Bin',
+  physicalCode: 'physicalCode',
+  internalCode: 'internalCode',
 };
 
 beforeAll(async () => {
@@ -44,24 +49,20 @@ afterAll(async () => {
   await app?.close();
 });
 
-it('should create a user', async () => {
+it('should create a bin size', async () => {
   assert(app);
   assert(user);
 
   const response = await user.inject({
     method: 'POST',
-    url: '/users',
-    payload: userData,
+    url: '/bin-sizes',
+    payload: sizeData,
   });
-  userId = response.json().data.id;
+  sizeId = response.json().data.id;
   expect(response.json()).toMatchObject({
     data: {
-      id: userId,
-      ...userData,
-      role: JSON.parse(
-        JSON.stringify(await repo(Role).findOneBy({ id: userData.role })),
-      ),
-      password: expect.any(String),
+      id: sizeId,
+      ...sizeData,
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
       deletedAt: null,
@@ -70,21 +71,19 @@ it('should create a user', async () => {
   });
 });
 
-it('should return all users', async () => {
+it('should get list of bin sizes', async () => {
   assert(app);
   assert(user);
 
   const response = await user.inject({
     method: 'GET',
-    url: '/users',
+    url: '/bin-sizes/',
   });
-
   expect(response.json().data).toMatchObject(
     expect.arrayContaining([
       expect.objectContaining({
-        id: userId,
-        ...userData,
-        password: expect.any(String),
+        id: sizeId,
+        ...sizeData,
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         deletedAt: null,
@@ -93,58 +92,33 @@ it('should return all users', async () => {
   );
 });
 
-it('should update user', async () => {
+it('should update a bin size', async () => {
   assert(app);
   assert(user);
 
   const response = await user.inject({
     method: 'PUT',
-    url: '/users/' + userId,
-    payload: { id: userId, ...userData, firstName: 'DanielEdited' },
+    url: '/bin-sizes/' + sizeId,
+    payload: { ...sizeData, title: 'edited' },
   });
 
   expect(response.statusCode).toBe(200);
 });
 
-it('should deactive user', async () => {
-  assert(app);
-  assert(user);
-
-  const response = await user.inject({
-    method: 'PUT',
-    url: '/users/' + userId,
-    payload: { id: userId, ...userData, isActive: false },
-  });
-
-  expect(response.statusCode).toBe(200);
-});
-
-it('should delete user', async () => {
-  assert(app);
-  assert(user);
-
-  const response = await user.inject({
-    method: 'DELETE',
-    url: '/users/' + userId,
-  });
-
-  expect(response.statusCode).toBe(200);
-});
-
-it('should create a role', async () => {
+it('should create a bin property', async () => {
   assert(app);
   assert(user);
 
   const response = await user.inject({
     method: 'POST',
-    url: '/roles',
-    payload: roleData,
+    url: '/bin-properties',
+    payload: propertyData,
   });
-  roleId = response.json().data.id;
+  propertyId = response.json().data.id;
   expect(response.json()).toMatchObject({
     data: {
-      id: roleId,
-      ...roleData,
+      id: propertyId,
+      ...propertyData,
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
       deletedAt: null,
@@ -153,19 +127,19 @@ it('should create a role', async () => {
   });
 });
 
-it('should return all roles', async () => {
+it('should get list of bin properties', async () => {
   assert(app);
   assert(user);
 
   const response = await user.inject({
     method: 'GET',
-    url: '/roles',
+    url: '/bin-properties',
   });
   expect(response.json().data).toMatchObject(
     expect.arrayContaining([
       expect.objectContaining({
-        id: roleId,
-        ...roleData,
+        id: propertyId,
+        ...propertyData,
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         deletedAt: null,
@@ -174,31 +148,33 @@ it('should return all roles', async () => {
   );
 });
 
-it('should update role', async () => {
+it('should update a bin property', async () => {
   assert(app);
   assert(user);
 
   const response = await user.inject({
     method: 'PUT',
-    url: '/roles/' + roleId,
-    payload: { id: roleId, ...roleData, title: 'testRoleEdited' },
+    url: '/bin-properties/' + propertyId,
+    payload: { ...propertyData, title: 'edited' },
   });
 
   expect(response.statusCode).toBe(200);
 });
 
-it('should add permission to role', async () => {
+it('should create a warehouse', async () => {
   assert(app);
   assert(user);
 
   const response = await user.inject({
     method: 'POST',
-    url: '/roles/' + roleId + '/permissions/testPermission',
+    url: '/warehouses',
+    payload: warehouseData,
   });
+  warehouseId = response.json().data.id;
   expect(response.json()).toMatchObject({
     data: {
-      role: { id: roleId },
-      permission: 'testPermission',
+      id: warehouseId,
+      ...warehouseData,
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
       deletedAt: null,
@@ -207,20 +183,19 @@ it('should add permission to role', async () => {
   });
 });
 
-it('should return all permissions added to role', async () => {
+it('should get list of warehouses', async () => {
   assert(app);
   assert(user);
 
   const response = await user.inject({
     method: 'GET',
-    url: '/roles/' + roleId + '/permissions',
+    url: '/warehouses',
   });
-
   expect(response.json().data).toMatchObject(
     expect.arrayContaining([
       expect.objectContaining({
-        role: roleId,
-        permission: 'testPermission',
+        id: warehouseId,
+        ...warehouseData,
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         deletedAt: null,
@@ -229,76 +204,112 @@ it('should return all permissions added to role', async () => {
   );
 });
 
-it('should delete permission of role', async () => {
-  assert(app);
-  assert(user);
-
-  const response = await user.inject({
-    method: 'DELETE',
-    url: '/roles/' + roleId + '/permissions/testPermission',
-  });
-
-  expect(response.statusCode).toBe(200);
-});
-
-it('should deactive role', async () => {
+it('should update a warehouse', async () => {
   assert(app);
   assert(user);
 
   const response = await user.inject({
     method: 'PUT',
-    url: '/roles/' + roleId,
-    payload: { id: roleId, ...roleData, isActive: false },
+    url: '/warehouses/' + warehouseId,
+    payload: { ...warehouseData, name: 'edited' },
   });
 
   expect(response.statusCode).toBe(200);
 });
 
-it('should delete role', async () => {
+it('should create a bin', async () => {
   assert(app);
   assert(user);
 
   const response = await user.inject({
-    method: 'DELETE',
-    url: '/roles/' + roleId,
+    method: 'POST',
+    url: '/bins',
+    payload: {
+      ...binData,
+      size: sizeId,
+      property: propertyId,
+      warehouse: warehouseId,
+    },
   });
-
-  expect(response.statusCode).toBe(200);
-});
-
-it('should return permissions', async () => {
-  assert(app);
-  assert(user);
-
-  const response = await user.inject({
-    method: 'GET',
-    url: '/permissions',
-  });
-
-  expect(response.json()).toMatchObject({
-    data: permissions,
-    meta: {},
-  });
-});
-
-it('should return a user that logged in', async () => {
-  assert(app);
-  assert(user);
-
-  const response = await user.inject({
-    method: 'GET',
-    url: '/users/me',
-  });
-
+  binId = response.json().data.id;
   expect(response.json()).toMatchObject({
     data: {
-      id: expect.any(Number),
-      email: expect.any(String),
-      isActive: true,
+      id: binId,
+      ...binData,
+      size: { ...sizeData, title: 'edited' },
+      property: { ...propertyData, title: 'edited' },
+      warehouse: { ...warehouseData, name: 'edited' },
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
       deletedAt: null,
     },
     meta: {},
   });
+});
+
+it('should get list of bin', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/bins',
+  });
+  expect(response.json().data).toMatchObject(
+    expect.arrayContaining([
+      expect.objectContaining({
+        id: binId,
+        ...binData,
+        size: sizeId,
+        property: propertyId,
+        warehouse: warehouseId,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        deletedAt: null,
+      }),
+    ]),
+  );
+});
+
+it('should update a bin', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'PUT',
+    url: '/bins/' + binId,
+    payload: {
+      ...binData,
+      size: sizeId,
+      property: propertyId,
+      warehouse: warehouseId,
+      name: 'edited',
+    },
+  });
+
+  expect(response.statusCode).toBe(200);
+});
+
+it('should delete a bin', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'DELETE',
+    url: '/bins/' + binId,
+  });
+
+  expect(response.statusCode).toBe(200);
+});
+
+it('should delete a warehouse', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'DELETE',
+    url: '/warehouses/' + warehouseId,
+  });
+
+  expect(response.statusCode).toBe(200);
 });

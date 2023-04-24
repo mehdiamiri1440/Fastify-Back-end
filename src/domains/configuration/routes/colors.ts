@@ -14,7 +14,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/',
     schema: {
-      tags: ['colors'],
       security: [
         {
           OAuth2: ['configuration@color::list'],
@@ -34,7 +33,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'POST',
     url: '/',
     schema: {
-      tags: ['colors'],
       security: [
         {
           OAuth2: ['configuration@color::create'],
@@ -56,7 +54,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'PUT',
     url: '/:id',
     schema: {
-      tags: ['colors'],
       security: [
         {
           OAuth2: ['configuration@color::update'],
@@ -74,7 +71,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      return await Colors.update({ id: req.params.id }, req.body);
+      const { id } = await Colors.findOneByOrFail({ id: req.params.id });
+      await Colors.update({ id }, req.body);
     },
   });
 };
