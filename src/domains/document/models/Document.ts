@@ -1,25 +1,30 @@
+import { User } from '$src/domains/user/models/User';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
+/**
+ * this is a polymorphic table. type and typeId columns are used to achieve this
+ */
 @Entity()
 export class Document {
   @PrimaryGeneratedColumn()
   id!: number;
 
   @Column()
-  creatorId!: number;
+  type!: 'inbound' | 'outbound';
 
   @Column()
-  title!: string;
+  typeId!: number;
 
-  @Column()
-  type!: 'inbound';
+  @ManyToOne(() => User)
+  creator!: User;
 
   @CreateDateColumn()
   createdAt!: Date;

@@ -23,7 +23,7 @@ test:
     - npm run format:check
     - npm run lint:quiet
     - npm run check
-    - npm run test
+    - npm run test:coverage
   variables:
     DB_URL: postgres://user:password@postgres:5432/inventory
     DB_DROP_SCHEMA: 'true'

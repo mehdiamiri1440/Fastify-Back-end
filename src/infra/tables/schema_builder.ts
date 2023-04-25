@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { ObjectLiteral } from 'typeorm';
 
 export interface Options {
   orderable: string[];
@@ -6,40 +6,42 @@ export interface Options {
   searchable: string[];
 }
 
+export type FilterValue = string | { $like: string };
+
+export interface ListQueryParams<T = any> {
+  page: number;
+  pageSize: number;
+  order?: 'asc' | 'desc';
+  orderBy?: string;
+  filter: T;
+}
+
 export function ListQueryOptions(options: Options) {
-  return Type.Object(
-    {
-      page: Type.Number({ default: 1 }),
-      pageSize: Type.Number({ default: 10 }),
-      order: Type.Optional(
-        Type.String({
-          enum: ['asc', 'desc'],
-        }),
-      ),
-      orderBy: Type.Optional(
-        Type.String({
-          enum: options.orderable,
-        }),
-      ),
-      filter: Type.Optional(
-        Type.Object(
-          Object.fromEntries(
-            options.filterable.map((x) => [
-              x,
-              Type.Union([
-                Type.String(),
-                Type.Object({
-                  like: Type.String(),
-                }),
-              ]),
-            ]),
-          ),
-        ),
-      ),
+  return {
+    page: {
+      type: 'number',
+      default: 1,
     },
-    {
-      style: 'deepObject',
-      explode: true,
+    pageSize: {
+      type: 'number',
+      default: 10,
     },
-  );
+    order: {
+      type: 'string',
+      enum: ['asc', 'desc'],
+    },
+    orderBy: {
+      type: 'string',
+      enum: options.orderable,
+    },
+    ...Object.fromEntries(
+      options.filterable.map((key) => [`filter.${key}`, { type: 'string' }]),
+    ),
+    ...Object.fromEntries(
+      options.searchable.map((key) => [
+        `filter.${key}.$like`,
+        { type: 'string' },
+      ]),
+    ),
+  };
 }

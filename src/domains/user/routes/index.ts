@@ -6,10 +6,10 @@ import { User } from '../models/User';
 import { RolePermission } from '$src/domains/user/models/RolePermission';
 import { repo } from '$src/infra/utils/repo';
 import { createError } from '@fastify/error';
-const ACCESS_DENIED = createError('ACCESS_DENIED', 'you dont have access', 403);
 import permissions from '$src/permissions';
 import crypto from 'crypto';
 
+const ACCESS_DENIED = createError('ACCESS_DENIED', 'you dont have access', 403);
 const Users = repo(User);
 const RolePermissions = repo(RolePermission);
 const { TOKEN_TTL_SECONDS } = process.env;
@@ -18,7 +18,7 @@ if (TOKEN_TTL_SECONDS) {
   assert(Number(TOKEN_TTL_SECONDS) > 0, 'Invalid TOKEN_TTL_SECONDS');
 }
 
-const TTL = TOKEN_TTL_SECONDS ? Number(TOKEN_TTL_SECONDS) : 20 * 60; // 20 mins
+const TTL = TOKEN_TTL_SECONDS ? Number(TOKEN_TTL_SECONDS) : 200 * 60; // 20 mins
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);

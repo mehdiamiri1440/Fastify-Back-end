@@ -1,4 +1,5 @@
 export default {
+  // user
   'menu@users': 'with this permission you can see the user in menu',
   'user@user::tab':
     'with this permission you can see tab that show list of users',
@@ -15,12 +16,29 @@ export default {
   'user@role::update': 'with this permission you can edit role',
   'user@role::delete': 'with this permission you can delete role',
   'user@role::list': 'with this permission you can get list of roles',
+
+  // inbound
+  'user@inbound::list': 'with this permission you can get list of inbounds',
+  'user@inbound::create': 'with this permission you can add new inbound',
+  'user@inbound::delete': 'with this permission you can delete inbound',
+  'user@inbound::update': 'with this permission you can edit inbound',
+  'user@inbound::sort': 'with this permission you can sort inbounds',
+
+  // outbound
+  'outbound@outbound::create': 'with this permission you can add new outbound',
+  'outbound@outbound::list':
+    'with this permission you can get list of outbounds',
+  'outbound@outbound::update': 'with this permission you can edit outbound',
+
+  // supplier
   'supplier@supplier::list':
     'with this permission you can get list of suppliers',
   'supplier@supplier::view': 'just with this permission you can see this page',
   'supplier@supplier::create': 'with this permission you can add new suppliers',
   'supplier@supplier::update': 'with this permission you can edit suppliers',
   'supplier@supplier::delete': 'with this permission you can delete supplier',
+
+  // warehouse
   'warehouse@warehouse::list':
     'with this permission you can get list of warehouses',
   'warehouse@warehouse::create':
@@ -42,8 +60,8 @@ export default {
     'with this permission you can get list of properties',
   'warehouse@bin-property::update':
     'with this permission you can edit bin property',
-  'user@inbound::list': '',
-  'user@inbound::create': '',
+
+  // configuration
   'configuration@unit::list': 'with this permission you can get list of units',
   'configuration@unit::create': 'with this permission you can add new unit',
   'configuration@unit::update': 'with this permission you can edit unit',

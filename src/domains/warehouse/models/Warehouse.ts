@@ -8,9 +8,11 @@ import {
   DeleteDateColumn,
   ManyToOne,
   Relation,
+  OneToMany,
 } from 'typeorm';
 import { WarehouseSchema } from '$src/domains/warehouse/schemas/warehouse.schema';
 import { Static, Type } from '@sinclair/typebox';
+import { WarehouseStaff } from './WarehouseStaff';
 
 const WarehouseSchemaWithoutRelations = Type.Omit(WarehouseSchema, ['creator']);
 
@@ -32,6 +34,12 @@ export class Warehouse
 
   @Column({ nullable: false })
   street!: string;
+
+  @OneToMany(
+    () => WarehouseStaff,
+    (warehouseStaffs) => warehouseStaffs.warehouse,
+  )
+  warehouseStaffs!: Relation<WarehouseStaff>;
 
   @Column({ nullable: false })
   postalCode!: string;

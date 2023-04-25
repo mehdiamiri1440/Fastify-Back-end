@@ -10,10 +10,10 @@ import { Role } from './models/Role';
 import routes from './routes';
 
 let app: FastifyInstance | undefined;
-let user: TestUser | undefined;
+let user: TestUser;
 
-let userId: number;
-let roleId: number;
+let userId: number | undefined;
+let roleId: number | undefined;
 
 const userData = {
   firstName: 'Daniel',
@@ -52,14 +52,14 @@ it('should create a user', async () => {
     url: '/users',
     payload: userData,
   });
-  userId = response.json().data.id;
-  expect(response.json()).toMatchObject({
+
+  const body = response.json();
+  expect(body).toMatchObject({
     data: {
-      id: userId,
+      id: expect.any(Number),
       ...userData,
-      role: JSON.parse(
-        JSON.stringify(await repo(Role).findOneBy({ id: userData.role })),
-      ),
+      role: structuredClone(await repo(Role).findOneBy({ id: userData.role })),
+
       password: expect.any(String),
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
@@ -67,6 +67,8 @@ it('should create a user', async () => {
     },
     meta: {},
   });
+
+  userId = body.data.id;
 });
 
 it('should return all users', async () => {
@@ -142,7 +144,7 @@ it('should create a role', async () => {
   roleId = response.json().data.id;
   expect(response.json()).toMatchObject({
     data: {
-      id: roleId,
+      id: expect.any(Number),
       ...roleData,
       createdAt: expect.any(String),
       updatedAt: expect.any(String),

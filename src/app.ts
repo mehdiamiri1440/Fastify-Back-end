@@ -29,6 +29,7 @@ const app: FastifyPluginAsync<Options> = async (fastify, { url }) => {
     // handle typeorm not found error
     if (error instanceof TypeORMError) {
       const fastifyError = new ENTITY_NOT_FOUND();
+      fastifyError.cause = error;
       // replace new line and white space
       // also replace quotes
       fastifyError.message = error.message
@@ -109,6 +110,13 @@ const app: FastifyPluginAsync<Options> = async (fastify, { url }) => {
       await fastify.register(import('./domains/document/routes'), {
         prefix: '/documents',
       });
+
+      await fastify.register(import('./domains/inbound/routes'));
+
+      await fastify.register(import('./domains/files/routes'), {
+        prefix: '/files',
+      });
+
       await fastify.register(import('./domains/warehouse/routes'));
       await fastify.register(import('./domains/supplier/routes'));
     },
