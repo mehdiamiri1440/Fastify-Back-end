@@ -1,16 +1,8 @@
-import createError from '@fastify/error';
-import assert from 'assert';
 import FastifySwagger from '@fastify/swagger';
+import assert from 'assert';
 import { FastifyPluginAsync } from 'fastify/types/plugin';
-import { TypeORMError } from 'typeorm';
-import permissions from './permissions';
 import { SwaggerTheme } from 'swagger-themes';
-
-const ENTITY_NOT_FOUND = createError(
-  'ENTITY_NOT_FOUND',
-  'Entity not found',
-  404,
-);
+import permissions from './permissions';
 
 export interface Options {
   /**
@@ -24,25 +16,8 @@ const app: FastifyPluginAsync<Options> = async (fastify, { url }) => {
   const { JWT_SECRET } = process.env;
   assert(JWT_SECRET, 'JWT_SECRET env var not provided');
 
-  const defaultErrorHandler = fastify.errorHandler;
-  fastify.setErrorHandler((error, request, reply) => {
-    // handle typeorm not found error
-    if (error instanceof TypeORMError) {
-      const fastifyError = new ENTITY_NOT_FOUND();
-      fastifyError.cause = error;
-      // replace new line and white space
-      // also replace quotes
-      fastifyError.message = error.message
-        .replace(/(\r\n|\n|\r|\s+)/gm, ' ')
-        .replaceAll('  ', ' ')
-        .replace(/"/g, "'");
-      return defaultErrorHandler(fastifyError, request, reply);
-    }
-
-    return defaultErrorHandler(error, request, reply);
-  });
-
   await fastify.register(import('./databases/typeorm'));
+  await fastify.register(import('./infra/error-handlers/typeorm'));
 
   await fastify.register(FastifySwagger, {
     openapi: {
