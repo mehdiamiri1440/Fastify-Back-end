@@ -1,5 +1,8 @@
 import { ResponseShape } from '$src/infra/Response';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
+import {
+  ListQueryOptions,
+  ListQueryParams,
+} from '$src/infra/tables/schema_builder';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Response } from '$src/infra/Response';
 import {
@@ -25,7 +28,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      const { page, pageSize, filter, order, orderBy } = req.query;
+      const { page, pageSize, filter, order, orderBy } =
+        req.query as ListQueryParams;
       const queryParams = generateQueryParamForPaginationAndOrder({
         page,
         pageSize,
@@ -35,12 +39,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
       const filters = [];
 
-      if (typeof filter?.code === 'object' && 'like' in filter.code) {
-        filters.push({ key: 'code', value: filter.code.like });
+      if (typeof filter?.code === 'object' && '$like' in filter.code) {
+        filters.push({ key: 'code', value: filter.code.$like });
       }
 
-      if (typeof filter?.name === 'object' && 'like' in filter.name) {
-        filters.push({ key: 'name', value: filter.name.like });
+      if (typeof filter?.name === 'object' && '$like' in filter.name) {
+        filters.push({ key: 'name', value: filter.name.$like });
       }
 
       const filterHub = getLikeFilter(filters);
@@ -66,7 +70,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req, rep) {
-      const { page, pageSize, filter, order, orderBy } = req.query;
+      const { page, pageSize, filter, order, orderBy } =
+        req.query as ListQueryParams;
       const queryParams = generateQueryParamForPaginationAndOrder({
         page,
         pageSize,
@@ -76,21 +81,21 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
       const filters = [];
 
-      if (typeof filter?.code === 'object' && 'like' in filter.code) {
-        filters.push({ key: 'code', value: filter.code.like });
+      if (typeof filter?.code === 'object' && '$like' in filter.code) {
+        filters.push({ key: 'code', value: filter.code.$like });
       }
 
-      if (typeof filter?.name === 'object' && 'like' in filter.name) {
-        filters.push({ key: 'name', value: filter.name.like });
+      if (typeof filter?.name === 'object' && '$like' in filter.name) {
+        filters.push({ key: 'name', value: filter.name.$like });
       }
 
       if (
         typeof filter?.provinceCode === 'object' &&
-        filter?.provinceCode?.like
+        filter?.provinceCode?.$like
       ) {
         filters.push({
           key: 'GeoProvince.code',
-          value: filter.provinceCode.like,
+          value: filter.provinceCode.$like,
         });
       }
 
@@ -117,7 +122,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req, rep) {
-      const { page, pageSize, filter, order, orderBy } = req.query;
+      const { page, pageSize, filter, order, orderBy } =
+        req.query as ListQueryParams;
 
       const queryParams = generateQueryParamForPaginationAndOrder({
         page,
@@ -128,18 +134,18 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
       const filters = [];
 
-      if (typeof filter?.code === 'object' && 'like' in filter.code) {
-        filters.push({ key: 'code', value: filter.code.like });
+      if (typeof filter?.code === 'object' && '$like' in filter.code) {
+        filters.push({ key: 'code', value: filter.code.$like });
       }
 
-      if (typeof filter?.name === 'object' && 'like' in filter.name) {
-        filters.push({ key: 'name', value: filter.name.like });
+      if (typeof filter?.name === 'object' && '$like' in filter.name) {
+        filters.push({ key: 'name', value: filter.name.$like });
       }
 
       if (typeof filter?.cityCode === 'object' && 'like' in filter.cityCode) {
         filters.push({
           key: 'GeoCity.code',
-          value: filter.cityCode.like,
+          value: filter.cityCode.$like,
         });
       }
 
@@ -166,7 +172,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      const { page, pageSize, filter, order, orderBy } = req.query;
+      const { page, pageSize, filter, order, orderBy } =
+        req.query as ListQueryParams;
 
       const queryParams = generateQueryParamForPaginationAndOrder({
         page,
@@ -177,21 +184,21 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
       const filters = [];
 
-      if (typeof filter?.code === 'object' && 'like' in filter.code) {
-        filters.push({ key: 'code', value: filter.code.like });
+      if (typeof filter?.code === 'object' && '$like' in filter.code) {
+        filters.push({ key: 'code', value: filter.code.$like });
       }
 
-      if (typeof filter?.name === 'object' && 'like' in filter.name) {
-        filters.push({ key: 'name', value: filter.name.like });
+      if (typeof filter?.name === 'object' && '$like' in filter.name) {
+        filters.push({ key: 'name', value: filter.name.$like });
       }
 
       if (
         typeof filter?.street_code === 'object' &&
-        'like' in filter.street_code
+        '$like' in filter.street_code
       ) {
         filters.push({
           key: 'GeoStreet.code',
-          value: filter.street_code.like,
+          value: filter.street_code.$like,
         });
       }
 

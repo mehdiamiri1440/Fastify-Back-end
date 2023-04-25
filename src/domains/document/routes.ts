@@ -35,8 +35,10 @@ async function getBuilder(docId: number) {
 const IMAGE_NOT_FOUND = createError('IMAGE_NOT_FOUND', 'Image not found', 404);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
+  // GET /:id/pdf
   app.route({
     method: 'GET',
+    url: '/:id/pdf',
     schema: {
       tags,
       params: Type.Object({
@@ -48,9 +50,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
     },
-    url: '/:id/pdf',
-    onRequest: usersAuth,
-
     async handler(req, reply) {
       const { id } = req.params;
       const builder = await getBuilder(id);
@@ -70,8 +69,37 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
+  // GET /:id/html
   app.route({
     method: 'GET',
+    url: '/:id/html',
+    schema: {
+      tags,
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      // security: [
+      //   {
+      //     OAuth2: [],
+      //   },
+      // ],
+    },
+    async handler(req, reply) {
+      const { id } = req.params;
+      const builder = await getBuilder(id);
+      await builder.load();
+      const html = builder.getHtml();
+
+      return reply
+        .header('Content-Type', 'text/html; charset=utf-8')
+        .send(html);
+    },
+  });
+
+  // GET /:id/thumbnail
+  app.route({
+    method: 'GET',
+    url: '/:id/thumbnail',
     schema: {
       tags,
       params: Type.Object({
@@ -83,8 +111,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
     },
-    url: '/:id/thumbnail',
-    onRequest: usersAuth,
 
     async handler(req, reply) {
       const { id } = req.params;
@@ -100,8 +126,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
+  // GET /:id/images/:imageId
   app.route({
     method: 'GET',
+    url: '/:id/images/:imageId',
     schema: {
       tags,
       params: Type.Object({
@@ -114,8 +142,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
     },
-    url: '/:id/images/:imageId',
-    onRequest: usersAuth,
 
     async handler(req, reply) {
       const { id, imageId } = req.params;
