@@ -1,12 +1,12 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
   CreateDateColumn,
-  UpdateDateColumn,
   DeleteDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
   Relation,
+  UpdateDateColumn,
 } from 'typeorm';
 import { UserSchema } from '../schemas/user.schema';
 import { Role } from './Role';
@@ -24,6 +24,12 @@ export class User implements Static<typeof UserSchemaWithoutRelations> {
 
   @Column({ nullable: false })
   lastName!: string;
+
+  @Column({
+    generatedType: 'STORED',
+    asExpression: `"first_name" || ' ' || "last_name"`,
+  })
+  fullName!: string;
 
   @ManyToOne(() => Role)
   role!: Relation<Role>;

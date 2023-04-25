@@ -6,8 +6,8 @@ function toTypeOrmFilter(obj: any) {
     const value = obj[key];
     if (value === undefined) {
       delete obj[key];
-    } else if (value.like) {
-      obj[key] = ILike(value.like);
+    } else if (value.$like) {
+      obj[key] = ILike(value.$like);
     } else if (typeof value === 'object') {
       toTypeOrmFilter(value);
     }

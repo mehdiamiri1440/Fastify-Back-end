@@ -14,7 +14,11 @@ declare module '@fastify/jwt' {
   }
 }
 
-const ACCESS_DENIED = createError('ACCESS_DENIED', 'you dont have access', 403);
+const ACCESS_DENIED = createError(
+  'ACCESS_DENIED',
+  'you do not have access to this resource scope',
+  403,
+);
 
 const toArray = <T>(input: T | T[]): T[] =>
   Array.isArray(input) ? input : [input];

@@ -12,13 +12,14 @@ import {
 } from 'typeorm';
 import { InboundImage } from './InboundImage';
 import { InboundProduct } from './InboundProduct';
+import { Warehouse } from '$src/domains/warehouse/models/Warehouse';
 
 export enum InboundType {
   NEW = 'new',
   RETURNED = 'returned',
 }
 
-enum InboundStatus {
+export enum InboundStatus {
   PRE_DELIVERY = 'pre_delivery',
   LOAD = 'load',
   SORTING = 'sorting',
@@ -30,8 +31,8 @@ export class Inbound {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
-  code!: string;
+  @Column({ nullable: true, type: 'varchar' })
+  code!: string | null;
 
   @Column({ type: 'enum', enum: InboundType })
   type!: InboundType;
@@ -43,11 +44,25 @@ export class Inbound {
   })
   status!: InboundStatus;
 
-  @Column()
-  docId!: string;
+  @Column({ type: 'integer', nullable: true })
+  docId!: number | null;
 
   @ManyToOne(() => User, { nullable: true })
-  driverUser!: User;
+  driver!: User | null;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    comment: 'fileId of creator signature',
+  })
+  creatorSignature!: string | null;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    comment: 'fileId of driver signature',
+  })
+  driverSignature!: string | null;
 
   @Column({ nullable: true })
   description!: string;
@@ -55,8 +70,8 @@ export class Inbound {
   @ManyToOne(() => User)
   creator!: User;
 
-  @Column()
-  creatorId!: number;
+  @ManyToOne(() => Warehouse)
+  warehouse!: Warehouse;
 
   @CreateDateColumn()
   createdAt!: Date;

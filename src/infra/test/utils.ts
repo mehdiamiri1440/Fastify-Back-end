@@ -6,6 +6,7 @@ import permissions from '$src/permissions';
 import qs from 'qs';
 
 import type Ajv from 'ajv';
+import AppDataSource from '$src/DataSource';
 
 async function createTestUser() {
   return await repo(User).save({
@@ -76,5 +77,19 @@ export async function createTestFastifyApp() {
   await app.register(import('@fastify/jwt'), { secret: 'test' });
   await app.register(import('$src/infra/RouteValidator'));
   await app.register(import('$src/infra/authorization'));
+
+  const superErrorHandler = app.errorHandler;
+  app.setErrorHandler((error, request, reply) => {
+    console.error(request.method, request.url, error);
+    superErrorHandler(error, request, reply);
+  });
   return app;
+}
+
+export function disableForeignKeyCheck() {
+  return AppDataSource.query(`SET session_replication_role = 'replica';`);
+}
+
+export function enableForeignKeyCheck() {
+  return AppDataSource.query(`SET session_replication_role = 'origin';`);
 }

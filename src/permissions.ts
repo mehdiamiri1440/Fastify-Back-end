@@ -15,6 +15,11 @@ export default {
   'user@role::update': 'with this permission you can edit role',
   'user@role::delete': 'with this permission you can delete role',
   'user@role::list': 'with this permission you can get list of roles',
+  'user@inbound::list': 'with this permission you can get list of inbounds',
+  'user@inbound::create': 'with this permission you can add new inbound',
+  'user@inbound::delete': 'with this permission you can delete inbound',
+  'user@inbound::update': 'with this permission you can edit inbound',
+  'user@inbound::sort': 'with this permission you can sort inbounds',
   'supplier@supplier::list':
     'with this permission you can get list of suppliers',
   'supplier@supplier::view': 'just with this permission you can see this page',
@@ -42,8 +47,6 @@ export default {
     'with this permission you can get list of properties',
   'warehouse@bin-property::update':
     'with this permission you can edit bin property',
-  'user@inbound::list': '',
-  'user@inbound::create': '',
   'configuration@unit::list': 'with this permission you can get list of units',
   'configuration@unit::create': 'with this permission you can add new unit',
   'configuration@unit::update': 'with this permission you can edit unit',

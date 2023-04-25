@@ -9,6 +9,7 @@ export type RelationBuilder = (
   req: FastifyRequest,
 ) => FindOneOptions['relations'];
 export type OrderBuilder = (req: FastifyRequest) => FindOneOptions['order'];
+export type SelectBuilder = (req: FastifyRequest) => FindOneOptions['select'];
 
 export class TableQueryBuilder {
   #repo: Repository<any>;
@@ -17,6 +18,8 @@ export class TableQueryBuilder {
   #whereBuilder: WhereBuilder = (req) => where.from(req);
   #relationBuilder: RelationBuilder = () => undefined;
   #orderBuilder: OrderBuilder = (req) => order.from(req);
+  #selectBuilder: SelectBuilder = () => undefined;
+  #loadRelationIds: FindOneOptions['loadRelationIds'] = true;
 
   constructor(repo: Repository<any>, req: FastifyRequest) {
     this.#repo = repo;
@@ -38,17 +41,28 @@ export class TableQueryBuilder {
     return this;
   }
 
+  loadRelationIds(value: FindOneOptions['loadRelationIds']) {
+    this.#loadRelationIds = value;
+    return this;
+  }
+
+  select(builder: SelectBuilder) {
+    this.#selectBuilder = builder;
+    return this;
+  }
+
   async exec() {
     const req = this.#req;
     const { page, pageSize } = req.query as { page: number; pageSize: number };
 
     const [rows, total] = await this.#repo.findAndCount({
+      select: this.#selectBuilder(req),
       where: this.#whereBuilder(req),
       order: this.#orderBuilder(req),
       relations: this.#relationBuilder(req),
       skip: (page - 1) * pageSize,
       take: pageSize,
-      loadRelationIds: true,
+      loadRelationIds: this.#loadRelationIds,
     });
 
     return new PaginatedResponse(rows, {
