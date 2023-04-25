@@ -1,4 +1,6 @@
+import { Product } from '$src/domains/product/models/Product';
 import { User } from '$src/domains/user/models/User';
+import type { Relation } from 'typeorm';
 import {
   Column,
   CreateDateColumn,
@@ -8,20 +10,21 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { OutboundProduct } from './OutboundProduct';
 
-/**
- * this is a polymorphic table. type and typeId columns are used to achieve this
- */
 @Entity()
-export class Document {
+export class OutboundProductSupply {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
-  type!: 'inbound' | 'outbound';
+  @ManyToOne(() => OutboundProduct, (outbound) => outbound.product)
+  outboundProduct!: Relation<OutboundProduct>;
+
+  @ManyToOne(() => Product)
+  product!: Relation<Product>;
 
   @Column()
-  typeId!: number;
+  quantity!: number;
 
   @ManyToOne(() => User)
   creator!: User;

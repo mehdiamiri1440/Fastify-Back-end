@@ -7,7 +7,7 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { InboundStatus } from '../models/Inbound';
 import { InboundProduct } from '../models/InboundProduct';
-import { loadUserWarehouse } from '../utils';
+import { loadUserWarehouse } from '../services/utils';
 import { Bin } from '$src/domains/warehouse/models/Bin';
 import { Product } from '$src/domains/product/models/Product';
 import { InboundProductSort } from '../models/InboundProductSort';

@@ -8,6 +8,7 @@ import { DocumentBuilder } from './Builder';
 import { InboundDocument } from './documents/Inbound';
 import { Document } from './models/Document';
 import createError from '@fastify/error';
+import { OutboundDocument } from './documents/Outbound';
 
 const Documents = repo(Document);
 
@@ -18,6 +19,7 @@ const TypeBuilderMap: Record<
   { new (repo: Repository<Document>, document: Document): DocumentBuilder }
 > = {
   inbound: InboundDocument,
+  outbound: OutboundDocument,
 };
 
 async function getBuilder(docId: number) {

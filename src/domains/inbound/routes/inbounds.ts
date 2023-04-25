@@ -12,7 +12,7 @@ import { Inbound, InboundStatus, InboundType } from '../models/Inbound';
 import { InboundImage } from '../models/InboundImage';
 import { InboundProduct } from '../models/InboundProduct';
 import { InboundService } from '../services/Inbound.service';
-import { loadUserWarehouse } from '../utils';
+import { loadUserWarehouse } from '../services/utils';
 
 const sum = (array: number[]) => array.reduce((a, b) => a + b, 0);
 

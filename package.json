@@ -15,7 +15,8 @@
     "check": "tsc --noEmit",
     "ci": "npm run format:check && npm run lint:quiet && npm run check",
     "seed": "node -r dotenv/config -r ts-node/register -r module-alias/register ./node_modules/@jorgebodega/typeorm-seeding/dist/cli.js seed -d src/DataSource.ts src/seeders/*.ts",
-    "test": "DOTENV_CONFIG_PATH=.env.test jest --runInBand"
+    "test": "DOTENV_CONFIG_PATH=.env.test jest --runInBand",
+    "test:coverage": "DOTENV_CONFIG_PATH=.env.test jest --collectCoverage --runInBand"
   },
   "keywords": [],
   "author": "",
