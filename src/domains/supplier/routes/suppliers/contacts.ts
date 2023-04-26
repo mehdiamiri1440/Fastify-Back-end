@@ -4,12 +4,12 @@ import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Supplier } from '$src/domains/supplier/models/Supplier';
-import { Contact } from '$src/domains/supplier/models/Contact';
+import { SupplierContact } from '$src/domains/supplier/models/Contact';
 import { Type } from '@sinclair/typebox';
 import { ContactSchema } from '$src/domains/supplier/schemas/contact.schema';
 
 const Suppliers = repo(Supplier);
-const SupplierContacts = repo(Contact);
+const SupplierContacts = repo(SupplierContact);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);

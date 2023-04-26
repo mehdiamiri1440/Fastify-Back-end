@@ -19,7 +19,7 @@ const ContactSchemaWithoutRelations = Type.Omit(ContactSchema, [
 ]);
 
 @Entity()
-export class Contact implements Static<typeof ContactSchemaWithoutRelations> {
+export class SupplierContact implements Static<typeof ContactSchemaWithoutRelations> {
   @PrimaryGeneratedColumn()
   id!: number;
 
