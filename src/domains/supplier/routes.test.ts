@@ -16,6 +16,7 @@ let user: TestUser | undefined;
 let languageId: number;
 let supplierId: number;
 let contactId: number;
+let documentId: number;
 
 const languageData = { title: 'SPN' };
 const supplierData = {
@@ -195,6 +196,62 @@ it('should delete contact of supplier', async () => {
   const response = await user.inject({
     method: 'DELETE',
     url: '/suppliers/' + supplierId + '/contacts/' + contactId,
+  });
+
+  expect(response.statusCode).toBe(200);
+});
+
+it('should create a document for supplier', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'POST',
+    url: '/suppliers/' + supplierId + '/documents',
+    payload: { fileId: 'testFileId', supplier: supplierId },
+  });
+  expect(response.json()).toMatchObject({
+    data: {
+      fileId: 'testFileId',
+      supplier: { id: supplierId },
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+      deletedAt: null,
+    },
+    meta: {},
+  });
+  documentId = response.json().data.id;
+});
+
+it('should return all documents of supplier', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/suppliers/' + supplierId + '/documents',
+  });
+  expect(response.json().data).toMatchObject(
+    expect.arrayContaining([
+      expect.objectContaining({
+        id: documentId,
+        fileId: 'testFileId',
+        supplier: supplierId,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        deletedAt: null,
+      }),
+    ]),
+  );
+});
+
+it('should delete document of supplier', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'DELETE',
+    url: '/suppliers/' + supplierId + '/documents/' + documentId,
   });
 
   expect(response.statusCode).toBe(200);
