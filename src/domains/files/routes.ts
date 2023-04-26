@@ -14,6 +14,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     bucketName: 'inbound-signatures',
     prefix: '/inbound-signatures',
   });
+
+  await app.register(Files, {
+    minio: minio,
+    bucketName: 'supplier-documents',
+    prefix: '/supplier-documents',
+  });
 };
 
 export default plugin;
