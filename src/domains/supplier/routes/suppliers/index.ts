@@ -111,7 +111,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       await Suppliers.delete({ id });
     },
   });
-  await app.register(import('./contact'));
+  await app.register(import('./contacts'));
 };
 
 export default plugin;
