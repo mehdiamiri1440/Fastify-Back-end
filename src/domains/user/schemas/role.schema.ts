@@ -1,7 +1,6 @@
-import { Type, Static } from '@sinclair/typebox';
-import { omit } from 'lodash';
+import { Type } from '@sinclair/typebox';
 
-export const RoleObject = {
+export const RoleSchema = Type.Object({
   id: Type.Number(),
   title: Type.String({ minLength: 1 }),
   isActive: Type.Boolean(),
@@ -15,45 +14,4 @@ export const RoleObject = {
       Type.Null(),
     ]),
   ),
-};
-export const RoleSchema = Type.Object(RoleObject);
-
-export type RoleType = Static<typeof RoleSchema>;
-
-export const RoleExample: RoleType = {
-  id: 1,
-  title: 'Admin',
-  isActive: true,
-  creator: 1,
-  createdAt: '2000-05-05 02-03-04',
-  updatedAt: '2000-05-05 02-03-04',
-  deletedAt: null,
-};
-
-const InputRoleRemove = [
-  'id',
-  'creator',
-  'createdAt',
-  'updatedAt',
-  'deletedAt',
-] as const;
-
-export const InputRoleSchema = Type.Object(omit(RoleObject, InputRoleRemove));
-export type InputRoleType = Static<typeof InputRoleSchema>;
-export const InputRoleExample = omit(RoleExample, InputRoleRemove);
-Object.seal(InputRoleExample);
-
-export const OutputRoleRemove = ['deletedAt'] as const;
-
-export const OutputRoleSchema = Type.Object(omit(RoleObject, OutputRoleRemove));
-export type OutputRoleType = Static<typeof OutputRoleSchema>;
-export const OutputRoleExample: OutputRoleType = omit(
-  RoleExample,
-  OutputRoleRemove,
-);
-Object.seal(OutputRoleExample);
-
-const ModelRoleRemove = ['creator'] as const;
-
-export const ModelRoleSchema = Type.Object(omit(RoleObject, ModelRoleRemove));
-export type ModelRoleType = Static<typeof ModelRoleSchema>;
+});

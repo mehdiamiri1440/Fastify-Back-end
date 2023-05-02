@@ -7,54 +7,61 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  Relation,
 } from 'typeorm';
 import { Language } from './Language';
-// import { SupplierLogoFile } from "./SupplierLogoFile.js";
+import { SupplierSchema } from '$src/domains/supplier/schemas/supplier.schema';
+import { Static, Type } from '@sinclair/typebox';
+
+const SupplierSchemaWithoutRelations = Type.Omit(SupplierSchema, [
+  'creator',
+  'language',
+]);
 
 @Entity()
-export class Supplier {
+export class Supplier implements Static<typeof SupplierSchemaWithoutRelations> {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
+  @Column({ nullable: false })
   name!: string;
 
-  @Column()
+  @Column({ nullable: false })
   cif!: string;
 
   @ManyToOne(() => Language, { nullable: false })
-  language!: Language;
+  language!: Relation<Language>;
 
-  @Column()
+  @Column({ nullable: false })
   iban!: string;
 
-  @Column()
+  @Column({ nullable: false })
   email!: string;
 
-  @Column()
+  @Column({ nullable: false })
   phoneNumber!: string;
 
-  @Column()
-  logoFileId?: string;
+  @Column({ type: 'text', nullable: true })
+  logoFileId!: string | null;
 
-  @Column()
+  @Column({ nullable: false })
   accountNumber!: string;
 
-  @Column({ nullable: true })
-  bic?: string;
+  @Column({ type: 'text', nullable: true })
+  bic!: string | null;
 
-  @Column({ nullable: true })
-  bicName?: string;
+  @Column({ type: 'text', nullable: true })
+  bicName!: string | null;
 
   @ManyToOne(() => User, { nullable: false })
-  creator!: User;
+  creator!: Relation<User>;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ nullable: false })
   createdAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ nullable: false })
   updatedAt!: Date;
 
-  @DeleteDateColumn()
-  deletedAt?: Date;
+  @DeleteDateColumn({ nullable: true })
+  deletedAt!: Date;
 }

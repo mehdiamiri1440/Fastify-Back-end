@@ -1,6 +1,5 @@
 import { Type } from '@sinclair/typebox';
-import { repo } from '$src/databases/typeorm';
-
+import { repo } from '$src/infra/utils/repo';
 import { ResponseShape } from '$src/infra/Response';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';

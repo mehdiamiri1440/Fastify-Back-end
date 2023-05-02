@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { AppDataSource } from '$src/databases/typeorm';
+import AppDataSource from '$src/DataSource';
 import { createTestFastifyApp, TestUser } from '$src/infra/test/utils';
 import { afterAll, beforeAll, expect, it } from '@jest/globals';
 import assert from 'assert';
@@ -8,8 +8,6 @@ import routes from '../routes/support-messages';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
-
-let message_id: number;
 
 beforeAll(async () => {
   app = await createTestFastifyApp();
@@ -42,5 +40,4 @@ it('should create a support message', async () => {
     },
     meta: {},
   });
-  message_id = response.json().data.id;
 });

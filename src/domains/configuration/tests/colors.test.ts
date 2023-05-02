@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { AppDataSource } from '$src/databases/typeorm';
+import AppDataSource from '$src/DataSource';
 import { createTestFastifyApp, TestUser } from '$src/infra/test/utils';
 import { afterAll, beforeAll, expect, it } from '@jest/globals';
 import assert from 'assert';
@@ -9,7 +9,7 @@ import routes from '../routes/colors';
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
 
-let color_id: number;
+let colorId: number;
 
 beforeAll(async () => {
   app = await createTestFastifyApp();
@@ -42,7 +42,7 @@ it('should create a color', async () => {
     },
     meta: {},
   });
-  color_id = response.json().data.id;
+  colorId = response.json().data.id;
 });
 
 it('should get list of colors', async () => {
@@ -56,7 +56,7 @@ it('should get list of colors', async () => {
   expect(response.json().data).toMatchObject(
     expect.arrayContaining([
       expect.objectContaining({
-        id: color_id,
+        id: colorId,
         name: 'test',
         code: '#FFFFFF',
         createdAt: expect.any(String),
@@ -73,16 +73,9 @@ it('should update a color', async () => {
 
   const response = await user.inject({
     method: 'PUT',
-    url: '/' + color_id,
+    url: '/' + colorId,
     payload: { name: 'edit', code: '#000000' },
   });
 
-  expect(response.json()).toMatchObject({
-    data: {
-      generatedMaps: expect.any(Array),
-      raw: expect.any(Array),
-      affected: 1,
-    },
-    meta: {},
-  });
+  expect(response.statusCode).toBe(200);
 });

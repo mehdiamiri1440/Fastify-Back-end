@@ -7,47 +7,53 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  Relation,
 } from 'typeorm';
 import { Warehouse } from './Warehouse';
+import { BinSchema } from '$src/domains/warehouse/schemas/bin.schema';
+import { BinSize } from '$src/domains/warehouse/models/BinSize';
+import { BinProperty } from '$src/domains/warehouse/models/BinProperty';
+import { Static, Type } from '@sinclair/typebox';
 
-enum BinProperty {
-  HOLDING = 'holding',
-  NORMAL = 'normal',
-  DAMAGE = 'damage',
-}
+const BinSchemaWithoutRelations = Type.Omit(BinSchema, [
+  'creator',
+  'warehouse',
+  'size',
+  'property',
+]);
 
 @Entity()
-export class Bin {
+export class Bin implements Static<typeof BinSchemaWithoutRelations> {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
+  @Column({ nullable: false })
   name!: string;
 
-  @ManyToOne(() => Warehouse, (warehouse) => warehouse.id)
-  warehouse!: Warehouse;
+  @ManyToOne(() => Warehouse)
+  warehouse!: Relation<Warehouse>;
 
-  // @ManyToOne(() => Size, (size) => size.bins)
-  // size!: Size;
+  @ManyToOne(() => BinSize)
+  size!: Relation<BinSize>;
 
-  @Column({ type: 'enum', enum: BinProperty })
-  property!: BinProperty;
+  @ManyToOne(() => BinProperty)
+  property!: Relation<BinProperty>;
 
-  @Column({ unique: true, nullable: true })
-  physicalCode!: string;
+  @Column({ type: 'text', unique: true, nullable: true })
+  physicalCode!: string | null;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: false })
   internalCode!: string;
 
   @ManyToOne(() => User)
-  creator!: User;
+  creator!: Relation<User>;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ nullable: false })
   createdAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ nullable: false })
   updatedAt!: Date;
 
   @DeleteDateColumn()
-  deletedAt?: Date;
+  deletedAt!: Date;
 }

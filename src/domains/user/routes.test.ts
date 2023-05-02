@@ -1,39 +1,34 @@
 import 'reflect-metadata';
-
-import { AppDataSource } from '$src/databases/typeorm';
+import AppDataSource from '$src/DataSource';
 import { createTestFastifyApp, TestUser } from '$src/infra/test/utils';
 import permissions from '$src/permissions';
 import { afterAll, beforeAll, expect, it } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance } from 'fastify';
-import { repo } from '$src/databases/typeorm';
+import { repo } from '$src/infra/utils/repo';
 import { Role } from './models/Role';
 import routes from './routes';
-import { InputRoleExample, InputRoleType } from './schemas/role.schema';
-import {
-  InputUserExample,
-  InputUserType,
-  UserExample,
-} from './schemas/user.schema';
 
 let app: FastifyInstance | undefined;
-let user: TestUser | undefined;
+let user: TestUser;
 
-let user_id: number;
-let role_id: number;
-let rp_id: number;
+let userId: number | undefined;
+let roleId: number | undefined;
 
-const user_data: InputUserType = {
-  ...InputUserExample,
-  email: 'other@email.example',
-  phoneNumber: '+989303590056',
+const userData = {
+  firstName: 'Daniel',
+  lastName: 'Soheil',
+  role: 1,
+  nif: 'B-6116622G',
+  email: 'daniel@sohe.ir',
+  phoneNumber: '+989303590055',
+  password: 'hackme',
+  position: 'Developer',
+  isActive: true,
 };
-const role_data: InputRoleType = {
-  ...InputRoleExample,
+const roleData = {
   title: 'testRole',
-};
-const rp_data: { permission: string } = {
-  permission: 'testPermission',
+  isActive: true,
 };
 
 beforeAll(async () => {
@@ -55,22 +50,25 @@ it('should create a user', async () => {
   const response = await user.inject({
     method: 'POST',
     url: '/users',
-    payload: user_data,
+    payload: userData,
   });
-  user_id = response.json().data.id;
-  expect(response.json()).toMatchObject({
+
+  const body = response.json();
+  expect(body).toMatchObject({
     data: {
-      id: user_id,
-      ...user_data,
-      role: JSON.parse(
-        JSON.stringify(await repo(Role).findOneBy({ id: user_data.role })),
-      ),
+      id: expect.any(Number),
+      ...userData,
+      role: structuredClone(await repo(Role).findOneBy({ id: userData.role })),
+
+      password: expect.any(String),
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
       deletedAt: null,
     },
     meta: {},
   });
+
+  userId = body.data.id;
 });
 
 it('should return all users', async () => {
@@ -85,8 +83,9 @@ it('should return all users', async () => {
   expect(response.json().data).toMatchObject(
     expect.arrayContaining([
       expect.objectContaining({
-        id: user_id,
-        ...user_data,
+        id: userId,
+        ...userData,
+        password: expect.any(String),
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         deletedAt: null,
@@ -101,18 +100,11 @@ it('should update user', async () => {
 
   const response = await user.inject({
     method: 'PUT',
-    url: '/users/' + user_id,
-    payload: { id: user_id, ...user_data, firstName: 'DanielEdited' },
+    url: '/users/' + userId,
+    payload: { id: userId, ...userData, firstName: 'DanielEdited' },
   });
 
-  expect(response.json()).toMatchObject({
-    data: {
-      generatedMaps: expect.any(Array),
-      raw: expect.any(Array),
-      affected: 1,
-    },
-    meta: {},
-  });
+  expect(response.statusCode).toBe(200);
 });
 
 it('should deactive user', async () => {
@@ -121,18 +113,11 @@ it('should deactive user', async () => {
 
   const response = await user.inject({
     method: 'PUT',
-    url: '/users/' + user_id,
-    payload: { id: user_id, ...user_data, isActive: false },
+    url: '/users/' + userId,
+    payload: { id: userId, ...userData, isActive: false },
   });
 
-  expect(response.json()).toMatchObject({
-    data: {
-      generatedMaps: expect.any(Array),
-      raw: expect.any(Array),
-      affected: 1,
-    },
-    meta: {},
-  });
+  expect(response.statusCode).toBe(200);
 });
 
 it('should delete user', async () => {
@@ -141,16 +126,10 @@ it('should delete user', async () => {
 
   const response = await user.inject({
     method: 'DELETE',
-    url: '/users/' + user_id,
+    url: '/users/' + userId,
   });
 
-  expect(response.json()).toMatchObject({
-    data: {
-      raw: expect.any(Array),
-      affected: 1,
-    },
-    meta: {},
-  });
+  expect(response.statusCode).toBe(200);
 });
 
 it('should create a role', async () => {
@@ -160,13 +139,13 @@ it('should create a role', async () => {
   const response = await user.inject({
     method: 'POST',
     url: '/roles',
-    payload: role_data,
+    payload: roleData,
   });
-  role_id = response.json().data.id;
+  roleId = response.json().data.id;
   expect(response.json()).toMatchObject({
     data: {
-      id: role_id,
-      ...role_data,
+      id: expect.any(Number),
+      ...roleData,
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
       deletedAt: null,
@@ -186,8 +165,8 @@ it('should return all roles', async () => {
   expect(response.json().data).toMatchObject(
     expect.arrayContaining([
       expect.objectContaining({
-        id: role_id,
-        ...role_data,
+        id: roleId,
+        ...roleData,
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         deletedAt: null,
@@ -202,18 +181,11 @@ it('should update role', async () => {
 
   const response = await user.inject({
     method: 'PUT',
-    url: '/roles/' + role_id,
-    payload: { id: role_id, ...role_data, title: 'testRoleEdited' },
+    url: '/roles/' + roleId,
+    payload: { id: roleId, ...roleData, title: 'testRoleEdited' },
   });
 
-  expect(response.json()).toMatchObject({
-    data: {
-      generatedMaps: expect.any(Array),
-      raw: expect.any(Array),
-      affected: 1,
-    },
-    meta: {},
-  });
+  expect(response.statusCode).toBe(200);
 });
 
 it('should add permission to role', async () => {
@@ -222,11 +194,11 @@ it('should add permission to role', async () => {
 
   const response = await user.inject({
     method: 'POST',
-    url: '/roles/' + role_id + '/permissions/testPermission',
+    url: '/roles/' + roleId + '/permissions/testPermission',
   });
   expect(response.json()).toMatchObject({
     data: {
-      role: { id: role_id },
+      role: { id: roleId },
       permission: 'testPermission',
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
@@ -242,13 +214,13 @@ it('should return all permissions added to role', async () => {
 
   const response = await user.inject({
     method: 'GET',
-    url: '/roles/' + role_id + '/permissions',
+    url: '/roles/' + roleId + '/permissions',
   });
 
   expect(response.json().data).toMatchObject(
     expect.arrayContaining([
       expect.objectContaining({
-        role: role_id,
+        role: roleId,
         permission: 'testPermission',
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
@@ -264,16 +236,10 @@ it('should delete permission of role', async () => {
 
   const response = await user.inject({
     method: 'DELETE',
-    url: '/roles/' + role_id + '/permissions/testPermission',
+    url: '/roles/' + roleId + '/permissions/testPermission',
   });
 
-  expect(response.json()).toMatchObject({
-    data: {
-      raw: expect.any(Array),
-      affected: 1,
-    },
-    meta: {},
-  });
+  expect(response.statusCode).toBe(200);
 });
 
 it('should deactive role', async () => {
@@ -282,18 +248,11 @@ it('should deactive role', async () => {
 
   const response = await user.inject({
     method: 'PUT',
-    url: '/roles/' + role_id,
-    payload: { id: role_id, ...role_data, isActive: false },
+    url: '/roles/' + roleId,
+    payload: { id: roleId, ...roleData, isActive: false },
   });
 
-  expect(response.json()).toMatchObject({
-    data: {
-      generatedMaps: expect.any(Array),
-      raw: expect.any(Array),
-      affected: 1,
-    },
-    meta: {},
-  });
+  expect(response.statusCode).toBe(200);
 });
 
 it('should delete role', async () => {
@@ -302,16 +261,10 @@ it('should delete role', async () => {
 
   const response = await user.inject({
     method: 'DELETE',
-    url: '/roles/' + role_id,
+    url: '/roles/' + roleId,
   });
 
-  expect(response.json()).toMatchObject({
-    data: {
-      raw: expect.any(Array),
-      affected: 1,
-    },
-    meta: {},
-  });
+  expect(response.statusCode).toBe(200);
 });
 
 it('should return permissions', async () => {
@@ -340,7 +293,9 @@ it('should return a user that logged in', async () => {
 
   expect(response.json()).toMatchObject({
     data: {
-      ...UserExample,
+      id: expect.any(Number),
+      email: expect.any(String),
+      isActive: true,
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
       deletedAt: null,

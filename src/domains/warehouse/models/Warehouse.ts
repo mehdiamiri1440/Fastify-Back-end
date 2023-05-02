@@ -7,38 +7,53 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   ManyToOne,
+  Relation,
+  OneToMany,
 } from 'typeorm';
+import { WarehouseSchema } from '$src/domains/warehouse/schemas/warehouse.schema';
+import { Static, Type } from '@sinclair/typebox';
+import { WarehouseStaff } from './WarehouseStaff';
+
+const WarehouseSchemaWithoutRelations = Type.Omit(WarehouseSchema, ['creator']);
 
 @Entity()
-export class Warehouse {
+export class Warehouse
+  implements Static<typeof WarehouseSchemaWithoutRelations>
+{
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
+  @Column({ nullable: false })
   name!: string;
 
-  // @ManyToOne(() => Province, { eager: true })
-  // province!: Province;
+  @Column({ nullable: false })
+  province!: string;
 
-  // @ManyToOne(() => City, { eager: true })
-  // city!: City;
+  @Column({ nullable: false })
+  city!: string;
 
-  // @ManyToOne(() => Street, { eager: true })
-  // street!: Street;
+  @Column({ nullable: false })
+  street!: string;
 
-  @Column()
+  @OneToMany(
+    () => WarehouseStaff,
+    (warehouseStaffs) => warehouseStaffs.warehouse,
+  )
+  warehouseStaffs!: Relation<WarehouseStaff>;
+
+  @Column({ nullable: false })
   postalCode!: string;
 
-  @Column()
-  description!: string;
+  @Column({ type: 'text', nullable: true })
+  description!: string | null;
 
   @ManyToOne(() => User)
-  creator!: User;
+  creator!: Relation<User>;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ nullable: false })
   createdAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ nullable: false })
   updatedAt!: Date;
 
   @DeleteDateColumn()

@@ -1,22 +1,27 @@
-import { repo } from '$src/databases/typeorm';
+import { repo } from '$src/infra/utils/repo';
 import { Role } from '$src/domains/user/models/Role';
 import { User } from '$src/domains/user/models/User';
-import { InputRoleExample } from '$src/domains/user/schemas/role.schema';
-import {
-  InputUserExample,
-  UserExample,
-} from '$src/domains/user/schemas/user.schema';
-import permissions from '$src/permissions';
 import fastify, { FastifyInstance, InjectOptions } from 'fastify';
+import permissions from '$src/permissions';
 import qs from 'qs';
 
 import type Ajv from 'ajv';
+import AppDataSource from '$src/DataSource';
 
 async function createTestUser() {
   return await repo(User).save({
-    ...InputUserExample,
-    role: await repo(Role).save({ ...InputRoleExample }),
-    creator: { id: UserExample.id },
+    firstName: 'tester',
+    lastName: 'tester',
+    role: await repo(Role).save({
+      title: 'tester',
+      isActive: true,
+    }),
+    nif: 'B-6116622G',
+    email: 't@est.er',
+    phoneNumber: '+989303590054',
+    password: 'hackme',
+    position: 'tester',
+    isActive: true,
   });
 }
 
@@ -72,5 +77,19 @@ export async function createTestFastifyApp() {
   await app.register(import('@fastify/jwt'), { secret: 'test' });
   await app.register(import('$src/infra/RouteValidator'));
   await app.register(import('$src/infra/authorization'));
+
+  const superErrorHandler = app.errorHandler;
+  app.setErrorHandler((error, request, reply) => {
+    console.error(request.method, request.url, error);
+    superErrorHandler(error, request, reply);
+  });
   return app;
+}
+
+export function disableForeignKeyCheck() {
+  return AppDataSource.query(`SET session_replication_role = 'replica';`);
+}
+
+export function enableForeignKeyCheck() {
+  return AppDataSource.query(`SET session_replication_role = 'origin';`);
 }

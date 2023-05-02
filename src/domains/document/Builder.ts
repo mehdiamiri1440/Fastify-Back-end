@@ -13,7 +13,6 @@ export abstract class DocumentBuilder {
   #loaded = false;
 
   protected abstract render(): JSX.IntrinsicElements;
-  protected abstract getTitle(): string;
   abstract getPdfName(): string;
   protected abstract loadProps(): Promise<void>;
 
@@ -29,16 +28,11 @@ export abstract class DocumentBuilder {
 
   async load() {
     await this.loadProps();
-
-    const title = this.getTitle();
-    await this.repo.update(this.entity.id, {
-      title,
-    });
     this.#loaded = true;
   }
 
   async #getBundleVerifyCache(): Promise<DocumentBundle> {
-    const html = this.#getHtml();
+    const html = this.getHtml();
     const cacheKey = this.bundler.getCacheKey(html);
     const fromCache = await this.cache.get(cacheKey);
 
@@ -53,7 +47,7 @@ export abstract class DocumentBuilder {
   async #getBundleFast(): Promise<DocumentBundle> {
     const fromCache = await this.cache.get();
     if (fromCache) return fromCache;
-    const html = this.#getHtml();
+    const html = this.getHtml();
     const pdfName = this.getPdfName();
     const bundle = await this.bundler.fromHtml(html, pdfName);
     await this.cache.save(bundle);
@@ -68,7 +62,7 @@ export abstract class DocumentBuilder {
     return verifyCache ? this.#getBundleVerifyCache() : this.#getBundleFast();
   }
 
-  #getHtml(): string {
+  getHtml(): string {
     assert(this.#loaded, 'document not loaded yet');
     const app = Nano.renderSSR(() => this.render());
     const rendered = Helmet.SSR(app);

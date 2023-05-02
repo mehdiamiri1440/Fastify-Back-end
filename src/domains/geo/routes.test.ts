@@ -1,11 +1,10 @@
 import 'reflect-metadata';
-
 import { createTestFastifyApp } from '$src/infra/test/utils';
 import { afterAll, beforeAll, expect, it } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance } from 'fastify';
 import routes from './routes';
-import { AppDataSource } from '$src/databases/typeorm';
+import AppDataSource from '$src/DataSource';
 
 let app: FastifyInstance | undefined;
 

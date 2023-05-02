@@ -1,7 +1,7 @@
 import { ResponseShape } from '$src/infra/Response';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Category } from '../models/Category';
-import { repo } from '$src/databases/typeorm';
+import { repo } from '$src/infra/utils/repo';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 const Categories = repo(Category);
@@ -14,7 +14,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/',
     schema: {
-      tags: ['categories'],
       security: [
         {
           OAuth2: ['configuration@category::list'],
@@ -34,7 +33,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'POST',
     url: '/',
     schema: {
-      tags: ['categories'],
       security: [
         {
           OAuth2: ['configuration@category::create'],
@@ -59,7 +57,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'PUT',
     url: '/:id',
     schema: {
-      tags: ['categories'],
       security: [
         {
           OAuth2: ['configuration@category::update'],
@@ -77,7 +74,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      return await Categories.update({ id: req.params.id }, req.body);
+      const { id } = await Categories.findOneByOrFail({ id: req.params.id });
+      await Categories.update({ id }, req.body);
     },
   });
 };

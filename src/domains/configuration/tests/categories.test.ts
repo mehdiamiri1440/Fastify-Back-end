@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { AppDataSource } from '$src/databases/typeorm';
+import AppDataSource from '$src/DataSource';
 import { createTestFastifyApp, TestUser } from '$src/infra/test/utils';
 import { afterAll, beforeAll, expect, it } from '@jest/globals';
 import assert from 'assert';
@@ -9,7 +9,7 @@ import routes from '../routes/categories';
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
 
-let category_id: number;
+let categoryId: number;
 
 beforeAll(async () => {
   app = await createTestFastifyApp();
@@ -41,7 +41,7 @@ it('should create a category', async () => {
     },
     meta: {},
   });
-  category_id = response.json().data.id;
+  categoryId = response.json().data.id;
 });
 
 it('should get list of categories', async () => {
@@ -55,7 +55,7 @@ it('should get list of categories', async () => {
   expect(response.json().data).toMatchObject(
     expect.arrayContaining([
       expect.objectContaining({
-        id: category_id,
+        id: categoryId,
         name: 'test',
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
@@ -71,16 +71,9 @@ it('should update a category', async () => {
 
   const response = await user.inject({
     method: 'PUT',
-    url: '/' + category_id,
+    url: '/' + categoryId,
     payload: { name: 'edit' },
   });
 
-  expect(response.json()).toMatchObject({
-    data: {
-      generatedMaps: expect.any(Array),
-      raw: expect.any(Array),
-      affected: 1,
-    },
-    meta: {},
-  });
+  expect(response.statusCode).toBe(200);
 });

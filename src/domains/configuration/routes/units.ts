@@ -1,7 +1,7 @@
 import { ResponseShape } from '$src/infra/Response';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Unit } from '../models/Unit';
-import { repo } from '$src/databases/typeorm';
+import { repo } from '$src/infra/utils/repo';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 const Units = repo(Unit);
@@ -14,7 +14,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/',
     schema: {
-      tags: ['units'],
       security: [
         {
           OAuth2: ['configuration@unit::list'],
@@ -34,7 +33,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'POST',
     url: '/',
     schema: {
-      tags: ['units'],
       security: [
         {
           OAuth2: ['configuration@unit::create'],
@@ -56,7 +54,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'PUT',
     url: '/:id',
     schema: {
-      tags: ['units'],
       security: [
         {
           OAuth2: ['configuration@unit::update'],
@@ -74,7 +71,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      return await Units.update({ id: req.params.id }, req.body);
+      const { id } = await Units.findOneByOrFail({ id: req.params.id });
+      await Units.update({ id }, req.body);
     },
   });
 };
