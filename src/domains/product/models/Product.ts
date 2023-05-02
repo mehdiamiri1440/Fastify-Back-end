@@ -8,7 +8,7 @@ import { User } from '$src/domains/user/models/User';
 import { ProductSalePrice } from './ProductSalePrice';
 import { Static } from '@sinclair/typebox';
 import { ProductSchema } from '../schemas/product.schema';
-import { SupplierProduct } from '$src/domains/global/models/ProductSupplier';
+import { SupplierProduct } from '$src/domains/product/models/ProductSupplier';
 
 import {
   Entity,

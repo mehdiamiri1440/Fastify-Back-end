@@ -1,5 +1,5 @@
 import { Supplier } from '$src/domains/supplier/models/Supplier';
-import { Product } from '../../product/models/Product';
+import { Product } from './Product';
 import { User } from '$src/domains/user/models/User';
 
 import {
@@ -24,7 +24,7 @@ export class SupplierProduct {
   product!: Product;
 
   @Column({ type: 'int' })
-  reference_code!: number;
+  referenceCode!: number;
 
   @ManyToOne(() => User, { nullable: false })
   creator!: User;

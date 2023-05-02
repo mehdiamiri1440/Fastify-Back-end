@@ -1,0 +1,36 @@
+import { Product } from './Product';
+import { Bin } from '$src/domains/warehouse/models/Bin';
+
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  ManyToOne,
+} from 'typeorm';
+
+@Entity()
+export class BinProduct {
+  @PrimaryGeneratedColumn()
+  id!: number;
+
+  @ManyToOne(() => Bin, { nullable: false })
+  bin!: Bin;
+
+  @ManyToOne(() => Product, { nullable: false })
+  product!: Product;
+
+  @Column({ type: 'int' })
+  quantity!: number;
+
+  @CreateDateColumn()
+  createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
+}

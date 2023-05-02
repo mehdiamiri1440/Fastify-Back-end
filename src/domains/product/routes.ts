@@ -13,7 +13,7 @@ import { Color } from '../configuration/models/Color';
 import { Unit } from '../configuration/models/Unit';
 import { Category } from '../configuration/models/Category';
 import { Supplier } from '../supplier/models/Supplier';
-import { SupplierProduct } from '../global/models/ProductSupplier';
+import { SupplierProduct } from './models/ProductSupplier';
 
 import { ProductSchema } from './schemas/product.schema';
 
@@ -248,7 +248,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         suppliers.map((supplier) => ({
           supplier,
           product,
-          reference_code: supplierReferenceCodes[supplier.id],
+          referenceCode: supplierReferenceCodes[supplier.id],
         })),
       );
     },
@@ -278,6 +278,27 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/:id/sale-prices',
+    schema: {
+      tags: ['Product'],
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      body: Type.Object({ price: Type.Number() }),
+    },
+    async handler(req) {
+      const productId = req.params.id;
+      const product = await Products.findOne({
+        where: { id: productId },
+        relations: ['salePrices'],
+      });
+      if (!product) throw new PRODUCT_NOT_FOUND();
+      return await ProductSalePrices.insert({ product, price: req.body.price });
+    },
+  });
+
+  app.route({
+    method: 'GET',
+    url: '/:id/bins',
     schema: {
       tags: ['Product'],
       params: Type.Object({
