@@ -3,20 +3,20 @@ import { ResponseShape } from '$src/infra/Response';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { Supplier } from '$src/domains/supplier/models/Supplier';
-import { Contact } from '$src/domains/supplier/models/Contact';
 import { Type } from '@sinclair/typebox';
-import { ContactSchema } from '$src/domains/supplier/schemas/contact.schema';
+import { DocumentSchema } from '$src/domains/supplier/schemas/document.schema';
+import { SupplierDocument } from '$src/domains/supplier/models/Documents';
+import { Supplier } from '$src/domains/supplier/models/Supplier';
 
 const Suppliers = repo(Supplier);
-const SupplierContacts = repo(Contact);
+const Documents = repo(SupplierDocument);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
 
   app.route({
     method: 'GET',
-    url: '/:id/contacts',
+    url: '/:id/documents',
     schema: {
       querystring: ListQueryOptions({
         filterable: ['name'],
@@ -36,7 +36,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       // validating references
       const supplier = await Suppliers.findOneByOrFail({ id: req.params.id });
 
-      return new TableQueryBuilder(SupplierContacts, req)
+      return new TableQueryBuilder(Documents, req)
         .where(() => {
           return { supplier: { id: supplier.id } };
         })
@@ -45,7 +45,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   });
   app.route({
     method: 'POST',
-    url: '/:id/contacts',
+    url: '/:id/documents',
     schema: {
       security: [
         {
@@ -55,7 +55,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Number(),
       }),
-      body: Type.Omit(ContactSchema, [
+      body: Type.Omit(DocumentSchema, [
         'id',
         'supplier',
         'creator',
@@ -68,7 +68,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       // validating references
       const supplier = await Suppliers.findOneByOrFail({ id: req.params.id });
 
-      return await SupplierContacts.save({
+      return await Documents.save({
         ...req.body,
         supplier,
         creator: { id: req.user.id },
@@ -76,46 +76,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
   app.route({
-    method: 'PUT',
-    url: '/:id/contacts/:cId',
-    schema: {
-      security: [
-        {
-          OAuth2: ['supplier@supplier::update'],
-        },
-      ],
-      params: Type.Object({
-        id: Type.Number(),
-        cId: Type.Number(),
-      }),
-      body: Type.Omit(ContactSchema, [
-        'id',
-        'supplier',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
-    },
-    async handler(req) {
-      // validating references
-      const supplier = await Suppliers.findOneByOrFail({ id: req.params.id });
-
-      const { id } = await SupplierContacts.findOneByOrFail({
-        id: req.params.cId,
-      });
-      await SupplierContacts.update(
-        { id, supplier: { id: supplier.id } },
-        {
-          ...req.body,
-          supplier,
-        },
-      );
-    },
-  });
-  app.route({
     method: 'DELETE',
-    url: '/:id/contacts/:cId',
+    url: '/:id/documents/:dId',
     schema: {
       security: [
         {
@@ -124,17 +86,17 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ],
       params: Type.Object({
         id: Type.Number(),
-        cId: Type.Number(),
+        dId: Type.Number(),
       }),
     },
     async handler(req) {
       // validating references
       const supplier = await Suppliers.findOneByOrFail({ id: req.params.id });
 
-      const { id } = await SupplierContacts.findOneByOrFail({
-        id: req.params.cId,
+      const { id } = await Documents.findOneByOrFail({
+        id: req.params.dId,
       });
-      await SupplierContacts.delete({
+      await Documents.delete({
         id,
         supplier: { id: supplier.id },
       });

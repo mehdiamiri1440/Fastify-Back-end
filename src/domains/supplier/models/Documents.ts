@@ -9,36 +9,27 @@ import {
   DeleteDateColumn,
   Relation,
 } from 'typeorm';
-import { ContactSchema } from '$src/domains/supplier/schemas/contact.schema';
+import { DocumentSchema } from '$src/domains/supplier/schemas/document.schema';
 import { Supplier } from '$src/domains/supplier/models/Supplier';
 import { Static, Type } from '@sinclair/typebox';
 
-const ContactSchemaWithoutRelations = Type.Omit(ContactSchema, [
+const DocumentSchemaWithoutRelations = Type.Omit(DocumentSchema, [
   'creator',
   'supplier',
 ]);
 
 @Entity()
-export class SupplierContact
-  implements Static<typeof ContactSchemaWithoutRelations>
+export class SupplierDocument
+  implements Static<typeof DocumentSchemaWithoutRelations>
 {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ nullable: false })
-  name!: string;
-
   @ManyToOne(() => User, { nullable: false })
   supplier!: Relation<Supplier>;
 
-  @Column({ type: 'text', nullable: true })
-  position!: string | null;
-
-  @Column({ type: 'text', nullable: true })
-  email!: string | null;
-
-  @Column({ type: 'text', nullable: true })
-  phoneNumber!: string | null;
+  @Column({ nullable: false })
+  fileId!: string;
 
   @ManyToOne(() => User, { nullable: false })
   creator!: Relation<User>;
