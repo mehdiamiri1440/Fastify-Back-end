@@ -7,8 +7,8 @@ import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { UserSchema } from '$src/domains/user/schemas/user.schema';
 import { Type } from '@sinclair/typebox';
+import bcrypt from 'bcrypt';
 import { createError } from '@fastify/error';
-import crypto from 'crypto';
 
 const Users = repo(User);
 const Roles = repo(Role);
@@ -58,10 +58,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       return await Users.save({
         ...req.body,
         role,
-        password: crypto
-          .createHash('md5')
-          .update(req.body.password)
-          .digest('hex'),
+        password: await bcrypt.hash(req.body.password, 10),
         creator: { id: req.user.id },
       });
     },
@@ -96,10 +93,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         {
           ...req.body,
           role,
-          password: crypto
-            .createHash('md5')
-            .update(req.body.password)
-            .digest('hex'),
+          password: await bcrypt.hash(req.body.password, 10),
         },
       );
     },

@@ -7,7 +7,7 @@ import { RolePermission } from '$src/domains/user/models/RolePermission';
 import { repo } from '$src/infra/utils/repo';
 import { createError } from '@fastify/error';
 import permissions from '$src/permissions';
-import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 
 const ACCESS_DENIED = createError('ACCESS_DENIED', 'you dont have access', 403);
 const Users = repo(User);
@@ -36,14 +36,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const user = await Users.findOne({
         where: {
           email: req.body.username,
-          password: crypto
-            .createHash('md5')
-            .update(req.body.password)
-            .digest('hex'),
         },
         relations: ['role'],
       });
-      if (!user) {
+      if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
         return new ACCESS_DENIED();
       }
       let scope: string;
