@@ -217,7 +217,7 @@ describe('Get Inbound', () => {
             actualQuantity: null,
             id: 1,
             price: 100,
-            quantity: 5,
+            requestedQuantity: 5,
             product: {
               id: 1,
               name: 'test',

@@ -101,7 +101,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           products: {
             id: true,
             price: true,
-            quantity: true,
+            requestedQuantity: true,
             actualQuantity: true,
             createdAt: true,
             product: {
