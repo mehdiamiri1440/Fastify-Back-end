@@ -27,10 +27,13 @@ export class InboundProduct {
   supplier!: Relation<Supplier> | null;
 
   @Column()
-  quantity!: number;
+  requestedQuantity!: number;
 
   @Column({ nullable: true })
   actualQuantity!: number;
+
+  @Column({ default: false })
+  sorted!: boolean;
 
   @Column({ nullable: true })
   price!: number;

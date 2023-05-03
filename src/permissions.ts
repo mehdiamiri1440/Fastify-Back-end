@@ -29,6 +29,7 @@ export default {
   'outbound@outbound::list':
     'with this permission you can get list of outbounds',
   'outbound@outbound::update': 'with this permission you can edit outbound',
+  'outbound@outbound::decline': 'with this permission you can decline outbound',
 
   // supplier
   'supplier@supplier::list':

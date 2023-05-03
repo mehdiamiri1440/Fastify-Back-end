@@ -64,6 +64,9 @@ export async function createTestFastifyApp() {
     querystringParser: (str) => qs.parse(str, { allowDots: true }),
     pluginTimeout: 20000,
     ajv: {
+      customOptions: {
+        removeAdditional: true,
+      },
       plugins: [
         (ajv: Ajv) => {
           ajv.addKeyword({ keyword: 'style' });

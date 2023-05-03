@@ -1,6 +1,5 @@
-import { Product } from '$src/domains/product/models/Product';
 import { User } from '$src/domains/user/models/User';
-import type { Relation } from 'typeorm';
+import { Bin } from '$src/domains/warehouse/models/Bin';
 import {
   Column,
   CreateDateColumn,
@@ -8,23 +7,23 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Relation,
   UpdateDateColumn,
 } from 'typeorm';
-import { OutboundProduct } from './OutboundProduct';
-import { Bin } from '$src/domains/warehouse/models/Bin';
+import { Product } from './Product';
 
 @Entity()
-export class OutboundProductSupply {
+export class BinProduct {
   @PrimaryGeneratedColumn()
   id!: number;
-
-  @ManyToOne(() => OutboundProduct, (outbound) => outbound.product)
-  outboundProduct!: Relation<OutboundProduct>;
 
   @ManyToOne(() => Bin)
   bin!: Relation<Bin>;
 
-  @Column()
+  @ManyToOne(() => Product)
+  product!: Relation<Product>;
+
+  @Column({ default: 0 })
   quantity!: number;
 
   @ManyToOne(() => User)

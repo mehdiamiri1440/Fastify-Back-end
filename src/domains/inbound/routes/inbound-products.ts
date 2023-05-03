@@ -74,7 +74,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         .select(() => ({
           id: true,
           createdAt: true,
-          quantity: true,
+          requestedQuantity: true,
           actualQuantity: true,
           supplier: {
             id: true,
@@ -235,16 +235,16 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     handler: (req) =>
       AppDataSource.transaction(async (manager) => {
-        const InboundProducts = manager.getRepository(InboundProduct);
-        const InboundProductSorts = manager.getRepository(InboundProductSort);
-        const Products = manager.getRepository(Product);
+        const inboundProductsRepo = manager.getRepository(InboundProduct);
+        const inboundProductSortsRepo =
+          manager.getRepository(InboundProductSort);
 
         const Bins = manager.getRepository(Bin);
 
         const { id } = req.params;
         const { binId, quantity } = req.body;
 
-        const inboundProduct = await InboundProducts.findOneOrFail({
+        const inboundProduct = await inboundProductsRepo.findOneOrFail({
           where: {
             id,
           },
@@ -277,7 +277,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           id: binId,
         });
 
-        const sort = await InboundProductSorts.save({
+        const sort = await inboundProductSortsRepo.save({
           inboundProduct,
           bin,
           quantity,
@@ -285,6 +285,13 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             id: req.user.id,
           },
         });
+
+        const productSortComplete = currentUnsorted === quantity;
+        if (productSortComplete) {
+          inboundProductsRepo.update(inboundProduct.id, {
+            sorted: true,
+          });
+        }
 
         // await Products.increment(
         //   {

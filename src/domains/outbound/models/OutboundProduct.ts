@@ -27,6 +27,9 @@ export class OutboundProduct {
   @ManyToOne(() => Product)
   product!: Relation<Product>;
 
+  @Column({ default: false })
+  supplied!: boolean;
+
   @ManyToOne(() => User)
   creator!: User;
 

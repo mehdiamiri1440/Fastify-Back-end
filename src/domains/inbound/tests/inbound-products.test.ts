@@ -18,13 +18,15 @@ import { InboundProduct } from '../models/InboundProduct';
 import { Unit } from '$src/domains/configuration/models/Unit';
 import AppDataSource from '$src/DataSource';
 import { repo } from '$src/infra/utils/repo';
+import { DeepPartial } from 'typeorm';
+import { Bin } from '$src/domains/warehouse/models/Bin';
+import { BinProduct } from '$src/domains/product/models/BinProduct';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
 let product: Product | undefined;
 let supplier: Supplier | undefined;
 let warehouse: Warehouse | undefined;
-let inbound: Inbound | undefined;
 
 beforeAll(async () => {
   app = await createTestFastifyApp();
@@ -81,16 +83,6 @@ beforeAll(async () => {
     },
   });
 
-  inbound = await repo(Inbound).save({
-    code: 'code',
-    type: InboundType.NEW,
-    status: InboundStatus.PRE_DELIVERY,
-    creator: {
-      id: 1,
-    },
-    warehouse,
-  });
-
   await enableForeignKeyCheck();
 });
 
@@ -99,13 +91,20 @@ afterAll(async () => {
 });
 
 describe('InboundProduct list', () => {
-  it('should get list of inbound-products', async () => {
-    assert(app);
-    assert(user);
-    assert(supplier);
-    assert(product);
+  let inbound: Inbound | undefined;
 
+  beforeAll(async () => {
     const InboundProducts = repo(InboundProduct);
+
+    inbound = await repo(Inbound).save({
+      code: 'code',
+      type: InboundType.NEW,
+      status: InboundStatus.PRE_DELIVERY,
+      creator: {
+        id: 1,
+      },
+      warehouse,
+    });
 
     await Promise.all([
       InboundProducts.save({
@@ -113,7 +112,7 @@ describe('InboundProduct list', () => {
         product,
         inbound,
         price: 100,
-        quantity: 10,
+        requestedQuantity: 10,
         actualQuantity: 10,
       }),
       InboundProducts.save({
@@ -121,10 +120,17 @@ describe('InboundProduct list', () => {
         product,
         inbound,
         price: 200,
-        quantity: 20,
+        requestedQuantity: 20,
         actualQuantity: 21,
       }),
     ]);
+  });
+
+  it('should get list of inbound-products', async () => {
+    assert(app);
+    assert(user);
+    assert(supplier);
+    assert(product);
 
     const response = await user.inject({
       method: 'GET',
@@ -134,50 +140,64 @@ describe('InboundProduct list', () => {
     expect(response.statusCode).toBe(200);
     const body = response.json();
 
-    expect(body).toMatchObject({
-      data: [
-        {
-          id: expect.any(Number),
-          createdAt: expect.any(String),
-
-          quantity: 10,
-          actualQuantity: 10,
-          supplier: {
-            id: supplier.id,
-            name: supplier.name,
-          },
-          product: {
-            id: product.id,
-            name: product.name,
-            unit: {
-              id: product.unit.id,
-              name: product.unit.name,
-            },
+    expect(body.data).toHaveLength(2);
+    expect(body.data).toMatchObject([
+      {
+        id: expect.any(Number),
+        createdAt: expect.any(String),
+        requestedQuantity: 10,
+        actualQuantity: 10,
+        supplier: {
+          id: supplier.id,
+          name: supplier.name,
+        },
+        product: {
+          id: product.id,
+          name: product.name,
+          unit: {
+            id: product.unit.id,
+            name: product.unit.name,
           },
         },
-        {
-          id: expect.any(Number),
-          createdAt: expect.any(String),
-          quantity: 20,
-          actualQuantity: 21,
-        },
-      ],
-    });
+      },
+      {
+        id: expect.any(Number),
+        createdAt: expect.any(String),
+        requestedQuantity: 20,
+        actualQuantity: 21,
+      },
+    ]);
   });
 });
 
 describe('Update InboundProduct', () => {
+  let inbound: Inbound | undefined;
+
+  beforeAll(async () => {
+    inbound = await repo(Inbound).save({
+      code: 'code',
+      type: InboundType.NEW,
+      status: InboundStatus.PRE_DELIVERY,
+      creator: {
+        id: 1,
+      },
+      warehouse,
+    });
+  });
+
   it('should patch inbound-product when inbound state is PRE_DELIVERY', async () => {
     assert(app);
     assert(user);
     const InboundProducts = repo(InboundProduct);
 
-    const inboundProduct = await InboundProducts.save({
+    const inboundProduct = await InboundProducts.save<
+      DeepPartial<InboundProduct>
+    >({
       supplier,
       product,
       inbound,
       price: 100,
-      quantity: 10,
+      requestedQuantity: 10,
     });
 
     const response = await user.inject({
@@ -208,17 +228,33 @@ describe('Update InboundProduct', () => {
 });
 
 describe('Delete InboundProduct', () => {
+  let inbound: Inbound | undefined;
+
+  beforeAll(async () => {
+    inbound = await repo(Inbound).save({
+      code: 'code',
+      type: InboundType.NEW,
+      status: InboundStatus.PRE_DELIVERY,
+      creator: {
+        id: 1,
+      },
+      warehouse,
+    });
+  });
+
   it('should delete inbound-product', async () => {
     assert(app);
     assert(user);
     const InboundProducts = repo(InboundProduct);
 
-    const inboundProduct = await InboundProducts.save({
+    const inboundProduct = await InboundProducts.save<
+      DeepPartial<InboundProduct>
+    >({
       supplier,
       product,
       inbound,
       price: 100,
-      quantity: 10,
+      requestedQuantity: 10,
     });
 
     const response = await user.inject({
@@ -243,5 +279,135 @@ describe('Delete InboundProduct', () => {
       withDeleted: true,
     });
     expect(entity?.deletedAt).not.toBeNull();
+  });
+});
+
+describe('Sorting', () => {
+  let inbound: Inbound | undefined;
+  let inboundProduct: InboundProduct;
+  let bin1: Bin;
+  let bin2: Bin;
+
+  beforeAll(async () => {
+    bin1 = await repo(Bin).save({
+      name: 'bin1',
+      warehouse,
+      internalCode: 'hey1',
+      creator: { id: 1 },
+    });
+
+    bin2 = await repo(Bin).save({
+      name: 'bin2',
+      warehouse,
+      internalCode: 'hey2',
+      creator: { id: 1 },
+    });
+  });
+
+  const init = async () => {
+    const InboundProducts = repo(InboundProduct);
+
+    inbound = await repo(Inbound).save({
+      code: 'code',
+      type: InboundType.NEW,
+      status: InboundStatus.SORTING,
+      creator: {
+        id: 1,
+      },
+      warehouse,
+    });
+
+    inboundProduct = await InboundProducts.save({
+      supplier,
+      product,
+      inbound,
+      price: 100,
+      requestedQuantity: 30,
+      actualQuantity: 30,
+    });
+
+    await repo(BinProduct).save({
+      bin: bin1,
+      product,
+      quantity: 0,
+    });
+
+    await repo(BinProduct).save({
+      bin: bin2,
+      product,
+      quantity: 0,
+    });
+  };
+
+  it('should sort', async () => {
+    await init();
+    assert(app);
+    assert(user);
+    assert(inbound);
+
+    const response = await user.inject({
+      method: 'POST',
+      url: `/${inboundProduct.id}/sorts`,
+      payload: {
+        quantity: 10,
+        binId: bin1.id,
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+
+    expect(
+      await repo(InboundProduct).findOneByOrFail({ id: inboundProduct.id }),
+    ).toMatchObject({
+      sorted: false,
+    });
+
+    const response2 = await user.inject({
+      method: 'POST',
+      url: `/${inboundProduct.id}/sorts`,
+      payload: {
+        quantity: 20,
+        binId: bin2.id,
+      },
+    });
+
+    expect(response2.statusCode).toBe(200);
+
+    expect(
+      await repo(InboundProduct).findOneByOrFail({ id: inboundProduct.id }),
+    ).toMatchObject({
+      sorted: true,
+    });
+  });
+
+  describe('Sort Errors', () => {
+    it('should throw error on duplicate sort on same bin', async () => {
+      await init();
+
+      assert(app);
+      assert(user);
+
+      const firstSort = await user.inject({
+        method: 'POST',
+        url: `/${inboundProduct.id}/sorts`,
+        payload: {
+          quantity: 10,
+          binId: bin1.id,
+        },
+      });
+
+      expect(firstSort.statusCode).toBe(200);
+
+      const secondSort = await user.inject({
+        method: 'POST',
+        url: `/${inboundProduct.id}/sorts`,
+        payload: {
+          quantity: 10,
+          binId: bin1.id,
+        },
+      });
+
+      expect(secondSort.statusCode).toBe(400);
+    });
   });
 });

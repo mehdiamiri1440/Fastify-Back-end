@@ -15,10 +15,10 @@ import { OutboundProduct } from './OutboundProduct';
 
 export enum OutboundStatus {
   DRAFT = 'draft',
-  NEW_ORDER = 'new_order',
-  PRE_PICK = 'pre_pick',
-  PICKING = 'picking',
-  PICKED = 'picked',
+  NEW_ORDER = 'new_order', // during this state, we perform product supplies
+  TRANSFER = 'transfer', // during this state, we collect creator and customer signatures
+  PICKING = 'picking', // during this state, we collect creator and driver signatures
+  PICKED = 'picked', // during this state, we collect customer signature
   DELIVERED = 'delivered',
 }
 

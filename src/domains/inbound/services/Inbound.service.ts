@@ -91,12 +91,12 @@ export class InboundService {
       ? await this.suppliersRepo.findOneByOrFail({ id: supplierId })
       : null;
 
-    await this.inboundProductsRepo.save({
+    await this.inboundProductsRepo.save<DeepPartial<InboundProduct>>({
       inbound,
       product,
       supplier,
       price: basePrice,
-      quantity,
+      requestedQuantity: quantity,
       creator: { id: this.#userId },
     });
   }

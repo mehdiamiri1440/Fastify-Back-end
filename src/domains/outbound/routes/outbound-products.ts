@@ -5,6 +5,14 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { OutboundStatus } from '../models/Outbound';
 import { OutboundProduct } from '../models/OutboundProduct';
+import { P } from 'pino';
+import { OutboundProductSupply } from '../models/OutboundProductSupply';
+import { BinProduct } from '$src/domains/product/models/BinProduct';
+import { MoreThan } from 'typeorm';
+import { Product } from '$src/domains/product/models/Product';
+import { Bin } from '$src/domains/warehouse/models/Bin';
+import AppDataSource from '$src/DataSource';
+import { OutboundProductManager } from '../OutboundProduct.manager';
 
 const OUTBOUND_INVALID_STATUS = createError(
   'OUTBOUND_INVALID_STATUS',
@@ -12,10 +20,12 @@ const OUTBOUND_INVALID_STATUS = createError(
   400,
 );
 
-const outboundsRepo = repo(OutboundProduct);
+const outboundProductsRepo = repo(OutboundProduct);
+const outboundProductSuppliesRepo = repo(OutboundProductSupply);
+const binProductsRepo = repo(BinProduct);
 
 function fineOne(id: number) {
-  return outboundsRepo.findOneOrFail({
+  return outboundProductsRepo.findOneOrFail({
     where: {
       id,
     },
@@ -53,8 +63,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         throw new OUTBOUND_INVALID_STATUS();
       }
 
-      await outboundsRepo.update(id, req.body);
-      return outboundsRepo.findOneByOrFail({ id });
+      await outboundProductsRepo.update(id, req.body);
+      return outboundProductsRepo.findOneByOrFail({ id });
     },
   });
 
@@ -68,7 +78,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
       security: [
         {
-          OAuth2: ['user@inbound::delete'],
+          OAuth2: ['outbound@outbound::update'],
         },
       ],
     },
@@ -81,8 +91,123 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         throw new OUTBOUND_INVALID_STATUS();
       }
 
-      await outboundsRepo.softRemove({ id });
-      return outboundsRepo.findOneOrFail({ where: { id }, withDeleted: true });
+      await outboundProductsRepo.softRemove({ id });
+      return outboundProductsRepo.findOneOrFail({
+        where: { id },
+        withDeleted: true,
+      });
+    },
+  });
+
+  async function getSupplyState(id: number, userId: number) {
+    const manager = new OutboundProductManager(AppDataSource, id, userId);
+    await manager.load();
+    return {
+      supplied: manager.supplied,
+      suppliedQuantity: manager.suppliedQuantity,
+      freeQuantity: manager.freeQuantity,
+      expectedQuantity: manager.entity.quantity,
+      bins: manager.supplyState,
+    };
+  }
+
+  // GET /:id/supply-state
+  app.route({
+    method: 'GET',
+    url: '/:id/supply-state',
+    schema: {
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      security: [
+        {
+          OAuth2: ['outbound@outbound::list'],
+        },
+      ],
+    },
+
+    async handler(req) {
+      const { id } = req.params;
+      return getSupplyState(id, req.user.id);
+    },
+  });
+
+  // POST /:id/supplies
+  app.route({
+    method: 'POST',
+    url: '/:id/supplies',
+    schema: {
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      body: Type.Object({
+        quantity: Type.Number(),
+        binId: Type.Number(),
+      }),
+      security: [
+        {
+          OAuth2: ['user@inbound::update'],
+        },
+      ],
+    },
+    handler: async (req) => {
+      await AppDataSource.transaction(async (transactionManager) => {
+        const { binId, quantity } = req.body;
+
+        const bin = await transactionManager
+          .getRepository(Bin)
+          .findOneByOrFail({
+            id: binId,
+          });
+
+        const manager = new OutboundProductManager(
+          transactionManager,
+          req.params.id,
+          req.user.id,
+        );
+        await manager.load();
+        await manager.supply({ bin, quantity });
+      });
+
+      return getSupplyState(req.params.id, req.user.id);
+    },
+  });
+
+  // DELETE /:id/supplies/:binId
+  app.route({
+    method: 'DELETE',
+    url: '/:id/supplies/:binId',
+    schema: {
+      params: Type.Object({
+        id: Type.Number(),
+        binId: Type.Number(),
+      }),
+      security: [
+        {
+          OAuth2: ['user@inbound::update'],
+        },
+      ],
+    },
+    handler: async (req) => {
+      await AppDataSource.transaction(async (transactionManager) => {
+        const { id, binId } = req.params;
+
+        const bin = await transactionManager
+          .getRepository(Bin)
+          .findOneByOrFail({
+            id: binId,
+          });
+
+        const manager = new OutboundProductManager(
+          transactionManager,
+          id,
+          req.user.id,
+        );
+        await manager.load();
+        await manager.deleteSupply(bin);
+      });
+
+      return getSupplyState(req.params.id, req.user.id);
     },
   });
 };

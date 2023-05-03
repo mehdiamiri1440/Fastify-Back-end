@@ -195,3 +195,23 @@ describe('Set CustomerId', () => {
     });
   });
 });
+
+describe('Confirm Order', () => {
+  it('should change the outbound status to new order phase', async () => {
+    assert(app);
+    assert(user);
+
+    const response = await user.inject({
+      method: 'POST',
+      url: '/1/confirm-order',
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = response.json();
+    expect(body).toMatchObject({
+      data: {
+        status: 'new_order',
+      },
+    });
+  });
+});

@@ -1,31 +1,16 @@
-import { h, Fragment } from 'nano-jsx';
-import { DocumentBuilder } from '../Builder';
-import { App } from '../components/App';
-import { Section } from '../components/Section';
 import { Inbound } from '$src/domains/inbound/models/Inbound';
 import { repo } from '$src/infra/utils/repo';
-import { Header } from '../components/Header';
-import { Footer } from '../components/Footer';
-import { Signature, SignatureContainer } from '../components/Signature';
-import { Table, Tr, Th, Td } from '../components/Table';
-import { minio } from '$src/infra/s3';
-import assert from 'assert';
-import { Readable } from 'node:stream';
 import { capitalCase } from 'case-anything';
+import { Fragment, h } from 'nano-jsx';
 import QRCode from 'qrcode';
-
-const bucketName = 'inbound-signatures';
-
-const formatter = new Intl.DateTimeFormat('es-ES', {
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-const format = (date: Date | null | undefined) =>
-  date ? formatter.format(date) : '';
+import { DocumentBuilder } from '../Builder';
+import { App } from '../components/App';
+import { Footer } from '../components/Footer';
+import { Header } from '../components/Header';
+import { Section } from '../components/Section';
+import { Signature, SignatureContainer } from '../components/Signature';
+import { Table, Td, Th, Tr } from '../components/Table';
+import { formatDate, loadSignature } from '../utils';
 
 export class InboundDocument extends DocumentBuilder {
   inbound!: Inbound;
@@ -63,12 +48,8 @@ export class InboundDocument extends DocumentBuilder {
     );
   }
 
-  getTitle() {
-    return 'hey';
-  }
-
   getPdfName() {
-    return 'a.pdf';
+    return `${this.inbound.code}.pdf`;
   }
 
   render(): JSX.IntrinsicElements {
@@ -130,7 +111,7 @@ export class InboundDocument extends DocumentBuilder {
           <div class="d-flex flex-column mb-1 w-50">
             <label class="text-gray">Date</label>
             <p>
-              {format(inbound.createdAt)} {}
+              {formatDate(inbound.createdAt)} {}
             </p>
           </div>
           <div class="d-flex flex-column mb-1 w-50">
@@ -174,56 +155,8 @@ export class InboundDocument extends DocumentBuilder {
               </Td>
             </Tr>
           ))}
-          {inbound.products.map((e, index) => (
-            <Tr>
-              <Td>{index}</Td>
-              <Td>{e.product.name}</Td>
-              <Td>{e.supplier?.name ?? '-'}</Td>
-              <Td>
-                {e.actualQuantity} / {e.product.unit?.name}
-              </Td>
-            </Tr>
-          ))}
-          {inbound.products.map((e, index) => (
-            <Tr>
-              <Td>{index}</Td>
-              <Td>{e.product.name}</Td>
-              <Td>{e.supplier?.name ?? '-'}</Td>
-              <Td>
-                {e.actualQuantity} / {e.product.unit?.name}
-              </Td>
-            </Tr>
-          ))}
         </tbody>
       </Table>
     );
   };
-}
-
-const loadSignature = async (fileId: string) => {
-  assert(minio, 'document s3 client is not initialized');
-
-  try {
-    const readable = await minio.getObject(bucketName, fileId);
-    const data = await readAll(readable);
-    return Buffer.from(data);
-  } catch (error: any) {
-    if (error.code === 'NoSuchKey') {
-      // the object doesn't exist in the S3 bucket
-      return null;
-    }
-    throw error;
-  }
-};
-
-async function readAll(stream: Readable) {
-  const chunks: Buffer[] = [];
-
-  for await (const chunk of stream) {
-    chunks.push(chunk);
-  }
-
-  // Concatenate all the chunks into a single Uint8Array
-  const result = new Uint8Array(Buffer.concat(chunks));
-  return result;
 }
