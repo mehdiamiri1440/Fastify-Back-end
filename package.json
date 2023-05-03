@@ -36,6 +36,7 @@
     "@types/lodash": "^4.14.192",
     "@types/node": "^18.15.0",
     "await-to-js": "^3.0.0",
+    "bcrypt": "^5.1.0",
     "bson": "^5.2.0",
     "case-anything": "^2.1.10",
     "content-disposition": "^0.5.4",
@@ -61,6 +62,7 @@
   },
   "devDependencies": {
     "@swc/jest": "^0.2.24",
+    "@types/bcrypt": "^5.0.0",
     "@types/content-disposition": "^0.5.5",
     "@types/mime-types": "^2.1.1",
     "@types/minio": "^7.0.18",

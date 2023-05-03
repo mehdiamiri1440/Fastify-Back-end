@@ -2,6 +2,7 @@ import { Seeder } from '@jorgebodega/typeorm-seeding';
 import { DataSource } from 'typeorm';
 import { User } from '$src/domains/user/models/User';
 import { Role } from '$src/domains/user/models/Role';
+import bcrypt from 'bcrypt';
 
 export default class UserSeeder extends Seeder {
   async run(dataSource: DataSource) {
@@ -15,7 +16,7 @@ export default class UserSeeder extends Seeder {
       nif: 'root',
       email: 'root',
       phoneNumber: 'root',
-      password: 'root',
+      password: await bcrypt.hash('root', 10),
       position: 'root',
       isActive: true,
     });
