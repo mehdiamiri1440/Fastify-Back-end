@@ -24,8 +24,9 @@ import {
   JoinTable,
   ManyToMany,
 } from 'typeorm';
-import { ProductMovementHistory } from './ProductMovementHistory';
+import { ProductStockHistory } from './ProductStockHistory';
 import { Bin } from '$src/domains/warehouse/models/Bin';
+import { Shape } from '$src/domains/configuration/models/Shape';
 
 @Entity()
 export class Product implements Static<typeof ProductSchema> {
@@ -35,12 +36,8 @@ export class Product implements Static<typeof ProductSchema> {
   @Column()
   name!: string;
 
-  @Column({ default: 0 })
-  basicQuantity!: number;
-
-  @Column({ default: 0 })
-  @Check(`"quantity" >= 0`)
-  quantity!: number;
+  @Column({ nullable: true })
+  code?: string;
 
   @Column({ nullable: true })
   barcode!: string;
@@ -60,8 +57,8 @@ export class Product implements Static<typeof ProductSchema> {
   @ManyToOne(() => SupplierProduct)
   productSuppliers!: Relation<SupplierProduct[]>;
 
-  @ManyToOne(() => ProductMovementHistory)
-  movementHistories!: Relation<ProductMovementHistory[]>;
+  @ManyToOne(() => ProductStockHistory)
+  stockHistory!: Relation<ProductStockHistory[]>;
 
   @ManyToMany(() => Bin)
   @JoinTable({
@@ -71,20 +68,23 @@ export class Product implements Static<typeof ProductSchema> {
   })
   bins!: Relation<Bin[]>;
 
-  @ManyToOne(() => Size)
-  size!: Relation<Size>;
-
   @ManyToOne(() => Unit)
   unit!: Relation<Unit>;
 
-  @ManyToOne(() => Brand)
-  brand!: Relation<Brand>;
-
-  @ManyToOne(() => Color)
-  color!: Relation<Color>;
-
   @ManyToOne(() => Category, (category) => category.id)
   category!: Relation<Category>;
+
+  @ManyToOne(() => Shape, (shape) => shape.id)
+  shape!: Relation<Shape> | null;
+
+  @ManyToOne(() => Color, { nullable: true })
+  color!: Relation<Color> | null;
+
+  @ManyToOne(() => Brand, { nullable: true })
+  brand!: Relation<Brand> | null;
+
+  @ManyToOne(() => Size)
+  size!: Relation<Size> | null;
 
   @ManyToOne(() => User)
   creator!: Relation<User>;

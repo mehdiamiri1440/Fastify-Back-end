@@ -17,11 +17,12 @@ import {
 export enum SourceType {
   INBOUND = 'inbound',
   OUTBOUND = 'outbound',
-  BIN = 'bin',
+  MOVE = 'move',
+  INIT = 'init',
 }
 
 @Entity()
-export class ProductMovementHistory {
+export class ProductStockHistory {
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -37,9 +38,12 @@ export class ProductMovementHistory {
   @Column({ type: 'integer', nullable: true })
   sourceId!: number | null;
 
-  @Column({ default: 0 })
-  @Check(`"quantity" >= 0`)
-  quantity!: number;
+  @Column()
+  description!: string;
+
+  @Column()
+  @Check(`"quantity" != 0`)
+  quantity!: number; // any number from negative to positive except zero
 
   @ManyToOne(() => User)
   creator!: User;

@@ -24,8 +24,8 @@ export class SupplierProduct {
   @ManyToOne(() => Product, { nullable: false })
   product!: Relation<Product>;
 
-  @Column({ type: 'int' })
-  referenceCode!: number;
+  @Column()
+  referenceCode!: string;
 
   @ManyToOne(() => User, { nullable: false })
   creator!: User;

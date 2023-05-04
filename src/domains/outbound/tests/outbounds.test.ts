@@ -154,7 +154,7 @@ describe('Get Outbound', () => {
             product: {
               id: 1,
               name: 'test',
-              quantity: 10,
+              // quantity: 10, // TODO(erfan)
               unit: {
                 id: 1,
                 name: 'unit',

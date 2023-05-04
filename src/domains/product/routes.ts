@@ -1,25 +1,22 @@
-import { Type } from '@sinclair/typebox';
-import { repo } from '$src/infra/utils/repo';
+import AppDataSource from '$src/DataSource';
 import { ResponseShape } from '$src/infra/Response';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
-
+import { ListQueryOptions } from '$src/infra/tables/schema_builder';
+import { repo } from '$src/infra/utils/repo';
+import { createError } from '@fastify/error';
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { Type } from '@sinclair/typebox';
+import assert from 'assert';
+import { DeepPartial, In } from 'typeorm';
+import { Supplier } from '../supplier/models/Supplier';
+import { Bin } from '../warehouse/models/Bin';
+import { ProductService } from './ProductService';
 import { Product } from './models/Product';
 import { ProductSalePrice } from './models/ProductSalePrice';
-import { TaxType } from './models/TaxType';
-import { Color } from '../configuration/models/Color';
-import { Unit } from '../configuration/models/Unit';
-import { Category } from '../configuration/models/Category';
-import { Supplier } from '../supplier/models/Supplier';
+import { SourceType } from './models/ProductStockHistory';
 import { SupplierProduct } from './models/ProductSupplier';
-import { Bin } from '../warehouse/models/Bin';
-
 import { ProductSchema } from './schemas/product.schema';
-import { createError } from '@fastify/error';
-import { In } from 'typeorm';
-
-import { addProductToBin } from './service';
+import { hydrateProductInfo } from './utils';
 
 const PRODUCT_NOT_FOUND = createError(
   'PRODUCT_NOT_FOUND',
@@ -47,60 +44,35 @@ const SUPPLIER_ALREADY_EXIST = createError(
   404,
 );
 
-const TAX_TYPE_NOT_FOUND = createError(
-  'TAX_TYPE_NOT_FOUND',
-  'tax type not found',
-  404,
-);
-
-const UNIT_NOT_FOUND = createError('UNIT_NOT_FOUND', 'unit not found', 404);
-
-const COLOR_NOT_FOUND = createError('COLOR_NOT_FOUND', 'color not found', 404);
-
-const CATEGORY_NOT_FOUND = createError(
-  'CATEGORY_NOT_FOUND',
-  'category not found',
-  404,
-);
-
-const Products = repo(Product);
-const TaxTypes = repo(TaxType);
-const Colors = repo(Color);
-const Units = repo(Unit);
-const Categories = repo(Category);
-const Suppliers = repo(Supplier);
-const SupplierProducts = repo(SupplierProduct);
-const ProductSalePrices = repo(ProductSalePrice);
-const Bins = repo(Bin);
-
-//remove unnecessary props and add post/update props
-const inputProductSchema = Type.Intersect([
-  Type.Omit(ProductSchema, [
-    'id',
-    'creator',
-    'createdAt',
-    'updatedAt',
-    'deletedAt',
-    'taxType',
-    'size',
-    'unit',
-    'brand',
-    'color',
-    'category',
+const InputProduct = Type.Composite([
+  Type.Pick(ProductSchema, [
+    'name',
+    'barcode',
+    'invoiceSystemCode',
+    'description',
+    'weight',
   ]),
   Type.Object({
-    taxTypeId: Type.Number(),
-    sizeId: Type.Number(),
     unitId: Type.Number(),
-    brandId: Type.Number(),
-    colorId: Type.Number(),
     categoryId: Type.Number(),
+    taxTypeId: Type.Number(),
+    colorId: Type.Optional(Type.Number()),
+    shapeId: Type.Optional(Type.Number()),
+    sizeId: Type.Optional(Type.Number()),
+    brandId: Type.Optional(Type.Number()),
   }),
 ]);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
+  const Products = repo(Product);
+  const Suppliers = repo(Supplier);
+  const SupplierProducts = repo(SupplierProduct);
+  const ProductSalePrices = repo(ProductSalePrice);
+  const Bins = repo(Bin);
+
   app.register(ResponseShape);
 
+  // GET /
   app.route({
     method: 'GET',
     url: '/',
@@ -108,23 +80,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       tags: ['Product'],
       querystring: ListQueryOptions({
         filterable: [],
-        orderable: [
-          'name',
-          'basicQuantity',
-          'category.name',
-          'price',
-          'isLocked',
-        ],
-        searchable: [
-          'name',
-          'basicQuantity',
-          'category.name',
-          'price',
-          'isLocked',
-        ],
+        orderable: ['name', 'category.name', 'price'],
+        searchable: ['name', 'category.name', 'price'],
       }),
     },
-    async handler(req, rep) {
+    async handler(req) {
       return new TableQueryBuilder(Products, req)
         .relation(() => ({
           category: true,
@@ -133,6 +93,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
+  // GET /:id
   app.route({
     method: 'GET',
     url: '/:id',
@@ -152,69 +113,103 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
+  // POST /
   app.route({
     method: 'POST',
     url: '/',
     schema: {
       tags: ['Product'],
-      body: inputProductSchema,
+      body: InputProduct,
     },
     async handler(req) {
-      const taxType = await TaxTypes.findOneBy({ id: req.body.taxTypeId });
-      if (!taxType) throw new TAX_TYPE_NOT_FOUND();
+      const {
+        taxTypeId,
+        colorId,
+        unitId,
+        categoryId,
+        shapeId,
+        sizeId,
+        brandId,
+        ...rest
+      } = req.body;
 
-      const color = await Colors.findOneBy({ id: req.body.colorId });
-      if (!color) throw new COLOR_NOT_FOUND();
-
-      const unit = await Units.findOneBy({ id: req.body.unitId });
-      if (!unit) throw new UNIT_NOT_FOUND();
-
-      const category = await Categories.findOneBy({ id: req.body.categoryId });
-      if (!category) throw new CATEGORY_NOT_FOUND();
-
-      const newProduct = await Products.save({
-        ...req.body,
-        taxType,
-        category,
-        unit,
-        color,
+      const relations = await hydrateProductInfo({
+        taxTypeId,
+        colorId,
+        unitId,
+        categoryId,
+        shapeId,
+        sizeId,
+        brandId,
       });
 
-      return newProduct;
+      const product: DeepPartial<Product> = {
+        ...rest,
+        ...relations,
+      };
+
+      return await Products.save(product);
     },
   });
 
+  // POST /:id/init-bin-products
   app.route({
     method: 'POST',
-    url: '/:id/init-products',
+    url: '/:id/init-bin-products',
     schema: {
       tags: ['Product'],
       params: Type.Object({ id: Type.Number() }),
-      body: Type.Record(Type.String(), Type.Number()),
+      body: Type.Object({
+        binProducts: Type.Array(
+          Type.Object({
+            binId: Type.Number(),
+            quantity: Type.Number(),
+          }),
+        ),
+      }),
     },
     async handler(req) {
       const productId = req.params.id;
+      const { binProducts } = req.body;
+
       const product = await Products.findOne({
         where: { id: productId },
-        relations: ['movementHistories'],
+        relations: ['stockHistory'],
       });
       if (!product) throw new PRODUCT_NOT_FOUND();
 
-      const binsWithQuantities = req.body;
-      const binIds = Object.keys(binsWithQuantities);
+      const binIds = binProducts.map((e) => e.binId);
       const bins = await Bins.findBy({ id: In(binIds) });
+
       if (binIds.length !== bins.length) throw new BIN_NOT_FOUND();
 
-      if (product.movementHistories.length) throw new CANT_INIT_PRODUCT();
+      if (product.stockHistory.length) throw new CANT_INIT_PRODUCT();
 
-      bins.forEach((bin) => {
-        addProductToBin(product, null, bin, binsWithQuantities[bin.id]);
+      await AppDataSource.transaction(async (manager) => {
+        const productService = new ProductService(manager, req.user.id);
+
+        for (const bin of bins) {
+          const quantity = binProducts.find(
+            (e) => e.binId === bin.id,
+          )?.quantity;
+
+          assert(quantity);
+          await productService.addProductToBin({
+            product,
+            bin,
+            quantity,
+            description: `init product ${product.name} in bin ${bin.name}`,
+            sourceType: SourceType.INIT,
+            sourceId: null,
+          });
+        }
       });
 
       return product;
     },
   });
 
+  // PUT /:id
   app.route({
     method: 'PUT',
     url: '/:id',
@@ -223,29 +218,33 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Number(),
       }),
-      body: inputProductSchema,
+      body: InputProduct,
     },
     async handler(req) {
       const productId = req.params.id;
-      const product = await Products.findOne({ where: { id: productId } });
-      if (!product) throw new PRODUCT_NOT_FOUND();
 
-      const taxType = await TaxTypes.findOneBy({ id: req.body.taxTypeId });
-      if (!taxType) throw new TAX_TYPE_NOT_FOUND();
+      const {
+        taxTypeId,
+        colorId,
+        unitId,
+        categoryId,
+        shapeId,
+        sizeId,
+        brandId,
+        ...rest
+      } = req.body;
 
-      const color = await Colors.findOneBy({ id: req.body.colorId });
-      if (!color) throw new COLOR_NOT_FOUND();
+      const relations = await hydrateProductInfo({
+        taxTypeId,
+        colorId,
+        unitId,
+        categoryId,
+        shapeId,
+        sizeId,
+        brandId,
+      });
 
-      const unit = await Units.findOneBy({ id: req.body.unitId });
-      if (!unit) throw new UNIT_NOT_FOUND();
-
-      const category = await Categories.findOneBy({ id: req.body.categoryId });
-      if (!category) throw new CATEGORY_NOT_FOUND();
-
-      await Products.update(
-        { id: req.params.id },
-        { ...req.body, taxType, category, unit, color },
-      );
+      await Products.update({ id: req.params.id }, { ...rest, ...relations });
 
       return await Products.findOne({
         where: { id: productId },
@@ -254,6 +253,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
+  // POST /:id/suppliers
   app.route({
     method: 'POST',
     url: '/:id/suppliers',
@@ -262,40 +262,41 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Number(),
       }),
-      body: Type.Record(Type.String(), Type.Number()),
+      body: Type.Object({
+        supplierId: Type.Number(),
+        referenceCodes: Type.Array(Type.String()),
+      }),
     },
     async handler(req) {
-      const productId = req.params.id;
-      const product = await Products.findOneBy({ id: productId });
-      if (!product) throw new PRODUCT_NOT_FOUND();
+      const { id } = req.params;
+      const { supplierId, referenceCodes } = req.body;
 
-      const supplierReferenceCodes = req.body;
-      const supplierIds = Array.from(
-        new Set(Object.keys(supplierReferenceCodes)),
-      );
-      const suppliers = await Suppliers.findBy({ id: In(supplierIds) });
-      if (suppliers.length !== supplierIds.length)
+      const product = await Products.findOneByOrFail({ id });
+
+      const suppliers = await Suppliers.findOneBy({ id: supplierId });
+      if (!suppliers) {
         throw new SUPPLIER_NOT_FOUND();
+      }
 
-      const existRelation = await SupplierProducts.createQueryBuilder(
-        'SupplierProduct',
-      )
-        .where('supplierId IN (:...supplierIds)', { supplierIds })
-        .where('productId = :productId', { productId })
-        .getOne();
+      const alreadyExist = await SupplierProducts.findAndCountBy({
+        product: {
+          id: product.id,
+        },
+        supplier: {
+          id: suppliers.id,
+        },
+      });
+      if (alreadyExist) throw new SUPPLIER_ALREADY_EXIST();
 
-      if (existRelation) throw new SUPPLIER_ALREADY_EXIST();
-
-      return await SupplierProducts.insert(
-        suppliers.map((supplier) => ({
-          supplier,
-          product,
-          referenceCode: supplierReferenceCodes[supplier.id],
-        })),
-      );
+      return SupplierProducts.save({
+        product,
+        supplier: suppliers,
+        referenceCodes,
+      });
     },
   });
 
+  // GET /:id/sale-prices
   app.route({
     method: 'GET',
     url: '/:id/sale-prices',
@@ -317,6 +318,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
+  // POST /:id/sale-prices
   app.route({
     method: 'POST',
     url: '/:id/sale-prices',
@@ -328,16 +330,16 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       body: Type.Object({ price: Type.Number() }),
     },
     async handler(req) {
-      const productId = req.params.id;
-      const product = await Products.findOne({
-        where: { id: productId },
-        relations: ['salePrices'],
-      });
+      const { id } = req.params;
+
+      const product = await Products.findOneBy({ id });
       if (!product) throw new PRODUCT_NOT_FOUND();
-      return await ProductSalePrices.insert({ product, price: req.body.price });
+
+      return ProductSalePrices.save({ product, price: req.body.price });
     },
   });
 
+  // POST /:id/bins
   app.route({
     method: 'POST',
     url: '/:id/bins',
@@ -349,13 +351,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       body: Type.Object({ price: Type.Number() }),
     },
     async handler(req) {
-      const productId = req.params.id;
-      const product = await Products.findOne({
-        where: { id: productId },
-        relations: ['salePrices'],
-      });
+      const { id } = req.params;
+
+      const product = await Products.findOneBy({ id });
       if (!product) throw new PRODUCT_NOT_FOUND();
-      return await ProductSalePrices.insert({ product, price: req.body.price });
+      return ProductSalePrices.save({ product, price: req.body.price });
     },
   });
 };
