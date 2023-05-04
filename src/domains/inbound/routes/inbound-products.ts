@@ -13,6 +13,8 @@ import { Product } from '$src/domains/product/models/Product';
 import { InboundProductSort } from '../models/InboundProductSort';
 import AppDataSource from '$src/DataSource';
 import { repo } from '$src/infra/utils/repo';
+import { ProductService } from '$src/domains/product/ProductService';
+import { SourceType } from '$src/domains/product/models/ProductStockHistory';
 
 const INBOUND_INVALID_STATUS = createError(
   'INBOUND_INVALID_STATUS',
@@ -235,6 +237,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     handler: (req) =>
       AppDataSource.transaction(async (manager) => {
+        const productsService = new ProductService(manager, req.user.id);
         const inboundProductsRepo = manager.getRepository(InboundProduct);
         const inboundProductSortsRepo =
           manager.getRepository(InboundProductSort);
@@ -250,6 +253,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           },
           relations: {
             inbound: true,
+            product: true,
             sorts: {
               bin: true,
             },
@@ -293,13 +297,14 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           });
         }
 
-        // await Products.increment(
-        //   {
-        //     id: inboundProduct.product.id,
-        //   },
-        //   'quantity',
-        //   quantity,
-        // );
+        await productsService.addProductToBin({
+          product: inboundProduct.product,
+          bin,
+          quantity,
+          sourceType: SourceType.INBOUND,
+          sourceId: inboundProduct.inbound.id,
+          description: `Sorted ${quantity} ${inboundProduct.product.name} from inbound id: ${inboundProduct.inbound.id}`,
+        });
 
         return sort;
       }),
@@ -322,9 +327,13 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     handler: (req) =>
       AppDataSource.transaction(async (manager) => {
+        const productsService = new ProductService(manager, req.user.id);
+
         const InboundProducts = manager.getRepository(InboundProduct);
         const InboundProductSorts = manager.getRepository(InboundProductSort);
         const Products = manager.getRepository(Product);
+        const inboundProductSortsRepo =
+          manager.getRepository(InboundProductSort);
 
         const { id, sortId } = req.params;
 
@@ -360,13 +369,14 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           id: sortId,
         });
 
-        // await Products.decrement(
-        //   {
-        //     id: inboundProduct.product.id,
-        //   },
-        //   'quantity',
-        //   sort.quantity,
-        // );
+        await productsService.subtractProductFromBin({
+          product: inboundProduct.product,
+          bin: sort.bin,
+          quantity: sort.quantity,
+          sourceType: SourceType.INBOUND,
+          sourceId: inboundProduct.inbound.id,
+          description: `Revert: sorted ${sort.quantity} ${inboundProduct.product.name} from inbound id: ${inboundProduct.inbound.id}`,
+        });
       }),
   });
 };

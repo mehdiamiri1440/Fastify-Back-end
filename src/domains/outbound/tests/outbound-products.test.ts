@@ -265,14 +265,14 @@ describe('Supply', () => {
     expect(state).toMatchObject({
       data: {
         supplied: true,
-        freeQuantity: 40, // TODO(erfan): should be 30 after integrate with Product domain
+        freeQuantity: 30,
         suppliedQuantity: 20,
         expectedQuantity: 20,
         bins: [
           {
             binId: bin1.id,
             binName: 'bin1',
-            freeQuantity: 10, // TODO(erfan): should be 0 after integrate with Product domain
+            freeQuantity: 0,
             suppliedQuantity: 10,
           },
           {

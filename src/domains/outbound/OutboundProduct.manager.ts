@@ -8,6 +8,8 @@ import { OutboundProduct } from './models/OutboundProduct';
 import assert from 'assert';
 import { OutboundProductSupply } from './models/OutboundProductSupply';
 import createError from '@fastify/error';
+import { ProductService } from '../product/ProductService';
+import { SourceType } from '../product/models/ProductStockHistory';
 
 const sum = (arr: number[]): number => arr.reduce((a, b) => a + b, 0);
 
@@ -35,6 +37,8 @@ export class OutboundProductManager {
   private outboundProductsRepo: Repository<OutboundProduct>;
   private outboundProductSuppliesRepo: Repository<OutboundProductSupply>;
   private productsRepo: Repository<Product>;
+  private productService: ProductService;
+
   creator!: { id: number };
 
   id!: number;
@@ -72,6 +76,7 @@ export class OutboundProductManager {
       OutboundProductSupply,
     );
     this.productsRepo = dataSource.getRepository(Product);
+    this.productService = new ProductService(dataSource, userId);
     this.id = id;
     this.creator = { id: userId };
   }
@@ -163,7 +168,14 @@ export class OutboundProductManager {
       creator: this.creator,
     });
 
-    // todo: call product service
+    await this.productService.subtractProductFromBin({
+      product: this.entity.product,
+      bin,
+      quantity,
+      sourceType: SourceType.OUTBOUND,
+      sourceId: this.entity.outbound.id,
+      description: `Supplied ${quantity} ${this.entity.product.name} by outbound id:${this.entity.outbound.id}`,
+    });
   }
 
   async deleteSupply(bin: Bin) {
@@ -181,9 +193,18 @@ export class OutboundProductManager {
         },
       });
 
+    const quantity = outboundProductSupply.quantity;
+
     await this.outboundProductSuppliesRepo.softDelete(outboundProductSupply.id);
 
-    // todo: call product service
+    await this.productService.addProductToBin({
+      product: this.entity.product,
+      bin,
+      quantity,
+      sourceType: SourceType.OUTBOUND,
+      sourceId: this.entity.outbound.id,
+      description: `Revert: supply ${quantity} ${this.entity.product.name} by outbound id:${this.entity.outbound.id}`,
+    });
   }
 
   async load() {

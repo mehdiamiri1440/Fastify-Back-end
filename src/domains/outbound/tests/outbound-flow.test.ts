@@ -10,7 +10,6 @@ import { repo } from '$src/infra/utils/repo';
 import { afterAll, beforeAll, expect, it } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance, InjectOptions } from 'fastify';
-import { describe } from 'node:test';
 import { Product } from '../../product/models/Product';
 import { Warehouse } from '../../warehouse/models/Warehouse';
 import { WarehouseStaff } from '../../warehouse/models/WarehouseStaff';
