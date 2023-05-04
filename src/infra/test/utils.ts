@@ -8,7 +8,7 @@ import qs from 'qs';
 import type Ajv from 'ajv';
 import AppDataSource from '$src/DataSource';
 
-async function createTestUser() {
+export async function createTestUser() {
   return await repo(User).save({
     firstName: 'tester',
     lastName: 'tester',

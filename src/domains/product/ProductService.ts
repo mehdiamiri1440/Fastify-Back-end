@@ -1,14 +1,11 @@
-import { Product } from './models/Product';
-import { BinProduct } from './models/BinProduct';
-import { Bin } from '../warehouse/models/Bin';
-import { repo } from '$src/infra/utils/repo';
-import { Inbound } from '../inbound/models/Inbound';
-import { Outbound } from '../outbound/models/Outbound';
 import { createError } from '@fastify/error';
+import { Bin } from '../warehouse/models/Bin';
+import { BinProduct } from './models/BinProduct';
+import { Product } from './models/Product';
 import { ProductStockHistory, SourceType } from './models/ProductStockHistory';
 
 import assert from 'assert';
-import { DataSource, DeepPartial, EntityManager, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 
 const QUANTITY_OUT_OF_RANGE = createError(
   'QUANTITY_OUT_OF_RANGE',
@@ -124,11 +121,11 @@ export class ProductService {
 
     await productStockHistoriesRepo.save({
       product,
-      sourceId,
-      sourceType,
       bin,
-      quantity: quantity * -1,
+      sourceType,
+      sourceId,
       description,
+      quantity: quantity * -1,
       creator: {
         id: this.#userId,
       },
