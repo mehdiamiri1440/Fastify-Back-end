@@ -84,4 +84,26 @@ export default {
     'with this permission you can get list of shapes',
   'configuration@shape::create': 'with this permission you can add new shape',
   'configuration@shape::update': 'with this permission you can edit shape',
+  'customer@customer::list':
+    'with this permission you can get list of customers',
+  'customer@customer::create': 'with this permission you can add new customer',
+  'customer@customer::delete': 'with this permission you can delete customer',
+  'customer@specification::view':
+    'with this permission you can see the customer specification',
+  'customer@specification::update':
+    'with this permission you can update customer specification',
+  'customer@contact::list': 'with this permission you can get list of contacts',
+  'customer@contact::create':
+    'with this permission you can add new contact for customer',
+  'customer@contact::update':
+    'with this permission you can edit contact of customer',
+  'customer@contact::delete':
+    'with this permission you can delete a existing contact of customer',
+  'customer@address::view': 'with this permission you can see customer addess',
+  'customer@address::update':
+    'with this permission you can edit customer address',
+  'customer@bank::view':
+    'with this permission you can see customer bank details',
+  'customer@bank::update':
+    'with this permission you can update customer bank details',
 };
