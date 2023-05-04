@@ -8,6 +8,7 @@ variables:
   POSTGRES_DB: inventory
   MINIO_ROOT_USER: minio
   MINIO_ROOT_PASSWORD: minio123
+  IBAN_VALIDATOR_URL: http://hub2.delinternet.com:5004
 
 test:
   stage: test

@@ -75,6 +75,7 @@ const app: FastifyPluginAsync<Options> = async (fastify, { url }) => {
       await fastify.register(import('./domains/user/routes'));
 
       await fastify.register(import('./domains/customer/routes'));
+      await fastify.register(import('./domains/hub-customers/routes'));
 
       await fastify.register(import('./domains/configuration/routes'));
 

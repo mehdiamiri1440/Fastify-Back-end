@@ -9,49 +9,57 @@ import {
   DeleteDateColumn,
   Relation,
 } from 'typeorm';
-import { Language } from './Language';
-import { SupplierSchema } from '$src/domains/supplier/schemas/supplier.schema';
+import { AddressSchema } from '../schemas/address.schema';
 import { Static, Type } from '@sinclair/typebox';
+import { Customer } from './Customer';
 
-const SupplierSchemaWithoutRelations = Type.Omit(SupplierSchema, [
+const AddressSchemaWithoutRelations = Type.Omit(AddressSchema, [
   'creator',
-  'language',
+  'customer',
 ]);
 
 @Entity()
-export class Supplier implements Static<typeof SupplierSchemaWithoutRelations> {
+export class CustomerAddress
+  implements Static<typeof AddressSchemaWithoutRelations>
+{
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ nullable: false })
-  name!: string;
+  @ManyToOne(() => Customer, { nullable: false, onDelete: 'CASCADE' })
+  customer!: Relation<Customer>;
 
   @Column({ nullable: false })
-  cif!: string;
-
-  @ManyToOne(() => Language, { nullable: false })
-  language!: Relation<Language>;
+  province!: string;
 
   @Column({ nullable: false })
-  iban!: string;
+  city!: string;
 
   @Column({ nullable: false })
-  email!: string;
+  street!: string;
 
   @Column({ nullable: false })
-  phoneNumber!: string;
+  postalCode!: string;
+
+  @Column({ type: 'int', nullable: true })
+  number!: number | null;
 
   @Column({ type: 'text', nullable: true })
-  logoFileId!: string | null;
-
-  @Column({ nullable: false })
-  accountNumber!: string;
+  building!: string | null;
 
   @Column({ type: 'text', nullable: true })
-  bic!: string | null;
+  stairway!: string | null;
 
   @Column({ type: 'text', nullable: true })
-  bankName!: string | null;
+  floor!: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  door!: string | null;
+
+  @Column({ type: 'float', nullable: true })
+  latitude!: number | null;
+
+  @Column({ type: 'float', nullable: true })
+  longitude!: number | null;
 
   @ManyToOne(() => User, { nullable: false })
   creator!: Relation<User>;

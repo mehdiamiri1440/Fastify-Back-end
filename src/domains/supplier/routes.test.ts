@@ -29,7 +29,7 @@ const supplierData = {
   logoFileId: 'NO IDEA',
   accountNumber: '12345',
   bic: 'CCRIES2A',
-  bicName: 'CAJAMAR CAJA RURAL, S.C.C.',
+  bankName: 'CAJAMAR CAJA RURAL, S.C.C.',
 };
 const contactData = {
   name: 'good contact',
