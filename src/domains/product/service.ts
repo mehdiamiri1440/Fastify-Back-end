@@ -5,7 +5,10 @@ import { repo } from '$src/infra/utils/repo';
 import { Inbound } from '../inbound/models/Inbound';
 import { Outbound } from '../outbound/models/Outbound';
 import { createError } from '@fastify/error';
-import { ProductMovementHistory } from './models/ProductMovementHistory';
+import {
+  ProductMovementHistory,
+  SourceType,
+} from './models/ProductMovementHistory';
 
 import assert from 'assert';
 
@@ -70,7 +73,7 @@ export async function moveProduct(
   await addAsset(product, targetBin, quantity);
   await recordMovement(
     product,
-    { id: sourceBin.id, type: 'bin' },
+    { id: sourceBin.id, type: SourceType.BIN },
     targetBin,
     quantity,
   );
@@ -85,7 +88,9 @@ export async function addProductToBin(
   await addAsset(product, to, quantity);
   await recordMovement(
     product,
-    comeFrom ? { id: comeFrom.id, type: 'inbound' } : { id: null, type: null },
+    comeFrom
+      ? { id: comeFrom.id, type: SourceType.INBOUND }
+      : { id: null, type: null },
     to,
     quantity,
   );
@@ -100,7 +105,7 @@ export async function subtractProductFromBin(
   await subtractAsset(product, from, quantity);
   await recordMovement(
     product,
-    { id: comeFrom.id, type: 'outbound' },
+    { id: comeFrom.id, type: SourceType.OUTBOUND },
     from,
     quantity,
   );
@@ -108,11 +113,11 @@ export async function subtractProductFromBin(
 
 async function recordMovement(
   product: Product,
-  source: { id: number | null; type: 'bin' | 'inbound' | 'outbound' | null },
+  source: { id: number | null; type: SourceType | null },
   targetBin: Bin,
   quantity: number,
 ) {
-  await ProductMovementHistories.create({
+  await ProductMovementHistories.save({
     product,
     sourceId: source.id,
     sourceType: source.type,

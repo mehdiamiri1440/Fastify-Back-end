@@ -14,7 +14,7 @@ import {
   Relation,
 } from 'typeorm';
 
-enum SourceType {
+export enum SourceType {
   INBOUND = 'inbound',
   OUTBOUND = 'outbound',
   BIN = 'bin',
@@ -31,11 +31,11 @@ export class ProductMovementHistory {
   @ManyToOne(() => Bin, { nullable: false })
   bin!: Relation<Bin>;
 
-  @Column({ nullable: true })
-  sourceId!: number | null;
+  @Column({ type: 'enum', nullable: true, enum: SourceType })
+  sourceType!: SourceType | null;
 
-  @Column({ nullable: true })
-  sourceType!: 'inbound' | 'outbound' | 'bin' | null;
+  @Column({ type: 'integer', nullable: true })
+  sourceId!: number | null;
 
   @Column({ default: 0 })
   @Check(`"quantity" >= 0`)

@@ -10,6 +10,7 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   ManyToOne,
+  Relation,
 } from 'typeorm';
 
 @Entity()
@@ -18,10 +19,10 @@ export class SupplierProduct {
   id!: number;
 
   @ManyToOne(() => Supplier, { nullable: false })
-  supplier!: Supplier;
+  supplier!: Relation<Supplier>;
 
   @ManyToOne(() => Product, { nullable: false })
-  product!: Product;
+  product!: Relation<Product>;
 
   @Column({ type: 'int' })
   referenceCode!: number;

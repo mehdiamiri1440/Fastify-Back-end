@@ -10,6 +10,7 @@ import {
   DeleteDateColumn,
   ManyToOne,
   Check,
+  Relation,
 } from 'typeorm';
 
 @Entity()
@@ -21,7 +22,7 @@ export class BinProduct {
   bin!: Bin;
 
   @ManyToOne(() => Product, { nullable: false })
-  product!: Product;
+  product!: Relation<Product>;
 
   @Column({ type: 'int', default: 0 })
   @Check(`"quantity" >= 0`)
