@@ -1,5 +1,6 @@
+import { Supplier } from '$src/domains/supplier/models/Supplier';
 import { Product } from './Product';
-import { Bin } from '$src/domains/warehouse/models/Bin';
+import { User } from '$src/domains/user/models/User';
 
 import {
   Entity,
@@ -9,24 +10,25 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   ManyToOne,
-  Check,
   Relation,
 } from 'typeorm';
 
 @Entity()
-export class BinProduct {
+export class SupplierProduct {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => Bin, { nullable: false })
-  bin!: Bin;
+  @ManyToOne(() => Supplier, { nullable: false })
+  supplier!: Relation<Supplier>;
 
   @ManyToOne(() => Product, { nullable: false })
   product!: Relation<Product>;
 
-  @Column({ type: 'int', default: 0 })
-  @Check(`"quantity" >= 0`)
-  quantity!: number;
+  @Column()
+  referenceCode!: string;
+
+  @ManyToOne(() => User, { nullable: false })
+  creator!: User;
 
   @CreateDateColumn()
   createdAt!: Date;

@@ -95,6 +95,10 @@ const app: FastifyPluginAsync<Options> = async (fastify, { url }) => {
 
       await fastify.register(import('./domains/warehouse/routes'));
       await fastify.register(import('./domains/supplier/routes'));
+
+      await fastify.register(import('./domains/product/routes'), {
+        prefix: '/products',
+      });
     },
     {
       prefix: '/api/v1',

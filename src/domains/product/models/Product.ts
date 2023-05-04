@@ -6,6 +6,10 @@ import { Unit } from '$src/domains/configuration/models/Unit';
 import { TaxType } from './TaxType';
 import { User } from '$src/domains/user/models/User';
 import { ProductSalePrice } from './ProductSalePrice';
+import { Static } from '@sinclair/typebox';
+import { ProductSchema } from '../schemas/product.schema';
+import { SupplierProduct } from '$src/domains/product/models/ProductSupplier';
+
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -15,21 +19,25 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  Relation,
+  Check,
+  JoinTable,
+  ManyToMany,
 } from 'typeorm';
+import { ProductStockHistory } from './ProductStockHistory';
+import { Bin } from '$src/domains/warehouse/models/Bin';
+import { Shape } from '$src/domains/configuration/models/Shape';
 
 @Entity()
-export class Product {
+export class Product implements Static<typeof ProductSchema> {
   @PrimaryGeneratedColumn()
   id!: number;
 
   @Column()
   name!: string;
 
-  @Column({ default: 0 })
-  basicQuantity!: number;
-
-  @Column({ default: 0 })
-  quantity!: number;
+  @Column({ nullable: true })
+  code?: string;
 
   @Column({ nullable: true })
   barcode!: string;
@@ -44,25 +52,42 @@ export class Product {
   weight!: number;
 
   @ManyToOne(() => TaxType)
-  taxType!: TaxType;
+  taxType!: Relation<TaxType>;
 
-  @ManyToOne(() => Size)
-  size!: Size;
+  @ManyToOne(() => SupplierProduct)
+  productSuppliers!: Relation<SupplierProduct[]>;
+
+  @ManyToOne(() => ProductStockHistory)
+  stockHistory!: Relation<ProductStockHistory[]>;
+
+  @ManyToMany(() => Bin)
+  @JoinTable({
+    name: 'bin_products',
+    joinColumn: { name: 'product_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'bin_id', referencedColumnName: 'id' },
+  })
+  bins!: Relation<Bin[]>;
 
   @ManyToOne(() => Unit)
-  unit!: Unit;
-
-  @ManyToOne(() => Brand)
-  brand!: Brand;
-
-  @ManyToOne(() => Color)
-  color!: Color;
+  unit!: Relation<Unit>;
 
   @ManyToOne(() => Category, (category) => category.id)
-  category!: Category;
+  category!: Relation<Category>;
+
+  @ManyToOne(() => Shape, (shape) => shape.id)
+  shape!: Relation<Shape> | null;
+
+  @ManyToOne(() => Color, { nullable: true })
+  color!: Relation<Color> | null;
+
+  @ManyToOne(() => Brand, { nullable: true })
+  brand!: Relation<Brand> | null;
+
+  @ManyToOne(() => Size)
+  size!: Relation<Size> | null;
 
   @ManyToOne(() => User)
-  creator!: User;
+  creator!: Relation<User>;
 
   @CreateDateColumn()
   createdAt!: Date;

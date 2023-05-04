@@ -33,6 +33,7 @@ export class TableQueryBuilder {
 
   relation(builder: RelationBuilder) {
     this.#relationBuilder = builder;
+    this.#loadRelationIds = false;
     return this;
   }
 

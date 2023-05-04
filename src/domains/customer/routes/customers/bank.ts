@@ -7,6 +7,7 @@ import { BankSchema } from '$src/domains/customer/schemas/bank.schema';
 import { fetch } from 'undici';
 import assert from 'assert';
 import createError from '@fastify/error';
+
 const { IBAN_VALIDATOR_URL } = process.env;
 const CANT_VALIDATE_IBAN = createError(
   'CANT_VALIDATE_IBAN',
