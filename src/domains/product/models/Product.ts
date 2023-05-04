@@ -20,7 +20,12 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   Relation,
+  Check,
+  JoinTable,
+  ManyToMany,
 } from 'typeorm';
+import { ProductMovementHistory } from './ProductMovementHistory';
+import { Bin } from '$src/domains/warehouse/models/Bin';
 
 @Entity()
 export class Product implements Static<typeof ProductSchema> {
@@ -34,6 +39,7 @@ export class Product implements Static<typeof ProductSchema> {
   basicQuantity!: number;
 
   @Column({ default: 0 })
+  @Check(`"quantity" >= 0`)
   quantity!: number;
 
   @Column({ nullable: true })
@@ -53,6 +59,17 @@ export class Product implements Static<typeof ProductSchema> {
 
   @ManyToOne(() => SupplierProduct)
   productSuppliers!: Relation<SupplierProduct[]>;
+
+  @ManyToOne(() => ProductMovementHistory)
+  movementHistories!: Relation<ProductMovementHistory[]>;
+
+  @ManyToMany(() => Bin)
+  @JoinTable({
+    name: 'bin_products',
+    joinColumn: { name: 'product_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'bin_id', referencedColumnName: 'id' },
+  })
+  bins!: Relation<Bin[]>;
 
   @ManyToOne(() => Size)
   size!: Relation<Size>;

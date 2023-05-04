@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   ManyToOne,
+  Check,
 } from 'typeorm';
 
 @Entity()
@@ -22,7 +23,8 @@ export class BinProduct {
   @ManyToOne(() => Product, { nullable: false })
   product!: Product;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', default: 0 })
+  @Check(`"quantity" >= 0`)
   quantity!: number;
 
   @CreateDateColumn()

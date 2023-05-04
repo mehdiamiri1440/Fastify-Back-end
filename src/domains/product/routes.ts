@@ -13,15 +13,26 @@ import { Unit } from '../configuration/models/Unit';
 import { Category } from '../configuration/models/Category';
 import { Supplier } from '../supplier/models/Supplier';
 import { SupplierProduct } from './models/ProductSupplier';
+import { Bin } from '../warehouse/models/Bin';
 
 import { ProductSchema } from './schemas/product.schema';
-
 import { createError } from '@fastify/error';
 import { In } from 'typeorm';
+
+import { addProductToBin } from './service';
+
 const PRODUCT_NOT_FOUND = createError(
   'PRODUCT_NOT_FOUND',
   'product not found',
   404,
+);
+
+const BIN_NOT_FOUND = createError('BIN_NOT_FOUND', 'bin not found', 404);
+
+const CANT_INIT_PRODUCT = createError(
+  'CANT_INIT_PRODUCT',
+  'could not init, initialized product',
+  400,
 );
 
 const SUPPLIER_NOT_FOUND = createError(
@@ -60,6 +71,7 @@ const Categories = repo(Category);
 const Suppliers = repo(Supplier);
 const SupplierProducts = repo(SupplierProduct);
 const ProductSalePrices = repo(ProductSalePrice);
+const Bins = repo(Bin);
 
 //remove unnecessary props and add post/update props
 const inputProductSchema = Type.Intersect([
@@ -169,6 +181,37 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       });
 
       return newProduct;
+    },
+  });
+
+  app.route({
+    method: 'POST',
+    url: '/:id/init-products',
+    schema: {
+      tags: ['Product'],
+      params: Type.Object({ id: Type.Number() }),
+      body: Type.Record(Type.String(), Type.Number()),
+    },
+    async handler(req) {
+      const productId = req.params.id;
+      const product = await Products.findOne({
+        where: { id: productId },
+        relations: ['movementHistories'],
+      });
+      if (!product) throw new PRODUCT_NOT_FOUND();
+
+      const binsWithQuantities = req.body;
+      const binIds = Object.keys(binsWithQuantities);
+      const bins = await Bins.findBy({ id: In(binIds) });
+      if (binIds.length !== bins.length) throw new BIN_NOT_FOUND();
+
+      if (product.movementHistories.length) throw new CANT_INIT_PRODUCT();
+
+      bins.forEach((bin) => {
+        addProductToBin(product, null, bin, binsWithQuantities[bin.id]);
+      });
+
+      return product;
     },
   });
 
@@ -296,7 +339,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   });
 
   app.route({
-    method: 'GET',
+    method: 'POST',
     url: '/:id/bins',
     schema: {
       tags: ['Product'],
