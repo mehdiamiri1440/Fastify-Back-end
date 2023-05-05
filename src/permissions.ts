@@ -17,6 +17,23 @@ export default {
   'user@role::delete': 'with this permission you can delete role',
   'user@role::list': 'with this permission you can get list of roles',
 
+  // product
+  'product@product::list': 'with this permission you can get list of products',
+  'product@product::view': 'with this permission you can see a product',
+  'product@product::create': 'with this permission you can add new product',
+  'product@product::update': 'with this permission you can update a product',
+  'product@product-suppliers::create':
+    'with this permission you can add new product supplier',
+  'product@product-suppliers::list':
+    'with this permission you can get list of product suppliers',
+  'product@product-sale-prices::list':
+    'with this permission you can get list of product sale prices',
+  'product@product-sale-prices::create':
+    'with this permission you can add new product sale price',
+  'product@product-bins::create': 'with this permission you can add new bin',
+  'product@product-tags::edit':
+    'with this permission you can edit product tags',
+
   // inbound
   'user@inbound::list': 'with this permission you can get list of inbounds',
   'user@inbound::create': 'with this permission you can add new inbound',
@@ -106,4 +123,7 @@ export default {
     'with this permission you can see customer bank details',
   'customer@bank::update':
     'with this permission you can update customer bank details',
+  'configuration@tag::list': 'with this permission you can get list of tags',
+  'configuration@tag::create': 'with this permission you can add new tag',
+  'configuration@tag::update': 'with this permission you can edit tag',
 };

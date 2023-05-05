@@ -1,5 +1,4 @@
 import { User } from '$src/domains/user/models/User';
-import { Product } from './Product';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -8,19 +7,20 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-  Relation,
 } from 'typeorm';
+import type { Relation } from 'typeorm';
+import { Product } from './Product';
 
 @Entity()
-export class ProductSalePrice {
+export class ProductImage {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => Product, (product) => product.salePrices)
-  product!: Relation<Product>;
+  @ManyToOne(() => Product, (product) => product.images)
+  inbound!: Relation<Product>;
 
   @Column()
-  price!: number;
+  fileId!: string;
 
   @ManyToOne(() => User)
   creator!: User;

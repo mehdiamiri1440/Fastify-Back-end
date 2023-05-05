@@ -1,4 +1,3 @@
-import { Category } from '$src/domains/configuration/models/Category';
 import { Type } from '@sinclair/typebox';
 
 export const ProductSchema = Type.Object({
@@ -9,6 +8,7 @@ export const ProductSchema = Type.Object({
   invoiceSystemCode: Type.Number(),
   description: Type.String(),
   weight: Type.Number(),
+  content: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   createdAt: Type.Union([Type.Date(), Type.String({ format: 'date' })]),
   updatedAt: Type.Union([Type.Date(), Type.String({ format: 'date' })]),
   deletedAt: Type.Union([

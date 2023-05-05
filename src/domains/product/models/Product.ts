@@ -27,6 +27,8 @@ import {
 import { ProductStockHistory } from './ProductStockHistory';
 import { Bin } from '$src/domains/warehouse/models/Bin';
 import { Shape } from '$src/domains/configuration/models/Shape';
+import { Tag } from '$src/domains/configuration/models/Tag';
+import { ProductImage } from './ProductImage';
 
 @Entity()
 export class Product implements Static<typeof ProductSchema> {
@@ -89,6 +91,12 @@ export class Product implements Static<typeof ProductSchema> {
   @ManyToOne(() => User)
   creator!: Relation<User>;
 
+  @ManyToMany(() => Tag)
+  tags!: Relation<Tag[]>;
+
+  @Column({ type: 'text', nullable: true })
+  content!: string | null;
+
   @CreateDateColumn()
   createdAt!: Date;
 
@@ -100,4 +108,7 @@ export class Product implements Static<typeof ProductSchema> {
 
   @OneToMany(() => ProductSalePrice, (salePrice) => salePrice.product)
   salePrices!: ProductSalePrice[];
+
+  @OneToMany(() => ProductImage, (image) => image.inbound)
+  images!: Relation<ProductImage[]>;
 }
