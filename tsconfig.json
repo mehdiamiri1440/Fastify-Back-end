@@ -18,6 +18,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "importsNotUsedAsValues": "remove",
+    "resolveJsonModule": true,
     "rootDir": ".",
     "baseUrl": ".",
     "paths": {

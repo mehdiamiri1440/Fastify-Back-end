@@ -1,18 +1,13 @@
+import AppDataSource from '$src/DataSource';
+import { Bin } from '$src/domains/warehouse/models/Bin';
 import { ResponseShape } from '$src/infra/Response';
 import { repo } from '$src/infra/utils/repo';
 import createError from '@fastify/error';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
+import { OutboundProductManager } from '../OutboundProduct.manager';
 import { OutboundStatus } from '../models/Outbound';
 import { OutboundProduct } from '../models/OutboundProduct';
-import { P } from 'pino';
-import { OutboundProductSupply } from '../models/OutboundProductSupply';
-import { BinProduct } from '$src/domains/product/models/BinProduct';
-import { MoreThan } from 'typeorm';
-import { Product } from '$src/domains/product/models/Product';
-import { Bin } from '$src/domains/warehouse/models/Bin';
-import AppDataSource from '$src/DataSource';
-import { OutboundProductManager } from '../OutboundProduct.manager';
 
 const OUTBOUND_INVALID_STATUS = createError(
   'OUTBOUND_INVALID_STATUS',
@@ -21,8 +16,6 @@ const OUTBOUND_INVALID_STATUS = createError(
 );
 
 const outboundProductsRepo = repo(OutboundProduct);
-const outboundProductSuppliesRepo = repo(OutboundProductSupply);
-const binProductsRepo = repo(BinProduct);
 
 function fineOne(id: number) {
   return outboundProductsRepo.findOneOrFail({
