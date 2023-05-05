@@ -1,7 +1,6 @@
 import { ResponseShape } from '$src/infra/Response';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
-import { fetch, Headers } from 'undici';
 import assert from 'assert';
 
 const { HUB_API_ADDRESS, HUB_TOKEN } = process.env;

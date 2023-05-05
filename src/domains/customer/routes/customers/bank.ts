@@ -4,7 +4,6 @@ import { Type } from '@sinclair/typebox';
 import { Customer } from '$src/domains/customer/models/Customer';
 import { CustomerBank } from '$src/domains/customer/models/Bank';
 import { BankSchema } from '$src/domains/customer/schemas/bank.schema';
-import { fetch } from 'undici';
 import assert from 'assert';
 import createError from '@fastify/error';
 
