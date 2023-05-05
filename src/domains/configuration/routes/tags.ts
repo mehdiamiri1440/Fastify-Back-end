@@ -1,13 +1,13 @@
+import { TagSchema } from '$src/domains/configuration/schemas/tag.schema';
 import { ResponseShape } from '$src/infra/Response';
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { Category } from '../models/Category';
-import { repo } from '$src/infra/utils/repo';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
+import { ListQueryOptions } from '$src/infra/tables/schema_builder';
+import { repo } from '$src/infra/utils/repo';
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
-import { CategorySchema } from '$src/domains/configuration/schemas/category.schema';
+import { Tag } from '../models/Tag';
 
-const Categories = repo(Category);
+const Tags = repo(Tag);
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
   app.route({
@@ -16,7 +16,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     schema: {
       security: [
         {
-          OAuth2: ['configuration@category::list'],
+          OAuth2: ['configuration@tag::list'],
         },
       ],
       querystring: ListQueryOptions({
@@ -26,7 +26,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      return new TableQueryBuilder(Categories, req).exec();
+      return new TableQueryBuilder(Tags, req).exec();
     },
   });
   app.route({
@@ -35,10 +35,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     schema: {
       security: [
         {
-          OAuth2: ['configuration@category::create'],
+          OAuth2: ['configuration@tag::create'],
         },
       ],
-      body: Type.Omit(CategorySchema, [
+      body: Type.Omit(TagSchema, [
         'id',
         'creator',
         'createdAt',
@@ -47,7 +47,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ]),
     },
     async handler(req) {
-      return await Categories.save({
+      return await Tags.save({
         ...req.body,
         creator: { id: req.user.id },
       });
@@ -59,10 +59,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     schema: {
       security: [
         {
-          OAuth2: ['configuration@category::update'],
+          OAuth2: ['configuration@tag::update'],
         },
       ],
-      body: Type.Omit(CategorySchema, [
+      body: Type.Omit(TagSchema, [
         'id',
         'creator',
         'createdAt',
@@ -74,8 +74,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      const { id } = await Categories.findOneByOrFail({ id: req.params.id });
-      await Categories.update({ id }, req.body);
+      const { id } = await Tags.findOneByOrFail({ id: req.params.id });
+      await Tags.update({ id }, req.body);
     },
   });
 };

@@ -10,9 +10,14 @@ export interface Options {
    * @example 'http://my.host.com:3000'
    */
   url: string;
+
+  appVersion: string;
 }
 
-const app: FastifyPluginAsync<Options> = async (fastify, { url }) => {
+const app: FastifyPluginAsync<Options> = async (
+  fastify,
+  { url, appVersion },
+) => {
   const { JWT_SECRET } = process.env;
   assert(JWT_SECRET, 'JWT_SECRET env var not provided');
 
@@ -55,14 +60,15 @@ const app: FastifyPluginAsync<Options> = async (fastify, { url }) => {
   fastify.register(import('@fastify/formbody'));
 
   await fastify.register(
-    async () => {
+    async (fastify) => {
       await fastify.register(import('@fastify/swagger-ui'), {
         prefix: '/docs',
         uiConfig: {
           persistAuthorization: true,
+          docExpansion: 'none',
         },
         theme: {
-          title: 'Inventory API',
+          title: `Inventory API v${appVersion}`,
           css: [
             {
               filename: 'theme.css',
@@ -70,6 +76,10 @@ const app: FastifyPluginAsync<Options> = async (fastify, { url }) => {
             },
           ],
         },
+      });
+
+      await fastify.register(import('./infra/health'), {
+        appVersion,
       });
 
       await fastify.register(import('./domains/user/routes'));
@@ -95,10 +105,7 @@ const app: FastifyPluginAsync<Options> = async (fastify, { url }) => {
 
       await fastify.register(import('./domains/warehouse/routes'));
       await fastify.register(import('./domains/supplier/routes'));
-
-      await fastify.register(import('./domains/product/routes'), {
-        prefix: '/products',
-      });
+      await fastify.register(import('./domains/product/routes'));
     },
     {
       prefix: '/api/v1',
