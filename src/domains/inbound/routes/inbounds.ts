@@ -13,12 +13,19 @@ import { InboundImage } from '../models/InboundImage';
 import { InboundProduct } from '../models/InboundProduct';
 import { InboundService } from '../services/Inbound.service';
 import { loadUserWarehouse } from '../services/utils';
+import { IsNull } from 'typeorm';
 
 const sum = (array: number[]) => array.reduce((a, b) => a + b, 0);
 
 const INBOUND_INVALID_STATUS = createError(
   'INBOUND_INVALID_STATUS',
   'inbound status is invalid',
+  400,
+);
+
+const INCOMPLETE_LOADING = createError(
+  'INCOMPLETE_LOADING',
+  'not all products are loaded completely ',
   400,
 );
 
@@ -139,7 +146,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           Type.Object({
             productId: Type.Number(),
             supplierId: Type.Number(),
-            basePrice: Type.Number(),
+            price: Type.Number(),
             quantity: Type.Number(),
           }),
         ),
@@ -171,11 +178,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
         // Add each product to the inbound record
         for (const productData of body.products) {
-          const { productId, supplierId, basePrice, quantity } = productData;
+          const { productId, supplierId, price, quantity } = productData;
 
           await inboundService.addInboundProduct(inbound, productId, {
             supplierId,
-            basePrice,
+            price,
             quantity,
           });
         }
@@ -197,7 +204,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         products: Type.Array(
           Type.Object({
             productId: Type.Number(),
-            basePrice: Type.Number(),
+            price: Type.Number(),
             quantity: Type.Number(),
           }),
         ),
@@ -230,9 +237,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
         // Add each product to the inbound record
         for (const productData of body.products) {
-          const { productId, basePrice, quantity } = productData;
+          const { productId, price, quantity } = productData;
           await inboundService.addInboundProduct(inbound, productId, {
-            basePrice,
+            price,
             quantity,
           });
         }
@@ -403,6 +410,21 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
       if (inbound.status !== InboundStatus.LOAD) {
         throw new INBOUND_INVALID_STATUS();
+      }
+
+      const inboundProductWithoutActualQuantity = await InboundProducts.findOne(
+        {
+          where: {
+            inbound: {
+              id: inbound.id,
+            },
+            actualQuantity: IsNull(),
+          },
+        },
+      );
+
+      if (inboundProductWithoutActualQuantity) {
+        throw new INCOMPLETE_LOADING();
       }
 
       await Inbounds.update(inbound.id, {
