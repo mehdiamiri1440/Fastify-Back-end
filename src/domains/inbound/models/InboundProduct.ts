@@ -29,8 +29,8 @@ export class InboundProduct {
   @Column()
   requestedQuantity!: number;
 
-  @Column({ nullable: true })
-  actualQuantity!: number;
+  @Column({ type: 'integer', nullable: true })
+  actualQuantity!: number | number;
 
   @Column({ default: false })
   sorted!: boolean;

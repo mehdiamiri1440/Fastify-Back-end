@@ -98,7 +98,7 @@ describe('Create Inbound', () => {
           {
             productId: product.id,
             supplierId: supplier.id,
-            basePrice: 100,
+            price: 100,
             quantity: 5,
           },
         ],
@@ -136,7 +136,7 @@ describe('Create Inbound', () => {
         products: [
           {
             productId: product.id,
-            basePrice: 100,
+            price: 100,
             quantity: 5,
           },
         ],

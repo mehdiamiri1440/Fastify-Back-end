@@ -185,7 +185,7 @@ describe('Update InboundProduct', () => {
     });
   });
 
-  it('should patch inbound-product when inbound state is PRE_DELIVERY', async () => {
+  it('should set-price when inbound state is PRE_DELIVERY', async () => {
     assert(app);
     assert(user);
     const InboundProducts = repo(InboundProduct);
@@ -201,8 +201,8 @@ describe('Update InboundProduct', () => {
     });
 
     const response = await user.inject({
-      method: 'PATCH',
-      url: `/${inboundProduct.id}`,
+      method: 'POST',
+      url: `/${inboundProduct.id}/set-price`,
       payload: {
         price: 200,
       },
@@ -224,6 +224,49 @@ describe('Update InboundProduct', () => {
     });
     expect(entity?.deletedAt).toBeNull();
     expect(entity?.price).toBe(200);
+  });
+
+  it('should set-actual-quantity when inbound state is LOAD', async () => {
+    assert(app);
+    assert(user);
+    const InboundProducts = repo(InboundProduct);
+
+    const inbound = await repo(Inbound).save({
+      code: 'code',
+      type: InboundType.NEW,
+      status: InboundStatus.LOAD,
+      creator: {
+        id: 1,
+      },
+      warehouse,
+    });
+
+    const inboundProduct = await InboundProducts.save<
+      DeepPartial<InboundProduct>
+    >({
+      supplier,
+      product,
+      inbound,
+      price: 100,
+      requestedQuantity: 10,
+    });
+
+    const response = await user.inject({
+      method: 'POST',
+      url: `/${inboundProduct.id}/set-actual-quantity`,
+      payload: {
+        actualQuantity: 123,
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+
+    const entity = await InboundProducts.findOne({
+      where: { id: inboundProduct.id },
+      withDeleted: true,
+    });
+    expect(entity?.deletedAt).toBeNull();
+    expect(entity?.actualQuantity).toBe(123);
   });
 });
 

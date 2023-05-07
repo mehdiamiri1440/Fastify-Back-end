@@ -146,16 +146,45 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // PATCH /:id
+  // POST /:id/set-price
   app.route({
-    method: 'PATCH',
-    url: '/:id',
+    method: 'POST',
+    url: '/:id/set-price',
     schema: {
       params: Type.Object({
         id: Type.Number(),
       }),
       body: Type.Object({
         price: Type.Optional(Type.Number()),
+      }),
+      security: [
+        {
+          OAuth2: ['user@inbound::update'],
+        },
+      ],
+    },
+    async handler(req) {
+      const { id } = req.params;
+      const inboundProduct = await fineOne(id);
+
+      if (inboundProduct.inbound.status !== InboundStatus.PRE_DELIVERY) {
+        throw new INBOUND_INVALID_STATUS();
+      }
+
+      await InboundProducts.update(inboundProduct.id, req.body);
+      return InboundProducts.findOneByOrFail({ id: inboundProduct.id });
+    },
+  });
+
+  // POST /:id/set-actual-quantity
+  app.route({
+    method: 'POST',
+    url: '/:id/set-actual-quantity',
+    schema: {
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      body: Type.Object({
         actualQuantity: Type.Optional(Type.Number()),
       }),
       security: [
@@ -168,9 +197,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const { id } = req.params;
       const inboundProduct = await fineOne(id);
 
-      const allowedStates = [InboundStatus.PRE_DELIVERY, InboundStatus.LOAD];
-
-      if (!allowedStates.includes(inboundProduct.inbound.status)) {
+      if (inboundProduct.inbound.status !== InboundStatus.LOAD) {
         throw new INBOUND_INVALID_STATUS();
       }
 

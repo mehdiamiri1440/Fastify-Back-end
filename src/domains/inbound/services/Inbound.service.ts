@@ -78,11 +78,11 @@ export class InboundService {
     {
       supplierId,
       quantity,
-      basePrice,
+      price,
     }: {
       supplierId?: number;
       quantity: number;
-      basePrice: number;
+      price: number;
     },
   ) {
     const product = await this.productsRepo.findOneByOrFail({ id: productId });
@@ -95,7 +95,7 @@ export class InboundService {
       inbound,
       product,
       supplier,
-      price: basePrice,
+      price,
       requestedQuantity: quantity,
       creator: { id: this.#userId },
     });
