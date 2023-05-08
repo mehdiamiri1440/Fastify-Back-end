@@ -10,6 +10,7 @@ variables:
   MINIO_ROOT_PASSWORD: minio123
   IBAN_VALIDATOR_URL: http://hub2.delinternet.com:5004
   HUB_API_ADDRESS: http://api.hub2.delinternet.com/api/v1
+  APP_URL: http://inventory.delinternet.com
 
 test:
   stage: test
