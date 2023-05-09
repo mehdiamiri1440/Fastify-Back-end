@@ -9,6 +9,7 @@ const config = JSON.parse(readFileSync('./.swcrc', 'utf-8'));
 module.exports = {
   testEnvironment: 'node',
   setupFiles: ['dotenv/config'],
+  reporters: ['default', 'jest-junit'],
   coverageReporters: ['cobertura'],
   transform: {
     '^.+\\.(t|j)sx?$': ['@swc/jest', config],
