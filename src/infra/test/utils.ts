@@ -81,11 +81,11 @@ export async function createTestFastifyApp() {
   await app.register(import('$src/infra/RouteValidator'));
   await app.register(import('$src/infra/authorization'));
 
-  const superErrorHandler = app.errorHandler;
-  app.setErrorHandler((error, request, reply) => {
-    console.error(request.method, request.url, error);
-    superErrorHandler(error, request, reply);
-  });
+  // const superErrorHandler = app.errorHandler;
+  // app.setErrorHandler((error, request, reply) => {
+  //   console.info(request.method, request.url, error);
+  //   superErrorHandler(error, request, reply);
+  // });
   return app;
 }
 

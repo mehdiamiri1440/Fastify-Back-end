@@ -2,7 +2,7 @@ import { FastifyPluginAsync, FastifySchema } from 'fastify';
 import createError from '@fastify/error';
 import fastifyMultipart from '@fastify/multipart';
 import { randomUUID } from 'crypto';
-import mime from 'mime-types';
+import { lookup, extension } from 'mime-types';
 import contentDisposition from 'content-disposition';
 import { to } from 'await-to-js';
 import type { Client } from 'minio';
@@ -10,10 +10,19 @@ import assert from 'assert';
 
 const FILE_NOT_FOUND = createError('FILE_NOT_FOUND', 'file not found', 404);
 const INVALID_FILE = createError('INVALID_FILE', 'invalid file', 400);
+const INVALID_MIME_TYPE = createError(
+  'INVALID_MIME_TYPE',
+  'uploaded mime type is not allowed',
+  400,
+);
+
+const DEFAULT_FILE_SIZE_LIMIT = 10 * 1024 * 1024; // 10MB
 
 export interface Options {
   minio: Client | null;
   bucketName: string;
+  maxUploadSize?: number;
+  allowedMimeTypes?: string[];
   schema?: {
     security?: FastifySchema['security'];
   };
@@ -21,7 +30,7 @@ export interface Options {
 
 const plugin: FastifyPluginAsync<Options> = async (
   app,
-  { minio, bucketName, schema = {} },
+  { minio, bucketName, schema = {}, maxUploadSize, allowedMimeTypes },
 ) => {
   app.register(fastifyMultipart);
 
@@ -54,7 +63,7 @@ const plugin: FastifyPluginAsync<Options> = async (
       }
 
       rep
-        .type(mime.lookup(filename) || 'application/octet-stream')
+        .type(lookup(filename) || 'application/octet-stream')
         .header(
           'Content-Disposition',
           contentDisposition(filename, { type: 'attachment' }),
@@ -89,11 +98,24 @@ const plugin: FastifyPluginAsync<Options> = async (
     },
     async handler(req) {
       assert(minio, 'Storage is not enable. missing env');
-      const file = await req.file();
+      const file = await req.file({
+        limits: {
+          files: 1,
+          fileSize: maxUploadSize ?? DEFAULT_FILE_SIZE_LIMIT,
+        },
+      });
       if (!file) throw new INVALID_FILE();
 
+      if (allowedMimeTypes && !allowedMimeTypes.includes(file.mimetype)) {
+        throw new INVALID_MIME_TYPE(
+          `uploaded mime type is not allowed, only ${allowedMimeTypes.join(
+            ',',
+          )} allowed`,
+        );
+      }
+
       const readable = file.file;
-      const filename = `${randomUUID()}.${mime.extension(file.mimetype)}`;
+      const filename = `${randomUUID()}.${extension(file.mimetype)}`;
 
       await minio.putObject(bucketName, filename, readable);
 

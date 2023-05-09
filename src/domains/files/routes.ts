@@ -7,12 +7,22 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     minio: minio,
     bucketName: 'inbound-images',
     prefix: '/inbound-images',
+    allowedMimeTypes: ['image/jpeg', 'image/png'],
   });
 
   await app.register(Files, {
     minio: minio,
-    bucketName: 'inbound-signatures',
-    prefix: '/inbound-signatures',
+    bucketName: 'inbound-images',
+    prefix: '/inbound-images',
+    allowedMimeTypes: ['image/jpeg', 'image/png'],
+  });
+
+  await app.register(Files, {
+    minio: minio,
+    bucketName: 'signatures',
+    prefix: '/signatures',
+    maxUploadSize: 1 * 1024 * 1024,
+    allowedMimeTypes: ['image/png'],
   });
 
   await app.register(Files, {
