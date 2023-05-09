@@ -56,39 +56,38 @@ async function ensureBucket(client: Client, bucketName: string) {
   );
 }
 
-describe('file plugin smoke test', () => {
-  let fastify: FastifyInstance;
-  const { S3_URI } = process.env;
-  assert(S3_URI, 'S3_URI env is required');
-  const s3Uri = new URL(S3_URI);
+let fastify: FastifyInstance;
+const { S3_URI } = process.env;
+assert(S3_URI, 'S3_URI env is required');
+const s3Uri = new URL(S3_URI);
 
-  const minio = new Client({
-    endPoint: s3Uri.hostname,
-    port: s3Uri.port ? Number(s3Uri.port) : 9000,
-    useSSL: s3Uri.protocol.startsWith('https'),
-    accessKey: decodeURIComponent(s3Uri.username),
-    secretKey: decodeURIComponent(s3Uri.password),
-  });
+const minio = new Client({
+  endPoint: s3Uri.hostname,
+  port: s3Uri.port ? Number(s3Uri.port) : 9000,
+  useSSL: s3Uri.protocol.startsWith('https'),
+  accessKey: decodeURIComponent(s3Uri.username),
+  secretKey: decodeURIComponent(s3Uri.password),
+});
 
-  const options: Options = {
-    minio: minio,
-    bucketName: 'test-bucket',
-    schema: {
-      security: [{ apiKey: [] }],
-    },
-  };
-  const bucketName = 'test-bucket';
+const bucketName = 'test-bucket';
 
+describe('Upload, download', () => {
   beforeEach(async () => {
     fastify = Fastify();
     // fastify.register(fastifyMultipart);
-    fastify.register(plugin, options);
+    fastify.register(plugin, {
+      minio: minio,
+      bucketName: 'test-bucket',
+      schema: {
+        security: [{ apiKey: [] }],
+      },
+    });
     await fastify.ready();
     await ensureBucket(minio, bucketName);
   });
 
   afterEach(() => {
-    fastify.close();
+    return fastify.close();
   });
 
   it('POST /', async () => {
@@ -123,5 +122,40 @@ describe('file plugin smoke test', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.body).toBe('hety');
+  });
+});
+
+describe('Errors', () => {
+  it('should error on invalid mime-type', async () => {
+    const fastify = Fastify();
+    fastify.register(plugin, {
+      minio: minio,
+      bucketName: 'test-bucket',
+      allowedMimeTypes: ['image/jpeg', 'image/png'],
+    });
+    await fastify.ready();
+    await ensureBucket(minio, bucketName);
+
+    const form = new FormData();
+    form.append(
+      'file',
+      createReadStream(join(__dirname, `./test_data/test.txt`)),
+      {
+        contentType: 'text/plain',
+      },
+    );
+
+    const response = await fastify.inject({
+      method: 'POST',
+      url: '/',
+      payload: form,
+      headers: form.getHeaders(),
+    });
+
+    expect(response.statusCode).toBe(400);
+    const body = response.json();
+    expect(body).toMatchObject({
+      code: 'INVALID_MIME_TYPE',
+    });
   });
 });
