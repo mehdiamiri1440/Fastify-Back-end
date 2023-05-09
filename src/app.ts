@@ -24,6 +24,13 @@ const app: FastifyPluginAsync<Options> = async (
   await fastify.register(import('./databases/typeorm'));
   await fastify.register(import('./infra/error-handlers/typeorm'));
 
+  await fastify.register(import('@fastify/cors'), {
+    origin: '*',
+    optionsSuccessStatus: 200,
+    maxAge: 3600, // cache for 1 hour
+    exposedHeaders: ['Content-Disposition'],
+  });
+
   await fastify.register(FastifySwagger, {
     openapi: {
       openapi: '3.0.0',

@@ -1,6 +1,5 @@
 {
   "name": "inventory-backend",
-  "version": "0.2.1",
   "description": "",
   "main": "src/app.ts",
   "type": "commonjs",
@@ -24,6 +23,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@fastify/cors": "^8.2.1",
     "@fastify/error": "^3.2.0",
     "@fastify/formbody": "^7.4.0",
     "@fastify/jwt": "^6.7.0",
@@ -47,7 +47,7 @@
     "imgproxy": "^1.1.1",
     "lodash": "^4.17.21",
     "mime-types": "^2.1.35",
-    "minio": "^7.0.33",
+    "minio": "^7.1.0",
     "module-alias": "^2.2.2",
     "nano-jsx": "^0.0.37",
     "pg": "^8.10.0",

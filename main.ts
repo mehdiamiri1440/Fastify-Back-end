@@ -1,7 +1,6 @@
 import qs from 'qs';
 import Fastify from 'fastify';
 import type Ajv from 'ajv';
-import { version } from './package.json';
 
 async function main() {
   const fastify = Fastify({
@@ -27,7 +26,7 @@ async function main() {
 
   await fastify.register(import('./src/app'), {
     url: appUrl,
-    appVersion: version,
+    appVersion: process.env.VERSION ?? '0.0.0',
   });
 
   await fastify.listen({
