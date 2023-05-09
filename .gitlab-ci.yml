@@ -33,10 +33,13 @@ test:
     S3_URI: http://minio:minio123@minio:9000/
 
   artifacts:
+    when: always
     reports:
       coverage_report:
         coverage_format: cobertura
         path: coverage/cobertura-coverage.xml
+      junit:
+        - junit.xml
 
   except:
     - tags
