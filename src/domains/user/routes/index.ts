@@ -87,6 +87,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
       return {
         data: user,
+        meta: {},
       };
     },
   });
@@ -97,6 +98,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       return {
         data: permissions,
+        meta: {},
       };
     },
   });
