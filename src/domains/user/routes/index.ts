@@ -1,4 +1,4 @@
-import { ResponseShape } from '$src/infra/Response';
+import { Response } from '$src/infra/Response';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import assert from 'assert';
 import { Type } from '@sinclair/typebox';
@@ -7,7 +7,7 @@ import { RolePermission } from '$src/domains/user/models/RolePermission';
 import { repo } from '$src/infra/utils/repo';
 import { createError } from '@fastify/error';
 import permissions from '$src/permissions';
-import bcrypt from 'bcrypt';
+import { compare } from 'bcrypt';
 
 const ACCESS_DENIED = createError('ACCESS_DENIED', 'you dont have access', 403);
 const Users = repo(User);
@@ -21,8 +21,6 @@ if (TOKEN_TTL_SECONDS) {
 const TTL = TOKEN_TTL_SECONDS ? Number(TOKEN_TTL_SECONDS) : 200 * 60; // 20 mins
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
-  app.register(ResponseShape);
-
   app.route({
     method: 'POST',
     url: '/login',
@@ -39,7 +37,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
         relations: ['role'],
       });
-      if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
+      if (!user || !(await compare(req.body.password, user.password))) {
         return new ACCESS_DENIED();
       }
       let scope: string;
@@ -59,17 +57,18 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           expiresIn: TTL,
         },
       );
-      return JSON.stringify({
+      return {
         access_token: token,
         token_type: 'bearer',
         expires_in: TTL,
         scope,
-      });
+      };
     },
   });
 
   await app.register(import('./users'), { prefix: '/users' });
   await app.register(import('./roles'), { prefix: '/roles' });
+
   app.route({
     method: 'GET',
     url: '/users/me',
@@ -81,10 +80,14 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ],
     },
     async handler(req) {
-      return await Users.findOne({
+      const user = await Users.findOne({
         where: { id: req.user.id },
         loadRelationIds: true,
       });
+
+      return {
+        data: user,
+      };
     },
   });
   app.route({
@@ -92,7 +95,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/permissions',
 
     async handler(req) {
-      return permissions;
+      return {
+        data: permissions,
+      };
     },
   });
 };

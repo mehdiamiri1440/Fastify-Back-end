@@ -27,6 +27,14 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
   await app.register(Files, {
     minio: minio,
+    bucketName: 'logos',
+    prefix: '/logos',
+    maxUploadSize: 1 * 1024 * 1024,
+    allowedMimeTypes: ['image/jpeg', 'image/png'],
+  });
+
+  await app.register(Files, {
+    minio: minio,
     bucketName: 'supplier-documents',
     prefix: '/supplier-documents',
   });
