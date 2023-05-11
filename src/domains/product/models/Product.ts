@@ -8,7 +8,7 @@ import { User } from '$src/domains/user/models/User';
 import { ProductSalePrice } from './ProductSalePrice';
 import { Static } from '@sinclair/typebox';
 import { ProductSchema } from '../schemas/product.schema';
-import { SupplierProduct } from '$src/domains/product/models/ProductSupplier';
+import { ProductSupplier } from '$src/domains/product/models/ProductSupplier';
 
 import {
   Entity,
@@ -29,6 +29,7 @@ import { Bin } from '$src/domains/warehouse/models/Bin';
 import { Shape } from '$src/domains/configuration/models/Shape';
 import { Tag } from '$src/domains/configuration/models/Tag';
 import { ProductImage } from './ProductImage';
+import { Supplier } from '$src/domains/supplier/models/Supplier';
 
 @Entity()
 export class Product implements Static<typeof ProductSchema> {
@@ -56,19 +57,32 @@ export class Product implements Static<typeof ProductSchema> {
   @ManyToOne(() => TaxType)
   taxType!: Relation<TaxType>;
 
-  @ManyToOne(() => SupplierProduct)
-  productSuppliers!: Relation<SupplierProduct[]>;
+  @OneToMany(
+    () => ProductSupplier,
+    (productSuppliers) => productSuppliers.product,
+  )
+  productSuppliers!: Relation<ProductSupplier[]>;
 
-  @ManyToOne(() => ProductStockHistory)
+  @OneToMany(() => ProductStockHistory, (stockHistory) => stockHistory.product)
   stockHistory!: Relation<ProductStockHistory[]>;
 
   @ManyToMany(() => Bin)
   @JoinTable({
-    name: 'bin_products',
-    joinColumn: { name: 'product_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'bin_id', referencedColumnName: 'id' },
+    name: 'bin_product',
+    joinColumn: { name: 'bin_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'product_id', referencedColumnName: 'id' },
+    synchronize: false,
   })
   bins!: Relation<Bin[]>;
+
+  // @ManyToMany(() => Supplier)
+  // @JoinTable({
+  //   name: 'product_supplier',
+  //   joinColumn: { name: 'product_id', referencedColumnName: 'id' },
+  //   inverseJoinColumn: { name: 'supplier_id', referencedColumnName: 'id' },
+  //   synchronize: false,
+  // })
+  // suppliers!: Relation<Supplier[]>;
 
   @ManyToOne(() => Unit)
   unit!: Relation<Unit>;
@@ -92,6 +106,9 @@ export class Product implements Static<typeof ProductSchema> {
   creator!: Relation<User>;
 
   @ManyToMany(() => Tag)
+  @JoinTable({
+    name: 'product_tag',
+  })
   tags!: Relation<Tag[]>;
 
   @Column({ type: 'text', nullable: true })
@@ -109,6 +126,6 @@ export class Product implements Static<typeof ProductSchema> {
   @OneToMany(() => ProductSalePrice, (salePrice) => salePrice.product)
   salePrices!: ProductSalePrice[];
 
-  @OneToMany(() => ProductImage, (image) => image.inbound)
+  @OneToMany(() => ProductImage, (image) => image.product)
   images!: Relation<ProductImage[]>;
 }

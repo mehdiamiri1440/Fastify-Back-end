@@ -13,7 +13,6 @@ import { DeepPartial, In } from 'typeorm';
 import { ProductService } from '../ProductService';
 import { Product } from '../models/Product';
 import { ProductSalePrice } from '../models/ProductSalePrice';
-import { SupplierProduct } from '../models/ProductSupplier';
 import { ProductSchema } from '../schemas/product.schema';
 import { hydrateProductInfo } from '../utils';
 import { SourceType } from '../models/ProductStockHistory';
@@ -30,18 +29,6 @@ const CANT_INIT_PRODUCT = createError(
   'CANT_INIT_PRODUCT',
   'could not init, initialized product',
   400,
-);
-
-const SUPPLIER_NOT_FOUND = createError(
-  'SUPPLIER_NOT_FOUND',
-  'supplier not found',
-  404,
-);
-
-const SUPPLIER_ALREADY_EXIST = createError(
-  'SUPPLIER_ALREADY_EXIST',
-  'supplier already exist',
-  404,
 );
 
 const InputProduct = Type.Composite([
@@ -66,17 +53,14 @@ const InputProduct = Type.Composite([
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   const Products = repo(Product);
-  const Suppliers = repo(Supplier);
-  const SupplierProducts = repo(SupplierProduct);
-  const ProductSalePrices = repo(ProductSalePrice);
   const Bins = repo(Bin);
 
   app.register(ResponseShape);
 
-  // GET /
+  // GET /products
   app.route({
     method: 'GET',
-    url: '/',
+    url: '/products',
     schema: {
       querystring: ListQueryOptions({
         filterable: [],
@@ -98,10 +82,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // GET /:id
+  // GET /products/:id
   app.route({
     method: 'GET',
-    url: '/:id',
+    url: '/products/:id',
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -115,12 +99,23 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       const product = await Products.findOne({
         where: { id: req.params.id },
+        select: {
+          images: {
+            fileId: true,
+          },
+        },
         relations: {
           taxType: true,
           category: true,
           unit: true,
           color: true,
           images: true,
+          shape: true,
+          size: true,
+          tags: true,
+          productSuppliers: {
+            supplier: true,
+          },
         },
       });
       if (!product) throw new PRODUCT_NOT_FOUND();
@@ -128,10 +123,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // POST /
+  // POST /products
   app.route({
     method: 'POST',
-    url: '/',
+    url: '/products',
     schema: {
       body: InputProduct,
       security: [
@@ -172,10 +167,63 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // POST /:id/init-bin-products
+  // PUT /products/:id
+  app.route({
+    method: 'PUT',
+    url: '/products/:id',
+    schema: {
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      body: InputProduct,
+      security: [
+        {
+          OAuth2: ['product@product::update'],
+        },
+      ],
+    },
+    async handler(req) {
+      const productId = req.params.id;
+
+      const {
+        taxTypeId,
+        colorId,
+        unitId,
+        categoryId,
+        shapeId,
+        sizeId,
+        brandId,
+        ...rest
+      } = req.body;
+
+      const relations = await hydrateProductInfo({
+        taxTypeId,
+        colorId,
+        unitId,
+        categoryId,
+        shapeId,
+        sizeId,
+        brandId,
+      });
+
+      await Products.update({ id: req.params.id }, { ...rest, ...relations });
+
+      return await Products.findOne({
+        where: { id: productId },
+        relations: {
+          taxType: true,
+          category: true,
+          unit: true,
+          color: true,
+        },
+      });
+    },
+  });
+
+  // POST /products/:id/init-bin-products
   app.route({
     method: 'POST',
-    url: '/:id/init-bin-products',
+    url: '/products/:id/init-bin-products',
     schema: {
       params: Type.Object({ id: Type.Number() }),
       body: Type.Object({
@@ -233,178 +281,40 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // PUT /:id
-  app.route({
-    method: 'PUT',
-    url: '/:id',
-    schema: {
-      params: Type.Object({
-        id: Type.Number(),
-      }),
-      body: InputProduct,
-      security: [
-        {
-          OAuth2: ['product@product::update'],
-        },
-      ],
-    },
-    async handler(req) {
-      const productId = req.params.id;
-
-      const {
-        taxTypeId,
-        colorId,
-        unitId,
-        categoryId,
-        shapeId,
-        sizeId,
-        brandId,
-        ...rest
-      } = req.body;
-
-      const relations = await hydrateProductInfo({
-        taxTypeId,
-        colorId,
-        unitId,
-        categoryId,
-        shapeId,
-        sizeId,
-        brandId,
-      });
-
-      await Products.update({ id: req.params.id }, { ...rest, ...relations });
-
-      return await Products.findOne({
-        where: { id: productId },
-        relations: {
-          taxType: true,
-          category: true,
-          unit: true,
-          color: true,
-        },
-      });
-    },
-  });
-
-  // POST /:id/suppliers
+  // POST /products/:id/move-bin-quantity
   app.route({
     method: 'POST',
-    url: '/:id/suppliers',
+    url: '/products/:id/move-bin-quantity',
     schema: {
+      summary: 'move bin quantity from one bin to another',
       params: Type.Object({
         id: Type.Number(),
       }),
       body: Type.Object({
-        supplierId: Type.Number(),
-        referenceCodes: Type.Array(Type.String()),
+        sourceBinId: Type.Number(),
+        targetBinId: Type.Number(),
+        quantity: Type.Number(),
       }),
       security: [
         {
-          OAuth2: ['product@product-suppliers::create'],
+          OAuth2: ['product@product-bins::move'],
         },
       ],
     },
     async handler(req) {
       const { id } = req.params;
-      const { supplierId, referenceCodes } = req.body;
-
-      const product = await Products.findOneByOrFail({ id });
-
-      const suppliers = await Suppliers.findOneBy({ id: supplierId });
-      if (!suppliers) {
-        throw new SUPPLIER_NOT_FOUND();
-      }
-
-      const alreadyExist = await SupplierProducts.findAndCountBy({
-        product: {
-          id: product.id,
-        },
-        supplier: {
-          id: suppliers.id,
-        },
-      });
-      if (alreadyExist) throw new SUPPLIER_ALREADY_EXIST();
-
-      return SupplierProducts.save({
-        product,
-        supplier: suppliers,
-        referenceCodes,
-      });
-    },
-  });
-
-  // GET /:id/sale-prices
-  app.route({
-    method: 'GET',
-    url: '/:id/sale-prices',
-    schema: {
-      params: Type.Object({
-        id: Type.Number(),
-      }),
-      security: [
-        {
-          OAuth2: ['product@product-sale-prices::list'],
-        },
-      ],
-    },
-    async handler(req) {
-      const productId = req.params.id;
-      const product = await Products.findOne({
-        where: { id: productId },
-        relations: ['salePrices'],
-      });
-      if (!product) throw new PRODUCT_NOT_FOUND();
-      const currentPrice = product.salePrices.pop();
-      return { currentPrice, history: product.salePrices };
-    },
-  });
-
-  // POST /:id/sale-prices
-  app.route({
-    method: 'POST',
-    url: '/:id/sale-prices',
-    schema: {
-      params: Type.Object({
-        id: Type.Number(),
-      }),
-      body: Type.Object({ price: Type.Number() }),
-      security: [
-        {
-          OAuth2: ['product@product-sale-prices::create'],
-        },
-      ],
-    },
-    async handler(req) {
-      const { id } = req.params;
+      const { sourceBinId, targetBinId, quantity } = req.body;
 
       const product = await Products.findOneBy({ id });
       if (!product) throw new PRODUCT_NOT_FOUND();
 
-      return ProductSalePrices.save({ product, price: req.body.price });
-    },
-  });
+      const sourceBin = await Bins.findOneByOrFail({ id: sourceBinId });
+      const targetBin = await Bins.findOneByOrFail({ id: targetBinId });
 
-  // POST /:id/bins
-  app.route({
-    method: 'POST',
-    url: '/:id/bins',
-    schema: {
-      params: Type.Object({
-        id: Type.Number(),
-      }),
-      body: Type.Object({ price: Type.Number() }),
-      security: [
-        {
-          OAuth2: ['product@product-bins::create'],
-        },
-      ],
-    },
-    async handler(req) {
-      const { id } = req.params;
-
-      const product = await Products.findOneBy({ id });
-      if (!product) throw new PRODUCT_NOT_FOUND();
-      return ProductSalePrices.save({ product, price: req.body.price });
+      await AppDataSource.transaction(async (manager) => {
+        const productService = new ProductService(manager, req.user.id);
+        await productService.move(product, sourceBin, targetBin, quantity);
+      });
     },
   });
 };
