@@ -7,11 +7,11 @@ import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { SupplierSchema } from '$src/domains/supplier/schemas/supplier.schema';
 import { Type } from '@sinclair/typebox';
-const Suppliers = repo(Supplier);
-const Languages = repo(Language);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
+  const Suppliers = repo(Supplier);
+  const Languages = repo(Language);
 
   app.route({
     method: 'GET',
@@ -29,9 +29,45 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      return new TableQueryBuilder(Suppliers, req).exec();
+      return new TableQueryBuilder(Suppliers, req)
+        .relation(() => ({
+          creator: true,
+        }))
+        .loadRelationIds({
+          disableMixedMap: false,
+        })
+        .exec();
     },
   });
+
+  app.route({
+    method: 'GET',
+    url: '/:id',
+    schema: {
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      security: [
+        {
+          OAuth2: ['supplier@supplier::list'],
+        },
+      ],
+    },
+    async handler(req) {
+      const { id } = req.params;
+
+      return Suppliers.findOneOrFail({
+        where: {
+          id,
+        },
+        relations: {
+          creator: true,
+          language: true,
+        },
+      });
+    },
+  });
+
   app.route({
     method: 'POST',
     url: '/',
@@ -108,7 +144,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     async handler(req) {
       const { id } = await Suppliers.findOneByOrFail({ id: req.params.id });
-      await Suppliers.delete({ id });
+      await Suppliers.softDelete({ id });
     },
   });
   await app.register(import('./contacts'));

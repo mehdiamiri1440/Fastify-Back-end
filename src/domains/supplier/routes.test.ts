@@ -8,6 +8,7 @@ import routes from './routes';
 import AppDataSource from '$src/DataSource';
 import { Language } from './models/Language';
 import { repo } from '$src/infra/utils/repo';
+import { describe } from 'node:test';
 
 const Languages = repo(Language);
 let app: FastifyInstance | undefined;
@@ -50,221 +51,241 @@ afterAll(async () => {
   await app?.close();
 });
 
-it('should return all languages', async () => {
-  assert(app);
-  assert(user);
+describe('flow', () => {
+  it('should return all languages', async () => {
+    assert(app);
+    assert(user);
 
-  languageId = (await Languages.save({ ...languageData })).id;
+    languageId = (await Languages.save({ ...languageData })).id;
 
-  const response = await user.inject({
-    method: 'GET',
-    url: '/languages',
+    const response = await user.inject({
+      method: 'GET',
+      url: '/languages',
+    });
+    expect(response.json()).toMatchObject({
+      data: [
+        {
+          id: languageId,
+          ...languageData,
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+          deletedAt: null,
+        },
+      ],
+      meta: {},
+    });
   });
-  expect(response.json()).toMatchObject({
-    data: [
-      {
-        id: languageId,
-        ...languageData,
+
+  it('should create a supplier', async () => {
+    assert(app);
+    assert(user);
+
+    const response = await user.inject({
+      method: 'POST',
+      url: '/suppliers',
+      payload: supplierData,
+    });
+    supplierId = response.json().data.id;
+    expect(response.json()).toMatchObject({
+      data: {
+        id: supplierId,
+        ...supplierData,
+        language: languageData,
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         deletedAt: null,
       },
-    ],
-    meta: {},
+      meta: {},
+    });
   });
-});
 
-it('should create a supplier', async () => {
-  assert(app);
-  assert(user);
+  it('should return all suppliers', async () => {
+    assert(app);
+    assert(user);
 
-  const response = await user.inject({
-    method: 'POST',
-    url: '/suppliers',
-    payload: supplierData,
-  });
-  supplierId = response.json().data.id;
-  expect(response.json()).toMatchObject({
-    data: {
-      id: supplierId,
-      ...supplierData,
-      language: languageData,
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String),
-      deletedAt: null,
-    },
-    meta: {},
-  });
-});
-
-it('should return all suppliers', async () => {
-  assert(app);
-  assert(user);
-
-  const response = await user.inject({
-    method: 'GET',
-    url: '/suppliers',
-  });
-  expect(response.json().data).toMatchObject(
-    expect.arrayContaining([
-      expect.objectContaining({
+    const response = await user.inject({
+      method: 'GET',
+      url: '/suppliers',
+    });
+    expect(response.json().data).toMatchObject([
+      {
         id: supplierId,
         ...supplierData,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        deletedAt: null,
         language: languageId,
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-        deletedAt: null,
-      }),
-    ]),
-  );
-});
-
-it('should update supplier', async () => {
-  assert(app);
-  assert(user);
-
-  const response = await user.inject({
-    method: 'PUT',
-    url: '/suppliers/' + supplierId,
-    payload: { ...supplierData, name: 'edited' },
+      },
+    ]);
   });
 
-  expect(response.statusCode).toBe(200);
-});
+  it('should single supplier', async () => {
+    assert(app);
+    assert(user);
 
-it('should create a contact for supplier', async () => {
-  assert(app);
-  assert(user);
-
-  const response = await user.inject({
-    method: 'POST',
-    url: '/suppliers/' + supplierId + '/contacts',
-    payload: { ...contactData, supplier: supplierId },
-  });
-  expect(response.json()).toMatchObject({
-    data: {
-      ...contactData,
-      supplier: { id: supplierId },
+    const response = await user.inject({
+      method: 'GET',
+      url: '/suppliers/1',
+    });
+    expect(response.json().data).toMatchObject({
+      id: supplierId,
+      ...supplierData,
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
       deletedAt: null,
-    },
-    meta: {},
+      language: {
+        id: languageId,
+      },
+    });
   });
-  contactId = response.json().data.id;
-});
 
-it('should return all contacts of supplier', async () => {
-  assert(app);
-  assert(user);
+  it('should update supplier', async () => {
+    assert(app);
+    assert(user);
 
-  const response = await user.inject({
-    method: 'GET',
-    url: '/suppliers/' + supplierId + '/contacts',
+    const response = await user.inject({
+      method: 'PUT',
+      url: '/suppliers/' + supplierId,
+      payload: { ...supplierData, name: 'edited' },
+    });
+
+    expect(response.statusCode).toBe(200);
   });
-  expect(response.json().data).toMatchObject(
-    expect.arrayContaining([
-      expect.objectContaining({
-        id: contactId,
+
+  it('should create a contact for supplier', async () => {
+    assert(app);
+    assert(user);
+
+    const response = await user.inject({
+      method: 'POST',
+      url: '/suppliers/' + supplierId + '/contacts',
+      payload: { ...contactData, supplier: supplierId },
+    });
+    expect(response.json()).toMatchObject({
+      data: {
         ...contactData,
-        supplier: supplierId,
+        supplier: { id: supplierId },
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         deletedAt: null,
-      }),
-    ]),
-  );
-});
-
-it('should update contact of supplier', async () => {
-  assert(app);
-  assert(user);
-
-  const response = await user.inject({
-    method: 'PUT',
-    url: '/suppliers/' + supplierId + '/contacts/' + contactId,
-    payload: { ...contactData, name: 'edited' },
+      },
+      meta: {},
+    });
+    contactId = response.json().data.id;
   });
 
-  expect(response.statusCode).toBe(200);
-});
+  it('should return all contacts of supplier', async () => {
+    assert(app);
+    assert(user);
 
-it('should delete contact of supplier', async () => {
-  assert(app);
-  assert(user);
-
-  const response = await user.inject({
-    method: 'DELETE',
-    url: '/suppliers/' + supplierId + '/contacts/' + contactId,
+    const response = await user.inject({
+      method: 'GET',
+      url: '/suppliers/' + supplierId + '/contacts',
+    });
+    expect(response.json().data).toMatchObject(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: contactId,
+          ...contactData,
+          supplier: supplierId,
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+          deletedAt: null,
+        }),
+      ]),
+    );
   });
 
-  expect(response.statusCode).toBe(200);
-});
+  it('should update contact of supplier', async () => {
+    assert(app);
+    assert(user);
 
-it('should create a document for supplier', async () => {
-  assert(app);
-  assert(user);
+    const response = await user.inject({
+      method: 'PUT',
+      url: '/suppliers/' + supplierId + '/contacts/' + contactId,
+      payload: { ...contactData, name: 'edited' },
+    });
 
-  const response = await user.inject({
-    method: 'POST',
-    url: '/suppliers/' + supplierId + '/documents',
-    payload: { fileId: 'testFileId', supplier: supplierId },
+    expect(response.statusCode).toBe(200);
   });
-  expect(response.json()).toMatchObject({
-    data: {
-      fileId: 'testFileId',
-      supplier: { id: supplierId },
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String),
-      deletedAt: null,
-    },
-    meta: {},
-  });
-  documentId = response.json().data.id;
-});
 
-it('should return all documents of supplier', async () => {
-  assert(app);
-  assert(user);
+  it('should delete contact of supplier', async () => {
+    assert(app);
+    assert(user);
 
-  const response = await user.inject({
-    method: 'GET',
-    url: '/suppliers/' + supplierId + '/documents',
+    const response = await user.inject({
+      method: 'DELETE',
+      url: '/suppliers/' + supplierId + '/contacts/' + contactId,
+    });
+
+    expect(response.statusCode).toBe(200);
   });
-  expect(response.json().data).toMatchObject(
-    expect.arrayContaining([
-      expect.objectContaining({
-        id: documentId,
+
+  it('should create a document for supplier', async () => {
+    assert(app);
+    assert(user);
+
+    const response = await user.inject({
+      method: 'POST',
+      url: '/suppliers/' + supplierId + '/documents',
+      payload: { fileId: 'testFileId', supplier: supplierId },
+    });
+    expect(response.json()).toMatchObject({
+      data: {
         fileId: 'testFileId',
-        supplier: supplierId,
+        supplier: { id: supplierId },
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         deletedAt: null,
-      }),
-    ]),
-  );
-});
-
-it('should delete document of supplier', async () => {
-  assert(app);
-  assert(user);
-
-  const response = await user.inject({
-    method: 'DELETE',
-    url: '/suppliers/' + supplierId + '/documents/' + documentId,
+      },
+      meta: {},
+    });
+    documentId = response.json().data.id;
   });
 
-  expect(response.statusCode).toBe(200);
-});
+  it('should return all documents of supplier', async () => {
+    assert(app);
+    assert(user);
 
-it('should delete supplier', async () => {
-  assert(app);
-  assert(user);
-
-  const response = await user.inject({
-    method: 'DELETE',
-    url: '/suppliers/' + supplierId,
+    const response = await user.inject({
+      method: 'GET',
+      url: '/suppliers/' + supplierId + '/documents',
+    });
+    expect(response.json().data).toMatchObject(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: documentId,
+          fileId: 'testFileId',
+          supplier: supplierId,
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+          deletedAt: null,
+        }),
+      ]),
+    );
   });
 
-  expect(response.statusCode).toBe(200);
+  it('should delete document of supplier', async () => {
+    assert(app);
+    assert(user);
+
+    const response = await user.inject({
+      method: 'DELETE',
+      url: '/suppliers/' + supplierId + '/documents/' + documentId,
+    });
+
+    expect(response.statusCode).toBe(200);
+  });
+
+  it('should delete supplier', async () => {
+    assert(app);
+    assert(user);
+
+    const response = await user.inject({
+      method: 'DELETE',
+      url: '/suppliers/' + supplierId,
+    });
+
+    expect(response.statusCode).toBe(200);
+  });
 });

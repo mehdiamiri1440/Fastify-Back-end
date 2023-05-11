@@ -19,6 +19,8 @@ import { P } from 'pino';
 import { BinProduct } from '../models/BinProduct';
 import { Bin } from '$src/domains/warehouse/models/Bin';
 import { Tag } from '$src/domains/configuration/models/Tag';
+import { describe } from 'node:test';
+import { ProductStockHistory, SourceType } from '../models/ProductStockHistory';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -333,4 +335,87 @@ it('POST /products/:id/move-bin-quantity', async () => {
   });
 
   expect(sourceBinProduct?.quantity).toBe(5);
+});
+
+describe('history', () => {
+  it('GET /products/:id/history should be working', async () => {
+    assert(user);
+    await disableForeignKeyCheck();
+
+    const product = await createSampleProduct();
+    const otherProduct = await createSampleProduct();
+
+    const bin = await repo(Bin).save({
+      name: 'bin1',
+      warehouse,
+      internalCode: 'hey1',
+      creator: { id: 1 },
+    });
+
+    await repo(ProductStockHistory).insert([
+      {
+        product,
+        quantity: 10,
+        bin,
+        sourceType: SourceType.INBOUND,
+        sourceId: null,
+        description: 'test',
+        creator: { id: 1 },
+      },
+      {
+        product,
+        quantity: 20,
+        bin,
+        sourceType: SourceType.OUTBOUND,
+        sourceId: null,
+        description: 'test',
+        creator: { id: 1 },
+      },
+      {
+        product: otherProduct,
+        quantity: 30,
+        bin,
+        sourceType: SourceType.OUTBOUND,
+        sourceId: null,
+        description: 'test',
+        creator: { id: 1 },
+      },
+    ]);
+
+    await enableForeignKeyCheck();
+
+    const response = await user.inject({
+      method: 'GET',
+      url: `/products/${product.id}/history`,
+    });
+    expect(response?.statusCode).toBe(200);
+    expect(response?.json().data).toMatchObject([
+      {
+        quantity: 20,
+        sourceType: 'outbound',
+        creator: {
+          id: 1,
+          fullName: 'tester tester',
+        },
+        bin: {
+          id: bin.id,
+          name: bin.name,
+        },
+        createdAt: expect.any(String),
+      },
+      {
+        quantity: 10,
+        sourceType: 'inbound',
+        creator: {
+          id: 1,
+          fullName: 'tester tester',
+        },
+        bin: {
+          id: bin.id,
+          name: bin.name,
+        },
+        createdAt: expect.any(String),
+      },
+    ]);
+  });
 });

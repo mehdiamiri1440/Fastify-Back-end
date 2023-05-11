@@ -1,5 +1,4 @@
 import AppDataSource from '$src/DataSource';
-import { Supplier } from '$src/domains/supplier/models/Supplier';
 import { Bin } from '$src/domains/warehouse/models/Bin';
 import { ResponseShape } from '$src/infra/Response';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
@@ -12,10 +11,9 @@ import assert from 'assert';
 import { DeepPartial, In } from 'typeorm';
 import { ProductService } from '../ProductService';
 import { Product } from '../models/Product';
-import { ProductSalePrice } from '../models/ProductSalePrice';
+import { SourceType } from '../models/ProductStockHistory';
 import { ProductSchema } from '../schemas/product.schema';
 import { hydrateProductInfo } from '../utils';
-import { SourceType } from '../models/ProductStockHistory';
 
 const PRODUCT_NOT_FOUND = createError(
   'PRODUCT_NOT_FOUND',
@@ -113,6 +111,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           shape: true,
           size: true,
           tags: true,
+          brand: true,
           productSuppliers: {
             supplier: true,
           },
