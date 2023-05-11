@@ -5,6 +5,13 @@ import { minio } from '$src/infra/s3';
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   await app.register(Files, {
     minio: minio,
+    bucketName: 'product-images',
+    prefix: '/product-images',
+    allowedMimeTypes: ['image/jpeg', 'image/png'],
+  });
+
+  await app.register(Files, {
+    minio: minio,
     bucketName: 'inbound-images',
     prefix: '/inbound-images',
     allowedMimeTypes: ['image/jpeg', 'image/png'],
