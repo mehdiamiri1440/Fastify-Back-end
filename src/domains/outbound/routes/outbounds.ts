@@ -1,5 +1,4 @@
 import AppDataSource from '$src/DataSource';
-import { Product } from '$src/domains/product/models/Product';
 import { User } from '$src/domains/user/models/User';
 import { ResponseShape } from '$src/infra/Response';
 import { TableQueryBuilder } from '$src/infra/tables/Table';

@@ -4,9 +4,10 @@ import { Warehouse } from '../models/Warehouse';
 import { repo } from '$src/infra/utils/repo';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
-const Warehouses = repo(Warehouse);
 import { Type } from '@sinclair/typebox';
 import { WarehouseSchema } from '../schemas/warehouse.schema';
+
+const Warehouses = repo(Warehouse);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
@@ -21,13 +22,42 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       querystring: ListQueryOptions({
-        filterable: ['name', 'province', 'city', 'street', 'postalCode'],
+        filterable: ['province', 'city', 'street', 'postalCode'],
         orderable: ['name', 'province', 'city', 'street', 'postalCode'],
         searchable: ['name', 'province', 'city', 'street', 'postalCode'],
       }),
     },
     async handler(req) {
-      return new TableQueryBuilder(Warehouses, req).exec();
+      return new TableQueryBuilder(Warehouses, req)
+        .relation(() => ({ creator: true }))
+        .exec();
+    },
+  });
+
+  app.route({
+    method: 'GET',
+    url: '/:id',
+    schema: {
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      security: [
+        {
+          OAuth2: ['warehouse@warehouse::list'],
+        },
+      ],
+    },
+    async handler(req) {
+      const { id } = req.params;
+
+      return Warehouses.findOneOrFail({
+        where: {
+          id,
+        },
+        relations: {
+          creator: true,
+        },
+      });
     },
   });
 

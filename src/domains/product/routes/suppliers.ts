@@ -76,7 +76,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // DELETE /:productId/suppliers/:supplierId
+  // DELETE /product-suppliers/:id
   app.route({
     method: 'DELETE',
     url: '/product-suppliers/:id',
@@ -101,7 +101,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // PUT /:productId/suppliers/:supplierId
+  // PUT /product-suppliers/:id
   app.route({
     method: 'PUT',
     url: '/product-suppliers/:id',
