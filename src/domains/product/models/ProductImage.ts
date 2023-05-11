@@ -17,7 +17,7 @@ export class ProductImage {
   id!: number;
 
   @ManyToOne(() => Product, (product) => product.images)
-  inbound!: Relation<Product>;
+  product!: Relation<Product>;
 
   @Column()
   fileId!: string;

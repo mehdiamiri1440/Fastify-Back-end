@@ -15,10 +15,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
   app.register(ResponseShape);
 
-  // POST /:id/sale-prices
+  // POST /products/:id/sale-prices
   app.route({
     method: 'POST',
-    url: '/:id/tags',
+    url: '/products/:id/tags',
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -44,10 +44,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // POST /:id/bins
+  // POST /products/:id/bins
   app.route({
     method: 'DELETE',
-    url: '/:id/tags/:tagId',
+    url: '/products/:id/tags/:tagId',
     schema: {
       params: Type.Object({
         id: Type.Number(),

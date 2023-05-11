@@ -14,7 +14,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class SupplierProduct {
+export class ProductSupplier {
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -24,8 +24,8 @@ export class SupplierProduct {
   @ManyToOne(() => Product, { nullable: false })
   product!: Relation<Product>;
 
-  @Column()
-  referenceCode!: string;
+  @Column({ type: 'varchar', nullable: true })
+  referenceCode?: string | null;
 
   @ManyToOne(() => User, { nullable: false })
   creator!: User;

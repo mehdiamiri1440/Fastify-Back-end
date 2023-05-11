@@ -4,11 +4,12 @@ import { Type } from '@sinclair/typebox';
 import { ProductImage } from '../models/ProductImage';
 import { repo } from '$src/infra/utils/repo';
 import { FastifySchema } from 'fastify';
-
-const ProductImages = repo(ProductImage);
+import { Product } from '../models/Product';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
+  const Products = repo(Product);
+  const ProductImages = repo(ProductImage);
 
   const security = [
     {
@@ -16,42 +17,53 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   ] satisfies FastifySchema['security'];
 
-  // GET /:id
+  // POST /products/:id/images
   app.route({
-    method: 'GET',
-    url: '/:id',
+    method: 'POST',
+    url: '/products/:productId/images',
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        productId: Type.Number(),
+      }),
+      body: Type.Object({
+        fileId: Type.String(),
       }),
       security,
     },
-    handler(req) {
-      const { id } = req.params;
-      return ProductImages.findOneOrFail({
-        where: {
-          id,
+    async handler(req) {
+      const { productId } = req.params;
+      const { fileId } = req.body;
+      const inbound = await Products.findOneByOrFail({ id: productId });
+      return ProductImages.save({
+        inbound,
+        fileId,
+        creator: {
+          id: req.user.id,
         },
       });
     },
   });
 
-  // DELETE /:id
+  // DELETE /products/:productId/images/:imageId
   app.route({
     method: 'DELETE',
-    url: '/:id',
+    url: '/products/:productId/images/:imageId',
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        productId: Type.Number(),
+        imageId: Type.Number(),
       }),
       security,
     },
     async handler(req) {
-      const { id } = req.params;
+      const { imageId, productId } = req.params;
 
       const image = await ProductImages.findOneOrFail({
         where: {
-          id,
+          id: imageId,
+          product: {
+            id: productId,
+          },
         },
       });
 

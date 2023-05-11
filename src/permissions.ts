@@ -24,8 +24,12 @@ export default {
   'product@product::update': 'with this permission you can update a product',
   'product@product-suppliers::create':
     'with this permission you can add new product supplier',
+  'product@product-suppliers::delete':
+    'with this permission you can add new product supplier',
   'product@product-suppliers::list':
     'with this permission you can get list of product suppliers',
+  'product@product-images::edit':
+    'with this permission you can edit product images',
   'product@product-sale-prices::list':
     'with this permission you can get list of product sale prices',
   'product@product-sale-prices::create':
@@ -33,6 +37,7 @@ export default {
   'product@product-bins::create': 'with this permission you can add new bin',
   'product@product-tags::edit':
     'with this permission you can edit product tags',
+  'product@product-bins::move': 'with this permission you can move a bin',
 
   // inbound
   'user@inbound::list': 'with this permission you can get list of inbounds',
