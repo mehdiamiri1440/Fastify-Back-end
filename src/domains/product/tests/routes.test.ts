@@ -1,4 +1,8 @@
 import AppDataSource from '$src/DataSource';
+import { Tag } from '$src/domains/configuration/models/Tag';
+import { Unit } from '$src/domains/configuration/models/Unit';
+import { Supplier } from '$src/domains/supplier/models/Supplier';
+import { Bin } from '$src/domains/warehouse/models/Bin';
 import { Warehouse } from '$src/domains/warehouse/models/Warehouse';
 import {
   TestUser,
@@ -7,21 +11,24 @@ import {
   enableForeignKeyCheck,
 } from '$src/infra/test/utils';
 import { repo } from '$src/infra/utils/repo';
-import { expect, it, beforeEach, afterEach } from '@jest/globals';
-import { FastifyInstance } from 'fastify';
-import routes from '../routes';
-import { Product } from '../models/Product';
-import { Supplier } from '$src/domains/supplier/models/Supplier';
-import { ProductSupplier } from '../models/ProductSupplier';
-import { ProductImage } from '../models/ProductImage';
+import { afterEach, beforeEach, expect, it } from '@jest/globals';
 import assert from 'assert';
-import { P } from 'pino';
-import { BinProduct } from '../models/BinProduct';
-import { Bin } from '$src/domains/warehouse/models/Bin';
-import { Tag } from '$src/domains/configuration/models/Tag';
+import { FastifyInstance } from 'fastify';
 import { describe } from 'node:test';
+import { BinProduct } from '../models/BinProduct';
+import { Product } from '../models/Product';
+import { ProductImage } from '../models/ProductImage';
 import { ProductStockHistory, SourceType } from '../models/ProductStockHistory';
-import { Unit } from '$src/domains/configuration/models/Unit';
+import { ProductSupplier } from '../models/ProductSupplier';
+import { Size } from '../models/Size';
+import { TaxType } from '../models/TaxType';
+import routes from '../routes';
+import { InboundProduct } from '$src/domains/inbound/models/InboundProduct';
+import {
+  Inbound,
+  InboundStatus,
+  InboundType,
+} from '$src/domains/inbound/models/Inbound';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -500,5 +507,142 @@ describe('bins', () => {
         },
       },
     ]);
+  });
+});
+
+describe('tax types', () => {
+  it('GET /tax-types should be working', async () => {
+    assert(user);
+
+    await repo(TaxType).insert([
+      {
+        title: 'tt1',
+        creator: { id: 1 },
+      },
+      {
+        title: 'tt2',
+        creator: { id: 1 },
+      },
+    ]);
+
+    const response = await user.inject({
+      method: 'GET',
+      url: `/tax-types`,
+    });
+
+    expect(response?.statusCode).toBe(200);
+    expect(response?.json().data).toHaveLength(2);
+    expect(response?.json().data).toMatchObject([
+      {
+        id: 1,
+        title: 'tt1',
+      },
+      {
+        id: 2,
+        title: 'tt2',
+      },
+    ]);
+  });
+});
+
+describe('sizes', () => {
+  it('GET /sizes should be working', async () => {
+    assert(user);
+
+    await repo(Size).insert([
+      {
+        title: 'tt1',
+        width: 10,
+        height: 10,
+        creator: { id: 1 },
+      },
+      {
+        title: 'tt2',
+        width: 10,
+        height: 10,
+        creator: { id: 1 },
+      },
+    ]);
+
+    const response = await user.inject({
+      method: 'GET',
+      url: `/sizes`,
+    });
+
+    expect(response?.statusCode).toBe(200);
+    expect(response?.json().data).toHaveLength(2);
+    expect(response?.json().data).toMatchObject([
+      {
+        id: 1,
+        width: 10,
+        height: 10,
+        title: 'tt1',
+      },
+      {
+        id: 2,
+        width: 10,
+        height: 10,
+        title: 'tt2',
+      },
+    ]);
+  });
+});
+
+describe('inbounds', () => {
+  it('GET /products/:id/inbounds should be working', async () => {
+    assert(user);
+    await disableForeignKeyCheck();
+
+    const product = await createSampleProduct();
+    const supplier = await createSampleSupplier();
+
+    const inbound = await repo(Inbound).save({
+      code: 'code',
+      type: InboundType.NEW,
+      status: InboundStatus.SORTED,
+      creator: {
+        id: 1,
+      },
+      warehouse,
+    });
+
+    await repo(InboundProduct).insert([
+      {
+        supplier,
+        product,
+        inbound,
+        price: 100,
+        requestedQuantity: 10,
+        actualQuantity: 10,
+      },
+      {
+        supplier,
+        product,
+        inbound,
+        price: 200,
+        requestedQuantity: 20,
+        actualQuantity: 21,
+      },
+    ]);
+    await enableForeignKeyCheck();
+
+    const response = await user.inject({
+      method: 'GET',
+      url: `/products/${product.id}/inbounds`,
+    });
+
+    expect(response?.statusCode).toBe(200);
+    const body = await response?.json().data;
+
+    expect(body).toHaveLength(2);
+    expect(body[0]).toMatchObject({
+      createdAt: expect.any(String),
+      supplier: {
+        id: supplier.id,
+        name: supplier.name,
+      },
+      price: 200,
+      actualQuantity: 21,
+    });
   });
 });

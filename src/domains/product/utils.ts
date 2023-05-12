@@ -10,8 +10,6 @@ import createError from '@fastify/error';
 import { Brand } from '../configuration/models/Brand';
 import { Shape } from '../configuration/models/Shape';
 import { Size } from './models/Size';
-import AppDataSource from '$src/DataSource';
-import { Product } from './models/Product';
 
 interface ProductRelationForeignKeys {
   taxTypeId: number;

@@ -90,7 +90,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
               name: true,
             },
           },
-          inbound: false,
+          inbound: {},
         }))
         .relation(() => ({
           inbound: {

@@ -2,26 +2,28 @@ import * as where from '$src/infra/tables/filter';
 import * as order from '$src/infra/tables/order';
 import { PaginatedResponse } from '$src/infra/tables/response';
 import { FastifyRequest } from 'fastify';
-import { FindOneOptions, Repository } from 'typeorm';
+import { FindOneOptions, ObjectLiteral, Repository } from 'typeorm';
 
 export type WhereBuilder = (req: FastifyRequest) => FindOneOptions['where'];
-export type RelationBuilder = (
+export type RelationBuilder<T> = (
   req: FastifyRequest,
-) => FindOneOptions['relations'];
+) => FindOneOptions<T>['relations'];
 export type OrderBuilder = (req: FastifyRequest) => FindOneOptions['order'];
-export type SelectBuilder = (req: FastifyRequest) => FindOneOptions['select'];
+export type SelectBuilder<T> = (
+  req: FastifyRequest,
+) => FindOneOptions<T>['select'];
 
-export class TableQueryBuilder {
-  #repo: Repository<any>;
+export class TableQueryBuilder<T extends ObjectLiteral> {
+  #repo: Repository<T>;
   #req: FastifyRequest;
 
   #whereBuilder: WhereBuilder = (req) => where.from(req);
-  #relationBuilder: RelationBuilder = () => undefined;
+  #relationBuilder: RelationBuilder<T> = () => undefined;
   #orderBuilder: OrderBuilder = (req) => order.from(req);
-  #selectBuilder: SelectBuilder = () => undefined;
+  #selectBuilder: SelectBuilder<T> = () => undefined;
   #loadRelationIds: FindOneOptions['loadRelationIds'] = true;
 
-  constructor(repo: Repository<any>, req: FastifyRequest) {
+  constructor(repo: Repository<T>, req: FastifyRequest) {
     this.#repo = repo;
     this.#req = req;
   }
@@ -31,7 +33,7 @@ export class TableQueryBuilder {
     return this;
   }
 
-  relation(builder: RelationBuilder) {
+  relation(builder: RelationBuilder<T>) {
     this.#relationBuilder = builder;
     this.#loadRelationIds = false;
     return this;
@@ -47,7 +49,7 @@ export class TableQueryBuilder {
     return this;
   }
 
-  select(builder: SelectBuilder) {
+  select(builder: SelectBuilder<T>) {
     this.#selectBuilder = builder;
     return this;
   }
