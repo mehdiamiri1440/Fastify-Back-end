@@ -39,6 +39,7 @@ export default {
     'with this permission you can edit product tags',
   'product@product-bins::move': 'with this permission you can move a bin',
   'product@product-history::list': 'with this permission you can get history',
+  'product@product-bins::list': 'with this permission you can get list of bins',
 
   // inbound
   'user@inbound::list': 'with this permission you can get list of inbounds',

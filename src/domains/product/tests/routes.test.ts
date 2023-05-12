@@ -21,6 +21,7 @@ import { Bin } from '$src/domains/warehouse/models/Bin';
 import { Tag } from '$src/domains/configuration/models/Tag';
 import { describe } from 'node:test';
 import { ProductStockHistory, SourceType } from '../models/ProductStockHistory';
+import { Unit } from '$src/domains/configuration/models/Unit';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -61,6 +62,10 @@ const createSampleProduct = async () =>
     invoiceSystemCode: 1,
     description: 'description',
     weight: 1,
+    unit: await repo(Unit).save({
+      id: 1,
+      name: 'meter',
+    }),
     creator: { id: 1 },
   });
 
@@ -415,6 +420,84 @@ describe('history', () => {
           name: bin.name,
         },
         createdAt: expect.any(String),
+      },
+    ]);
+  });
+});
+
+describe('bins', () => {
+  it('GET /products/:id/bins should be working', async () => {
+    assert(user);
+    assert(warehouse);
+
+    await disableForeignKeyCheck();
+
+    const product = await createSampleProduct();
+
+    const binProductA = await repo(BinProduct).save({
+      bin: await repo(Bin).save({
+        name: 'bin1',
+        warehouse,
+        internalCode: 'hey1',
+        creator: { id: 1 },
+      }),
+      product,
+
+      quantity: 10,
+      creator: { id: 1 },
+    });
+
+    const binProductB = await repo(BinProduct).save({
+      bin: await repo(Bin).save({
+        name: 'bin2',
+        warehouse,
+        internalCode: 'hey2',
+        creator: { id: 1 },
+      }),
+      product,
+      quantity: 30,
+      creator: { id: 1 },
+    });
+
+    await enableForeignKeyCheck();
+
+    const response = await user.inject({
+      method: 'GET',
+      url: `/products/${product.id}/bins`,
+    });
+
+    expect(response?.statusCode).toBe(200);
+    const body = await response?.json().data;
+
+    expect(body).toHaveLength(2);
+    expect(body).toMatchObject([
+      {
+        id: binProductA.id,
+        bin: {
+          id: binProductA.bin.id,
+          name: binProductA.bin.name,
+          warehouse: {
+            id: expect.any(Number),
+            name: warehouse.name,
+          },
+        },
+        unit: {
+          name: 'meter',
+        },
+      },
+      {
+        id: binProductB.id,
+        bin: {
+          id: binProductB.bin.id,
+          name: binProductB.bin.name,
+          warehouse: {
+            id: expect.any(Number),
+            name: warehouse.name,
+          },
+        },
+        unit: {
+          name: 'meter',
+        },
       },
     ]);
   });
