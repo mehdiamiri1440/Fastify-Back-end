@@ -1,35 +1,34 @@
+import { Brand } from '$src/domains/configuration/models/Brand';
 import { Category } from '$src/domains/configuration/models/Category';
 import { Color } from '$src/domains/configuration/models/Color';
-import { Size } from './Size';
-import { Brand } from '$src/domains/configuration/models/Brand';
 import { Unit } from '$src/domains/configuration/models/Unit';
-import { TaxType } from './TaxType';
+import { ProductSupplier } from '$src/domains/product/models/ProductSupplier';
 import { User } from '$src/domains/user/models/User';
-import { ProductSalePrice } from './ProductSalePrice';
 import { Static } from '@sinclair/typebox';
 import { ProductSchema } from '../schemas/product.schema';
-import { ProductSupplier } from '$src/domains/product/models/ProductSupplier';
+import { ProductSalePrice } from './ProductSalePrice';
+import { Size } from './Size';
+import { TaxType } from './TaxType';
 
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  OneToMany,
-  CreateDateColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
-  Relation,
-  Check,
-  JoinTable,
-  ManyToMany,
-} from 'typeorm';
-import { ProductStockHistory } from './ProductStockHistory';
-import { Bin } from '$src/domains/warehouse/models/Bin';
 import { Shape } from '$src/domains/configuration/models/Shape';
 import { Tag } from '$src/domains/configuration/models/Tag';
+import { Bin } from '$src/domains/warehouse/models/Bin';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  Relation,
+  UpdateDateColumn,
+} from 'typeorm';
+import { BinProduct } from './BinProduct';
 import { ProductImage } from './ProductImage';
-import { Supplier } from '$src/domains/supplier/models/Supplier';
+import { ProductStockHistory } from './ProductStockHistory';
 
 @Entity()
 export class Product implements Static<typeof ProductSchema> {
@@ -74,6 +73,9 @@ export class Product implements Static<typeof ProductSchema> {
     synchronize: false,
   })
   bins!: Relation<Bin[]>;
+
+  @OneToMany(() => BinProduct, (BinProduct) => BinProduct.product)
+  binProducts!: Relation<BinProduct[]>;
 
   // @ManyToMany(() => Supplier)
   // @JoinTable({
