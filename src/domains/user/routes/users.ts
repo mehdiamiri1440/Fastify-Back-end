@@ -99,6 +99,26 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
   app.route({
+    method: 'GET',
+    url: '/:id',
+    schema: {
+      security: [
+        {
+          OAuth2: ['user@user::list'],
+        },
+      ],
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+    },
+    async handler(req) {
+      return await Users.findOneOrFail({
+        where: { id: req.params.id },
+        relations: { role: true },
+      });
+    },
+  });
+  app.route({
     method: 'DELETE',
     url: '/:id',
     schema: {
