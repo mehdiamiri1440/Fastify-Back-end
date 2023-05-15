@@ -23,6 +23,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@erfanium/fetch-typebox": "^0.2.2",
     "@fastify/cors": "^8.2.1",
     "@fastify/error": "^3.2.0",
     "@fastify/formbody": "^7.4.0",

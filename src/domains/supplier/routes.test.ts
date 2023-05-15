@@ -29,8 +29,6 @@ const supplierData = {
   phoneNumber: '+989112223344',
   logoFileId: 'NO IDEA',
   accountNumber: '12345',
-  bic: 'CCRIES2A',
-  bankName: 'CAJAMAR CAJA RURAL, S.C.C.',
 };
 const contactData = {
   name: 'good contact',

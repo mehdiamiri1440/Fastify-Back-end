@@ -7,6 +7,7 @@ import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { SupplierSchema } from '$src/domains/supplier/schemas/supplier.schema';
 import { Type } from '@sinclair/typebox';
+import ibanValidator from '$src/infra/ibanValidator';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
@@ -79,6 +80,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ],
       body: Type.Omit(SupplierSchema, [
         'id',
+        'bic',
+        'bankName',
         'creator',
         'createdAt',
         'updatedAt',
@@ -91,8 +94,13 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         id: req.body.language,
       });
 
+      // validating iban
+      const { bic, bankName } = await ibanValidator(req.body.iban);
+
       return await Suppliers.save({
         ...req.body,
+        bic,
+        bankName,
         language,
         creator: { id: req.user.id },
       });
@@ -110,6 +118,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ],
       body: Type.Omit(SupplierSchema, [
         'id',
+        'bic',
+        'bankName',
         'creator',
         'createdAt',
         'updatedAt',
@@ -125,8 +135,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         id: req.body.language,
       });
 
+      // validating iban
+      const { bic, bankName } = await ibanValidator(req.body.iban);
+
       const { id } = await Suppliers.findOneByOrFail({ id: req.params.id });
-      await Suppliers.update({ id }, { ...req.body, language });
+      await Suppliers.update({ id }, { ...req.body, bic, bankName, language });
     },
   });
   app.route({
