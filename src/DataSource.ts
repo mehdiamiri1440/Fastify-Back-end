@@ -15,7 +15,7 @@ const AppDataSource = new DataSource({
   dropSchema: DB_DROP_SCHEMA === 'true',
   entities: models,
   subscribers: [],
-  migrations: [],
+  migrations: ['migrations/*.ts'],
   namingStrategy: new SnakeNamingStrategy(),
   connectTimeoutMS: 10000,
 });
