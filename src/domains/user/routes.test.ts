@@ -94,6 +94,28 @@ it('should return all users', async () => {
   );
 });
 
+it('should get user by id', async () => {
+  assert(app);
+  assert(user);
+  assert(userId);
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/users/' + userId,
+  });
+
+  expect(response.statusCode).toBe(200);
+  expect(response.json().data).toMatchObject({
+    id: userId,
+    ...userData,
+    role: { id: userData.role },
+    password: expect.any(String),
+    createdAt: expect.any(String),
+    updatedAt: expect.any(String),
+    deletedAt: null,
+  });
+});
+
 it('should update user', async () => {
   assert(app);
   assert(user);
