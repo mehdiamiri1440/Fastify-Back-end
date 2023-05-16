@@ -30,6 +30,7 @@ import {
   InboundType,
 } from '$src/domains/inbound/models/Inbound';
 import { DeepPartial } from 'typeorm';
+import '$src/infra/test/statusCodeExpect';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -260,6 +261,20 @@ it('PUT /product-suppliers/:id should be working', async () => {
   });
 });
 
+expect.extend({
+  // ...any other custom matchers.
+  statusCodeToBe(actual, expected) {
+    const pass = expected === actual.statusCode;
+    return {
+      pass,
+      message: pass
+        ? () => `ok`
+        : () =>
+            `expected status code :${expected}, actual:${actual.statusCode}.\n payload: ${actual.payload}`,
+    };
+  },
+});
+
 it('POST /products/:id/images should be working', async () => {
   await disableForeignKeyCheck();
   const product = await createSampleProduct();
@@ -272,7 +287,7 @@ it('POST /products/:id/images should be working', async () => {
       fileId: 'file1.png',
     },
   });
-  expect(createResponse?.statusCode).toBe(200);
+  expect(createResponse).statusCodeToBe(200);
 
   const images = await repo(ProductImage).find({
     loadRelationIds: {
@@ -281,6 +296,9 @@ it('POST /products/:id/images should be working', async () => {
   });
   expect(images.length).toBe(1);
   expect(images[0]).toMatchObject({
+    product: {
+      id: product.id,
+    },
     fileId: 'file1.png',
   });
 });

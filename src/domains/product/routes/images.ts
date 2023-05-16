@@ -33,9 +33,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       const { productId } = req.params;
       const { fileId } = req.body;
-      const inbound = await Products.findOneByOrFail({ id: productId });
+      const product = await Products.findOneByOrFail({ id: productId });
       return ProductImages.save({
-        inbound,
+        product,
         fileId,
         creator: {
           id: req.user.id,
