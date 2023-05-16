@@ -13,7 +13,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (fastify) {
   const defaultErrorHandler = fastify.errorHandler;
   fastify.setErrorHandler((error, request, reply) => {
     // handle typeorm not found error
-    if (error instanceof TypeORMError) {
+    if (
+      error instanceof TypeORMError &&
+      error.message.includes('Could not find any entity')
+    ) {
       const fastifyError = new ENTITY_NOT_FOUND();
       fastifyError.cause = error;
       // replace new line and white space

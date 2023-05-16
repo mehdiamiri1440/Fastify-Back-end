@@ -34,6 +34,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const user = await Users.findOne({
         where: {
           email: req.body.username,
+          isActive: true,
         },
         relations: ['role'],
       });
@@ -44,9 +45,13 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       if (user.role.title === 'root') {
         scope = Object.keys(permissions).join(' ');
       } else {
-        const { id } = user.role;
-        const permissions = await RolePermissions.findBy({ role: { id } });
-        scope = permissions.map((p) => p.permission).join(' ');
+        if (user.role.isActive) {
+          const { id } = user.role;
+          const permissions = await RolePermissions.findBy({ role: { id } });
+          scope = permissions.map((p) => p.permission).join(' ');
+        } else {
+          scope = '';
+        }
       }
       const token = app.jwt.sign(
         {

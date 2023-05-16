@@ -3,9 +3,10 @@ import { Type } from '@sinclair/typebox';
 export const WarehouseSchema = Type.Object({
   id: Type.Number(),
   name: Type.String({ minLength: 1 }),
-  province: Type.String(),
-  city: Type.String(),
-  street: Type.String(),
+  provinceCode: Type.String({ default: 'S43' }),
+  cityCode: Type.String({ default: 'S43.001' }),
+  streetCode: Type.String({ default: 'S43.001.00104' }),
+  streetName: Type.String({ default: 'Alicante  en  ur mas en pares' }),
   postalCode: Type.String(),
   description: Type.Union([Type.String(), Type.Null()]),
   supervisor: Type.Number(),

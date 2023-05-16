@@ -8,6 +8,7 @@ import {
   Relation,
   UpdateDateColumn,
   OneToMany,
+  Index,
 } from 'typeorm';
 import { UserSchema } from '../schemas/user.schema';
 import { Role } from './Role';
@@ -42,7 +43,11 @@ export class User implements Static<typeof UserSchemaWithoutRelations> {
   @Column({ unique: true, nullable: false })
   email!: string;
 
-  @Column({ type: 'text', unique: true, nullable: true })
+  @Column({ type: 'text', nullable: true })
+  @Index({
+    unique: true,
+    where: `(phone_number IS NOT NULL)`,
+  })
   phoneNumber?: string | null;
 
   @Column({ nullable: false })

@@ -56,9 +56,10 @@ beforeAll(async () => {
     name: 'warehouse test',
     description: 'description',
     postalCode: 'postalCode',
-    province: 'province',
-    city: 'city',
-    street: 'street',
+    provinceCode: 'provinceCode',
+    cityCode: 'cityCode',
+    streetCode: 'streetCode',
+    streetName: 'streetName',
     creator: {
       id: 1,
     },

@@ -31,7 +31,8 @@ const supplierData = {
   accountNumber: '12345',
 };
 const contactData = {
-  name: 'good contact',
+  name: 'good',
+  surName: 'contact',
   position: 'CEO',
   email: 'good@Suppliercontact.sup',
   phoneNumber: '+989112223344',

@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   Relation,
+  Index,
 } from 'typeorm';
 import { Warehouse } from './Warehouse';
 import { BinSchema } from '$src/domains/warehouse/schemas/bin.schema';
@@ -39,7 +40,11 @@ export class Bin implements Static<typeof BinSchemaWithoutRelations> {
   @ManyToOne(() => BinProperty)
   property!: Relation<BinProperty>;
 
-  @Column({ type: 'text', unique: true, nullable: true })
+  @Column({ type: 'text', nullable: true })
+  @Index({
+    unique: true,
+    where: `(physical_code IS NOT NULL)`,
+  })
   physicalCode!: string | null;
 
   @Column({ unique: true, nullable: false })

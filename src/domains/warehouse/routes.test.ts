@@ -29,9 +29,10 @@ const propertyData = {
 };
 const warehouseData = {
   name: 'DI Warehouse',
-  province: 'P43',
-  city: 'C43.183',
-  street: 'S43.183.00057',
+  provinceCode: 'P43',
+  cityCode: 'C43.183',
+  streetCode: 'S43.183.00057',
+  streetName: 'Quatre',
   postalCode: '43894',
   description: 'this is just for test',
 };
@@ -217,6 +218,25 @@ it('should get list of warehouses', async () => {
       }),
     ]),
   );
+});
+
+it('should get a warehouse', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/warehouses/' + warehouseId,
+  });
+
+  expect(response.statusCode).toBe(200);
+  expect(response.json().data).toMatchObject({
+    id: warehouseId,
+    ...warehouseData,
+    createdAt: expect.any(String),
+    updatedAt: expect.any(String),
+    deletedAt: null,
+  });
 });
 
 it('should update a warehouse', async () => {

@@ -28,7 +28,10 @@ export class SupplierContact
   @Column({ nullable: false })
   name!: string;
 
-  @ManyToOne(() => User, { nullable: false })
+  @Column({ type: 'text', nullable: true })
+  surName!: string | null;
+
+  @ManyToOne(() => Supplier, { nullable: false })
   supplier!: Relation<Supplier>;
 
   @Column({ type: 'text', nullable: true })

@@ -69,6 +69,7 @@ export default {
   // warehouse
   'warehouse@warehouse::list':
     'with this permission you can get list of warehouses',
+  'warehouse@warehouse::view': 'with this permission you can get a warehouse',
   'warehouse@warehouse::create':
     'with this permission you can add new warehouse',
   'warehouse@warehouse::update': 'with this permission you can edit warehouse',
