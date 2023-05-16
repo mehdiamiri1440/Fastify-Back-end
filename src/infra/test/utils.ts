@@ -66,6 +66,7 @@ export async function createTestFastifyApp() {
     ajv: {
       customOptions: {
         removeAdditional: true,
+        coerceTypes: true,
       },
       plugins: [
         (ajv: Ajv) => {

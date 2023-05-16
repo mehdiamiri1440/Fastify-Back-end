@@ -30,13 +30,16 @@ export class Warehouse
   name!: string;
 
   @Column({ nullable: false })
-  province!: string;
+  provinceCode!: string;
 
   @Column({ nullable: false })
-  city!: string;
+  cityCode!: string;
 
   @Column({ nullable: false })
-  street!: string;
+  streetCode!: string;
+
+  @Column({ nullable: false })
+  streetName!: string;
 
   @OneToMany(
     () => WarehouseStaff,

@@ -7,6 +7,13 @@ import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { Type } from '@sinclair/typebox';
 import { WarehouseSchema } from '../schemas/warehouse.schema';
 import { User } from '$src/domains/user/models/User';
+import { getStreets } from '$src/domains/geo/service';
+import createError from '@fastify/error';
+const STREET_NAME_NOT_FOUND = createError(
+  'STREET_NAME_NOT_FOUND',
+  'we can not find name of this street code',
+  404,
+);
 
 const Warehouses = repo(Warehouse);
 const Users = repo(User);
@@ -26,24 +33,27 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       querystring: ListQueryOptions({
         filterable: [
           'province',
-          'city',
-          'street',
+          'cityCode',
+          'streetCode',
+          'streetName',
           'postalCode',
           'supervisor.fullName',
         ],
         orderable: [
           'name',
           'province',
-          'city',
-          'street',
+          'cityCode',
+          'streetCode',
+          'streetName',
           'postalCode',
           'supervisor.fullName',
         ],
         searchable: [
           'name',
           'province',
-          'city',
-          'street',
+          'cityCode',
+          'streetCode',
+          'streetName',
           'postalCode',
           'supervisor.fullName',
         ],
@@ -95,6 +105,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ],
       body: Type.Omit(WarehouseSchema, [
         'id',
+        'streetName',
         'creator',
         'createdAt',
         'updatedAt',
@@ -102,10 +113,28 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ]),
     },
     async handler(req) {
+      // validate references
       const supervisor = await Users.findOneByOrFail({
         id: req.body.supervisor,
       });
-      return await Warehouses.save({ ...req.body, supervisor });
+
+      // get detail by street code to use street name
+      const { streets } = await getStreets(
+        new URLSearchParams({
+          filter: `filter[code]=${req.body.streetCode}`,
+          include: 'false',
+          page: '0',
+          size: '1',
+        }),
+      );
+      if (streets.length !== 1) throw new STREET_NAME_NOT_FOUND();
+      const street = streets[0];
+
+      return await Warehouses.save({
+        ...req.body,
+        supervisor,
+        streetName: street.formated_name, // use street name
+      });
     },
   });
 
@@ -120,6 +149,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ],
       body: Type.Omit(WarehouseSchema, [
         'id',
+        'streetName',
         'creator',
         'createdAt',
         'updatedAt',
@@ -130,11 +160,28 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
+      // validate references
       const { id } = await Warehouses.findOneByOrFail({ id: req.params.id });
       const supervisor = await Users.findOneByOrFail({
         id: req.body.supervisor,
       });
-      await Warehouses.update({ id }, { ...req.body, supervisor });
+
+      // get detail by street code to use street name
+      const { streets } = await getStreets(
+        new URLSearchParams({
+          filter: `filter[code]=${req.body.streetCode}`,
+          include: 'false',
+          page: '0',
+          size: '1',
+        }),
+      );
+      if (streets.length !== 1) throw new STREET_NAME_NOT_FOUND();
+      const street = streets[0];
+
+      await Warehouses.update(
+        { id },
+        { ...req.body, supervisor, streetName: street.formated_name },
+      );
     },
   });
   app.route({
