@@ -7,10 +7,12 @@ import {
   PrimaryGeneratedColumn,
   Relation,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { UserSchema } from '../schemas/user.schema';
 import { Role } from './Role';
 import { Static, Type } from '@sinclair/typebox';
+import { WarehouseStaff } from '$src/domains/warehouse/models/WarehouseStaff';
 
 const UserSchemaWithoutRelations = Type.Omit(UserSchema, ['creator', 'role']);
 
@@ -51,6 +53,9 @@ export class User implements Static<typeof UserSchemaWithoutRelations> {
 
   @Column({ nullable: false })
   isActive!: boolean;
+
+  @OneToMany(() => WarehouseStaff, (warehouseStaff) => warehouseStaff.user)
+  staffWarehouses!: WarehouseStaff[];
 
   @ManyToOne(() => User)
   creator!: Relation<User>;

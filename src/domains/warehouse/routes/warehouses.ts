@@ -6,8 +6,10 @@ import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { Type } from '@sinclair/typebox';
 import { WarehouseSchema } from '../schemas/warehouse.schema';
+import { User } from '$src/domains/user/models/User';
 
 const Warehouses = repo(Warehouse);
+const Users = repo(User);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
@@ -22,9 +24,29 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       querystring: ListQueryOptions({
-        filterable: ['province', 'city', 'street', 'postalCode'],
-        orderable: ['name', 'province', 'city', 'street', 'postalCode'],
-        searchable: ['name', 'province', 'city', 'street', 'postalCode'],
+        filterable: [
+          'province',
+          'city',
+          'street',
+          'postalCode',
+          'supervisor.fullName',
+        ],
+        orderable: [
+          'name',
+          'province',
+          'city',
+          'street',
+          'postalCode',
+          'supervisor.fullName',
+        ],
+        searchable: [
+          'name',
+          'province',
+          'city',
+          'street',
+          'postalCode',
+          'supervisor.fullName',
+        ],
       }),
     },
     async handler(req) {
@@ -55,6 +77,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           id,
         },
         relations: {
+          supervisor: true,
           creator: true,
         },
       });
@@ -79,7 +102,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ]),
     },
     async handler(req) {
-      return await Warehouses.save(req.body);
+      const supervisor = await Users.findOneByOrFail({
+        id: req.body.supervisor,
+      });
+      return await Warehouses.save({ ...req.body, supervisor });
     },
   });
 
@@ -105,7 +131,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     async handler(req) {
       const { id } = await Warehouses.findOneByOrFail({ id: req.params.id });
-      await Warehouses.update({ id }, req.body);
+      const supervisor = await Users.findOneByOrFail({
+        id: req.body.supervisor,
+      });
+      await Warehouses.update({ id }, { ...req.body, supervisor });
     },
   });
   app.route({
