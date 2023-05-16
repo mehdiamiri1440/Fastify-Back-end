@@ -16,7 +16,7 @@ export class ProductImage {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => Product, (product) => product.images)
+  @ManyToOne(() => Product, (product) => product.images, { nullable: false })
   product!: Relation<Product>;
 
   @Column()
