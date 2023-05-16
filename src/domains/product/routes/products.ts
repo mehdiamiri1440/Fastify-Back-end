@@ -142,6 +142,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         where: { id: req.params.id },
         select: {
           images: {
+            id: true,
             fileId: true,
           },
         },

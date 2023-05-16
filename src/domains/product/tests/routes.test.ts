@@ -103,10 +103,18 @@ it('GET /products/:id should be working', async () => {
   const supplier = await createSampleSupplier();
   // const bin = await createSampleBin();
 
-  await repo(ProductImage).save({
-    product,
-    fileId: 'file1.png',
-  });
+  await repo(ProductImage).insert([
+    {
+      product,
+      fileId: 'file1.png',
+    },
+    {
+      product,
+      fileId: 'file2.png',
+    },
+  ]);
+
+  await repo(Product).save(product);
 
   await repo(ProductSupplier).save({
     product,
@@ -115,13 +123,6 @@ it('GET /products/:id should be working', async () => {
       id: 1,
     },
   });
-
-  await repo(Product).save(product);
-
-  // await repo(BinProduct).save({
-  //   bin,
-  //   product,
-  // });
 
   await enableForeignKeyCheck();
 
@@ -134,7 +135,12 @@ it('GET /products/:id should be working', async () => {
   expect(response?.json().data).toMatchObject({
     images: [
       {
+        id: expect.any(Number),
         fileId: 'file1.png',
+      },
+      {
+        id: expect.any(Number),
+        fileId: 'file2.png',
       },
     ],
     productSuppliers: [
