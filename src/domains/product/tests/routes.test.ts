@@ -29,6 +29,7 @@ import {
   InboundStatus,
   InboundType,
 } from '$src/domains/inbound/models/Inbound';
+import { DeepPartial } from 'typeorm';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -62,7 +63,7 @@ afterEach(async () => {
   await app?.close();
 });
 
-const createSampleProduct = async () =>
+const createSampleProduct = async (overrides?: DeepPartial<Product>) =>
   await repo(Product).save({
     name: 'product 1',
     barcode: '123',
@@ -74,6 +75,7 @@ const createSampleProduct = async () =>
       name: 'meter',
     }),
     creator: { id: 1 },
+    ...overrides,
   });
 
 const createSampleSupplier = async () =>
@@ -644,5 +646,28 @@ describe('inbounds', () => {
       price: 200,
       actualQuantity: 21,
     });
+  });
+});
+
+describe('Search', () => {
+  it('GET /products/search should be working', async () => {
+    assert(user);
+    await disableForeignKeyCheck();
+
+    await createSampleProduct({ name: 'abcdef', description: 'iPhone 11 pro' });
+    await createSampleProduct({ name: 'def', description: 'Samsung 13 pro' });
+
+    const response = await user.inject({
+      method: 'GET',
+      url: `/products/search?q=${encodeURIComponent('def 13')}`,
+    });
+
+    expect(response?.statusCode).toBe(200);
+    expect(response?.json().data).toMatchObject([
+      {
+        name: 'def',
+        description: 'Samsung 13 pro',
+      },
+    ]);
   });
 });

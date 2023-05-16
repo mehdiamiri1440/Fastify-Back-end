@@ -1,6 +1,6 @@
 import AppDataSource from '$src/DataSource';
 import { Bin } from '$src/domains/warehouse/models/Bin';
-import { ResponseShape } from '$src/infra/Response';
+import { Response, ResponseShape } from '$src/infra/Response';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { repo } from '$src/infra/utils/repo';
@@ -8,12 +8,13 @@ import { createError } from '@fastify/error';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import assert from 'assert';
-import { DeepPartial, In } from 'typeorm';
+import { DeepPartial, In, Raw } from 'typeorm';
 import { ProductService } from '../ProductService';
 import { Product } from '../models/Product';
 import { SourceType } from '../models/ProductStockHistory';
 import { ProductSchema } from '../schemas/product.schema';
 import { hydrateProductInfo } from '../utils';
+import { toTsQuery } from '../utils/tsquery';
 
 const PRODUCT_NOT_FOUND = createError(
   'PRODUCT_NOT_FOUND',
@@ -77,6 +78,48 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           category: true,
         }))
         .exec();
+    },
+  });
+
+  // GET /products
+  app.route({
+    method: 'GET',
+    url: '/products/search',
+    schema: {
+      querystring: Type.Object({
+        q: Type.String(),
+        page: Type.Number({ default: 1 }),
+        pageSize: Type.Number({ default: 10 }),
+      }),
+      security: [
+        {
+          OAuth2: ['product@product::list'],
+        },
+      ],
+    },
+    async handler(req) {
+      const { q, page, pageSize } = req.query;
+
+      const [rows, total] = await Products.createQueryBuilder('products')
+        .addSelect(
+          `ts_rank(to_tsvector('english', search_text), to_tsquery('english', :q))`,
+          'rank',
+        )
+        .orderBy('rank', 'DESC')
+        .where('search_text like :like')
+        .orWhere(
+          `to_tsvector('english', search_text) @@ to_tsquery('english', :q)`,
+        )
+        .setParameters({ q: toTsQuery(q), like: `%${q}%` })
+        .skip((page - 1) * pageSize)
+        .take(pageSize)
+        .getManyAndCount();
+
+      return new Response(rows, {
+        page,
+        pageSize,
+        total,
+      });
     },
   });
 
