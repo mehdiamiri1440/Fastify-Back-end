@@ -114,13 +114,9 @@ export class Product implements Static<typeof ProductSchema> {
   })
   tags!: Relation<Tag[]>;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true, select: false })
   content!: string | null;
 
-  /**
-   * @see https://www.crunchydata.com/blog/postgres-full-text-search-a-search-engine-in-a-database
-   * @see https://matthewdaly.co.uk/blog/2017/12/02/full-text-search-with-laravel-and-postgresql/
-   */
   @Column({
     type: 'text',
     generatedType: 'STORED',
