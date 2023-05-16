@@ -114,6 +114,7 @@ const app: FastifyPluginAsync<Options> = async (
       await fastify.register(import('./domains/warehouse/routes'));
       await fastify.register(import('./domains/supplier/routes'));
       await fastify.register(import('./domains/product/routes'));
+      await fastify.register(import('./domains/iban/routes'));
     },
     {
       prefix: '/api/v1',
