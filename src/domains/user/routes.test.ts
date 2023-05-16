@@ -8,6 +8,8 @@ import { FastifyInstance } from 'fastify';
 import { repo } from '$src/infra/utils/repo';
 import { Role } from './models/Role';
 import routes from './routes';
+import exp from 'constants';
+import { User } from './models/User';
 
 let app: FastifyInstance | undefined;
 let user: TestUser;
@@ -69,6 +71,37 @@ it('should create a user', async () => {
   });
 
   userId = body.data.id;
+});
+
+it('should create a user without phone number', async () => {
+  assert(app);
+  assert(user);
+
+  const requestBody = {
+    firstName: 'Daniel',
+    lastName: 'Soheil',
+    role: 1,
+    nif: 'X12345678A',
+    email: 'daniel2@sohe.ir',
+    phoneNumber: null,
+    password: 'hackme',
+    position: 'Developer',
+    isActive: true,
+  };
+
+  const response = await user.inject({
+    method: 'POST',
+    url: '/users',
+    payload: requestBody,
+  });
+
+  expect(response.statusCode).toBe(200);
+
+  expect(
+    await repo(User).findOneBy({ email: requestBody.email }),
+  ).toMatchObject({
+    phoneNumber: null,
+  });
 });
 
 it('should return all users', async () => {
