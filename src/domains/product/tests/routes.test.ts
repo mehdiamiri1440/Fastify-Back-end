@@ -95,14 +95,6 @@ const createSampleSupplier = async () =>
     },
   });
 
-const createSampleBin = () =>
-  repo(Bin).save({
-    name: 'bin1',
-    warehouse,
-    internalCode: 'hey1',
-    creator: { id: 1 },
-  });
-
 it('GET /products/:id should be working', async () => {
   assert(user);
   await disableForeignKeyCheck();
@@ -259,20 +251,6 @@ it('PUT /product-suppliers/:id should be working', async () => {
   expect(supplierProducts[0]).toMatchObject({
     referenceCode: 'ref1',
   });
-});
-
-expect.extend({
-  // ...any other custom matchers.
-  statusCodeToBe(actual, expected) {
-    const pass = expected === actual.statusCode;
-    return {
-      pass,
-      message: pass
-        ? () => `ok`
-        : () =>
-            `expected status code :${expected}, actual:${actual.statusCode}.\n payload: ${actual.payload}`,
-    };
-  },
 });
 
 it('POST /products/:id/images should be working', async () => {
