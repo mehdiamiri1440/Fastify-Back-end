@@ -9,9 +9,19 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Warehouse } from './Warehouse';
+import { Static, Type } from '@sinclair/typebox';
+import { WarehouseStaffSchema } from '$src/domains/warehouse/schemas/warehouse-staff';
+
+const WarehouseStaffSchemaWithoutRelations = Type.Omit(WarehouseStaffSchema, [
+  'user',
+  'warehouse',
+  'creator',
+]);
 
 @Entity()
-export class WarehouseStaff {
+export class WarehouseStaff
+  implements Static<typeof WarehouseStaffSchemaWithoutRelations>
+{
   @PrimaryGeneratedColumn()
   id!: number;
 

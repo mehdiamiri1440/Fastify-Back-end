@@ -14,7 +14,10 @@ import { WarehouseSchema } from '$src/domains/warehouse/schemas/warehouse.schema
 import { Static, Type } from '@sinclair/typebox';
 import { WarehouseStaff } from './WarehouseStaff';
 
-const WarehouseSchemaWithoutRelations = Type.Omit(WarehouseSchema, ['creator']);
+const WarehouseSchemaWithoutRelations = Type.Omit(WarehouseSchema, [
+  'creator',
+  'supervisor',
+]);
 
 @Entity()
 export class Warehouse
@@ -46,6 +49,9 @@ export class Warehouse
 
   @Column({ type: 'text', nullable: true })
   description!: string | null;
+
+  @ManyToOne(() => User)
+  supervisor!: Relation<User>;
 
   @ManyToOne(() => User)
   creator!: Relation<User>;

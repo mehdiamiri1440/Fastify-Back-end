@@ -6,6 +6,8 @@ import { afterAll, beforeAll, expect, it } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance } from 'fastify';
 import routes from './routes';
+import { repo } from '$src/infra/utils/repo';
+import { User } from '$src/domains/user/models/User';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -14,6 +16,8 @@ let sizeId: number;
 let propertyId: number;
 let warehouseId: number;
 let binId: number;
+let userId: number;
+let staffId: number;
 
 const sizeData = {
   title: 'big',
@@ -36,6 +40,16 @@ const binData = {
   physicalCode: 'physicalCode',
   internalCode: 'internalCode',
 };
+const userData = {
+  firstName: 'Daniel',
+  lastName: 'Soheil',
+  nif: 'B-6116622G',
+  email: 'daniel@sohe.ir',
+  phoneNumber: '+989303590055',
+  password: 'hackme',
+  position: 'Developer',
+  isActive: true,
+};
 
 beforeAll(async () => {
   app = await createTestFastifyApp();
@@ -43,6 +57,7 @@ beforeAll(async () => {
   await app.register(routes);
   await app.ready();
   user = await TestUser.create(app);
+  userId = (await repo(User).save({ ...userData })).id;
 });
 
 afterAll(async () => {
@@ -168,7 +183,7 @@ it('should create a warehouse', async () => {
   const response = await user.inject({
     method: 'POST',
     url: '/warehouses',
-    payload: warehouseData,
+    payload: { ...warehouseData, supervisor: userId },
   });
   warehouseId = response.json().data.id;
   expect(response.json()).toMatchObject({
@@ -211,7 +226,7 @@ it('should update a warehouse', async () => {
   const response = await user.inject({
     method: 'PUT',
     url: '/warehouses/' + warehouseId,
-    payload: { ...warehouseData, name: 'edited' },
+    payload: { ...warehouseData, supervisor: userId, name: 'edited' },
   });
 
   expect(response.statusCode).toBe(200);
@@ -300,6 +315,131 @@ it('should delete a bin', async () => {
   });
 
   expect(response.statusCode).toBe(200);
+});
+it('check that our user is available for staff', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/warehouse-staffs/available',
+  });
+  expect(response.json().data).toMatchObject(
+    expect.arrayContaining([expect.objectContaining(userData)]),
+  );
+});
+
+it('should create a staff for warehouse', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'POST',
+    url: '/warehouse-staffs',
+    payload: {
+      user: userId,
+      warehouse: warehouseId,
+    },
+  });
+  expect(response.json()).toMatchObject({
+    data: {
+      user: { ...userData },
+      warehouse: { ...warehouseData, name: 'edited' },
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+      deletedAt: null,
+    },
+    meta: {},
+  });
+  staffId = response.json().data.id;
+});
+
+it('should not create a not available staff for warehouse', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'POST',
+    url: '/warehouse-staffs',
+    payload: {
+      user: userId,
+      warehouse: warehouseId,
+    },
+  });
+  expect(response.statusCode).not.toBe(200);
+});
+
+it('check that our user is not available for staff', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/warehouse-staffs/available',
+  });
+  expect(response.json().data).not.toMatchObject(
+    expect.arrayContaining([expect.objectContaining(userData)]),
+  );
+});
+
+it('should get list staffs assigned to a warehouse', async () => {
+  assert(app);
+  assert(user);
+  assert(staffId);
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/warehouse-staffs',
+  });
+  expect(response.json().data).toMatchObject([
+    {
+      id: staffId,
+      user: { ...userData },
+      warehouse: { ...warehouseData, name: 'edited' },
+      creator: {},
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+      deletedAt: null,
+    },
+  ]);
+});
+
+it('should delete a bin', async () => {
+  assert(app);
+  assert(user);
+  assert(staffId);
+
+  const response = await user.inject({
+    method: 'DELETE',
+    url: '/warehouse-staffs/' + staffId,
+  });
+
+  expect(response.statusCode).toBe(200);
+});
+
+it('should get empty list of staffs assigned to a warehouse', async () => {
+  assert(app);
+  assert(user);
+  assert(staffId);
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/warehouse-staffs',
+  });
+  expect(response.json().data).toMatchObject([]);
+});
+
+it('should not delete a bin', async () => {
+  assert(app);
+  assert(user);
+  assert(staffId);
+
+  const response = await user.inject({
+    method: 'DELETE',
+    url: '/warehouse-staffs/' + staffId,
+  });
+
+  expect(response.statusCode).not.toBe(200);
 });
 
 it('should delete a warehouse', async () => {
