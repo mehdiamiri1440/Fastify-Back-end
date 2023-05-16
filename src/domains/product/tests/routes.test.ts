@@ -123,12 +123,6 @@ it('GET /products/:id should be working', async () => {
     },
   });
 
-  const tag = await repo(Tag).save({
-    name: 'tag',
-  });
-
-  product.tags = [tag];
-
   await repo(Product).save(product);
 
   // await repo(BinProduct).save({
@@ -157,12 +151,6 @@ it('GET /products/:id should be working', async () => {
           id: 1,
           name: supplier.name,
         },
-      },
-    ],
-    tags: [
-      {
-        id: tag.id,
-        name: tag.name,
       },
     ],
   });
@@ -598,6 +586,8 @@ describe('inbounds', () => {
     const product = await createSampleProduct();
     const supplier = await createSampleSupplier();
 
+    await enableForeignKeyCheck();
+
     const inbound = await repo(Inbound).save({
       code: 'code',
       type: InboundType.NEW,
@@ -653,9 +643,9 @@ describe('Search', () => {
   it('GET /products/search should be working', async () => {
     assert(user);
     await disableForeignKeyCheck();
-
     await createSampleProduct({ name: 'abcdef', description: 'iPhone 11 pro' });
     await createSampleProduct({ name: 'def', description: 'Samsung 13 pro' });
+    await enableForeignKeyCheck();
 
     const response = await user.inject({
       method: 'GET',
@@ -669,5 +659,67 @@ describe('Search', () => {
         description: 'Samsung 13 pro',
       },
     ]);
+  });
+});
+
+describe('Content', async () => {
+  it('GET and PUT of /products/:id/content should be working', async () => {
+    assert(user);
+    await disableForeignKeyCheck();
+    const product = await createSampleProduct();
+
+    const { identifiers: tags } = await repo(Tag).insert([
+      {
+        name: 'tag1',
+      },
+      {
+        name: 'tag2',
+      },
+      {
+        name: 'tag3',
+      },
+    ]);
+
+    await enableForeignKeyCheck();
+
+    const emptyContentResponse = await user.inject({
+      method: 'GET',
+      url: `/products/${product.id}/content`,
+    });
+    expect(emptyContentResponse.statusCode).toBe(200);
+    expect(emptyContentResponse.json().data).toMatchObject({
+      id: product.id,
+      content: null,
+      tags: [],
+    });
+
+    await user.inject({
+      method: 'PUT',
+      url: `/products/${product.id}/content`,
+      payload: {
+        content: 'content',
+        tagIds: [tags[0].id, tags[1].id],
+      },
+    });
+
+    const contentResponse = await user.inject({
+      method: 'GET',
+      url: `/products/${product.id}/content`,
+    });
+    expect(contentResponse.statusCode).toBe(200);
+    expect(contentResponse.json().data).toMatchObject({
+      id: product.id,
+      content: 'content',
+      tags: [
+        {
+          id: tags[0].id,
+          name: 'tag1',
+        },
+        {
+          id: tags[1].id,
+          name: 'tag2',
+        },
+      ],
+    });
   });
 });
