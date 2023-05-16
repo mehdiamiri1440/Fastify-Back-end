@@ -10,7 +10,6 @@ async function main() {
     ajv: {
       customOptions: {
         removeAdditional: true,
-        coerceTypes: false,
       },
       plugins: [
         (ajv: Ajv) => {

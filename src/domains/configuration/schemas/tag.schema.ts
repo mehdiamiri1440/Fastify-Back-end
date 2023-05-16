@@ -7,8 +7,8 @@ export const TagSchema = Type.Object({
   createdAt: Type.Union([Type.Date(), Type.String({ format: 'date-time' })]),
   updatedAt: Type.Union([Type.Date(), Type.String({ format: 'date-time' })]),
   deletedAt: Type.Union([
+    Type.Null(),
     Type.Date(),
     Type.String({ format: 'date-time' }),
-    Type.Null(),
   ]),
 });

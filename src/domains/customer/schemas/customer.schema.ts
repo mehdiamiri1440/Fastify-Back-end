@@ -14,9 +14,9 @@ export const CustomerSchema = Type.Object({
   documentType,
   businessDocumentType: Type.Union([documentType, Type.Null()]),
   fiscalId: Type.String(),
-  businessFiscalId: Type.Union([Type.String(), Type.Null()]),
+  businessFiscalId: Type.Union([Type.Null(), Type.String()]),
   contactFamily1: Type.String(),
-  contactFamily2: Type.Union([Type.String(), Type.Null()]),
+  contactFamily2: Type.Union([Type.Null(), Type.String()]),
   nationality: Type.Number(),
   birthday: Type.String({ format: 'date-time' }),
   isActive: Type.Boolean(),
@@ -24,8 +24,8 @@ export const CustomerSchema = Type.Object({
   createdAt: Type.Union([Type.Date(), Type.String({ format: 'date-time' })]),
   updatedAt: Type.Union([Type.Date(), Type.String({ format: 'date-time' })]),
   deletedAt: Type.Union([
+    Type.Null(),
     Type.Date(),
     Type.String({ format: 'date-time' }),
-    Type.Null(),
   ]),
 });

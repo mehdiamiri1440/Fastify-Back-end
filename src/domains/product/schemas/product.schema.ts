@@ -8,7 +8,7 @@ export const ProductSchema = Type.Object({
   invoiceSystemCode: Type.Number(),
   description: Type.String(),
   weight: Type.Number(),
-  content: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  content: Type.Optional(Type.Union([Type.Null(), Type.String()])),
   createdAt: Type.Union([Type.Date(), Type.String({ format: 'date' })]),
   updatedAt: Type.Union([Type.Date(), Type.String({ format: 'date' })]),
   deletedAt: Type.Union([

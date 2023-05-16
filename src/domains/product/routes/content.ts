@@ -49,7 +49,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         id: Type.Integer(),
       }),
       body: Type.Object({
-        content: Type.Union([Type.String(), Type.Null()]),
+        content: Type.Union([Type.Null(), Type.String()]),
         tagIds: Type.Array(Type.Integer()),
       }),
     },

@@ -9,9 +9,9 @@ export const RoleSchema = Type.Object({
   updatedAt: Type.Union([Type.Date(), Type.String({ format: 'date-time' })]),
   deletedAt: Type.Optional(
     Type.Union([
+      Type.Null(),
       Type.Date(),
       Type.String({ format: 'date-time' }),
-      Type.Null(),
     ]),
   ),
 });
