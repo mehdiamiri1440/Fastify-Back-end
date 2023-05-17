@@ -30,7 +30,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      return new TableQueryBuilder(Roles, req).exec();
+      return new TableQueryBuilder(Roles, req)
+        .relation(() => {
+          return { creator: true };
+        })
+        .exec();
     },
   });
   app.route({
@@ -138,6 +142,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       return await Roles.findOneOrFail({
         where: { id: req.params.id },
+        relations: { creator: true },
       });
     },
   });

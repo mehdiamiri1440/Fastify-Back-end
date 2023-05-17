@@ -118,6 +118,7 @@ it('should return all users', async () => {
       expect.objectContaining({
         id: userId,
         ...userData,
+        role: expect.objectContaining({ id: userData.role }),
         password: expect.any(String),
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
