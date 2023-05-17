@@ -94,16 +94,16 @@ export class Product implements Static<typeof ProductSchema> {
   category!: Relation<Category>;
 
   @ManyToOne(() => Shape, (shape) => shape.id)
-  shape!: Relation<Shape> | null;
+  shape?: Relation<Shape> | null;
 
   @ManyToOne(() => Color, { nullable: true })
-  color!: Relation<Color> | null;
+  color?: Relation<Color> | null;
 
   @ManyToOne(() => Brand, { nullable: true })
-  brand!: Relation<Brand> | null;
+  brand?: Relation<Brand> | null;
 
   @ManyToOne(() => Size)
-  size!: Relation<Size> | null;
+  size?: Relation<Size> | null;
 
   @ManyToOne(() => User)
   creator!: Relation<User>;
