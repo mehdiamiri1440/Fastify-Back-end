@@ -284,7 +284,20 @@ it('should add permission to role', async () => {
   });
 });
 
-it('should return all permissions added to role', async () => {
+it('should update permissions of role', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'PUT',
+    url: '/roles/' + roleId + '/permissions',
+    payload: { permissions: ['testPermission', 'testPermission2'] },
+  });
+
+  expect(response.statusCode).toBe(200);
+});
+
+it('should return all permissions added to role and new permission must added', async () => {
   assert(app);
   assert(user);
 
@@ -298,6 +311,48 @@ it('should return all permissions added to role', async () => {
       expect.objectContaining({
         role: roleId,
         permission: 'testPermission',
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        deletedAt: null,
+      }),
+      expect.objectContaining({
+        role: roleId,
+        permission: 'testPermission2',
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        deletedAt: null,
+      }),
+    ]),
+  );
+});
+
+it('should update permissions of role', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'PUT',
+    url: '/roles/' + roleId + '/permissions',
+    payload: { permissions: ['testPermission'] },
+  });
+
+  expect(response.statusCode).toBe(200);
+});
+
+it('should not return permission that not sended to put', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/roles/' + roleId + '/permissions',
+  });
+
+  expect(response.json().data).not.toMatchObject(
+    expect.arrayContaining([
+      expect.objectContaining({
+        role: roleId,
+        permission: 'testPermission2',
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         deletedAt: null,

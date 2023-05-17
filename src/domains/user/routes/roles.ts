@@ -7,6 +7,8 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { Role } from '../../user/models/Role';
 import { RolePermission } from '../models/RolePermission';
+import { DeepPartial } from 'typeorm';
+import AppDataSource from '$src/DataSource';
 
 const Roles = repo(Role);
 const RolePermissions = repo(RolePermission);
@@ -171,6 +173,41 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           return { role: { id: roleId } };
         })
         .exec();
+    },
+  });
+  app.route({
+    method: 'PUT',
+    url: '/:id/permissions',
+    schema: {
+      security: [
+        {
+          OAuth2: ['user@role::list'],
+        },
+      ],
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      body: Type.Object({ permissions: Type.Array(Type.String()) }),
+    },
+    async handler(req) {
+      return await AppDataSource.transaction(async (manager) => {
+        const { id } = await manager
+          .getRepository(Role)
+          .findOneByOrFail({ id: req.params.id });
+        // create list that new permissions assigned to role
+        const newRolePermissions: DeepPartial<RolePermission>[] = [];
+        for (const permission of req.body.permissions) {
+          newRolePermissions.push({ role: { id }, permission });
+        }
+
+        // delete old permissions
+        await manager.getRepository(RolePermission).delete({
+          role: { id },
+        });
+
+        // saving new permissions
+        await manager.getRepository(RolePermission).save(newRolePermissions);
+      });
     },
   });
   app.route({
