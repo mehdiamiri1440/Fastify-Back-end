@@ -25,7 +25,7 @@ export class SupplierDocument
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => User, { nullable: false })
+  @ManyToOne(() => Supplier, { nullable: false })
   supplier!: Relation<Supplier>;
 
   @Column({ nullable: false })
