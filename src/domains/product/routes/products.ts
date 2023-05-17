@@ -191,7 +191,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         ...rest
       } = req.body;
 
-      const relations = await hydrateProductInfo({
+      const { unit, category, ...optionals } = await hydrateProductInfo({
         taxTypeId,
         colorId,
         unitId,
@@ -201,24 +201,29 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         brandId,
       });
 
+      assert(unit);
+      assert(category);
+
       const product: DeepPartial<Product> = {
         ...rest,
-        ...relations,
+        unit,
+        category,
+        ...optionals,
       };
 
       return await Products.save(product);
     },
   });
 
-  // PUT /products/:id
+  // PATCH /products/:id
   app.route({
-    method: 'PUT',
+    method: 'PATCH',
     url: '/products/:id',
     schema: {
       params: Type.Object({
         id: Type.Number(),
       }),
-      body: InputProduct,
+      body: Type.Partial(InputProduct),
       security: [
         {
           OAuth2: ['product@product::update'],
@@ -249,7 +254,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         brandId,
       });
 
-      await Products.update({ id: req.params.id }, { ...rest, ...relations });
+      await Products.update({ id: req.params.id }, {
+        ...rest,
+        ...relations,
+      } as Product);
 
       return await Products.findOne({
         where: { id: productId },

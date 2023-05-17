@@ -12,13 +12,23 @@ import { Shape } from '../configuration/models/Shape';
 import { Size } from './models/Size';
 
 interface ProductRelationForeignKeys {
-  unitId: number;
-  categoryId: number;
+  unitId?: number;
+  categoryId?: number;
   taxTypeId?: number;
   colorId?: number;
   shapeId?: number;
   sizeId?: number;
   brandId?: number;
+}
+
+interface HydratedRelations {
+  unit?: Unit | null;
+  category?: Category | null;
+  taxType?: TaxType | null;
+  color?: Color | null;
+  shape?: Shape | null;
+  size?: Size | null;
+  brand?: Brand | null;
 }
 
 const TAX_TYPE_NOT_FOUND = createError(
@@ -41,7 +51,9 @@ const CATEGORY_NOT_FOUND = createError(
 
 const BRAND_NOT_FOUND = createError('BRAND_NOT_FOUND', 'brand not found', 404);
 
-export async function hydrateProductInfo(product: ProductRelationForeignKeys) {
+export async function hydrateProductInfo(
+  product: ProductRelationForeignKeys,
+): Promise<HydratedRelations> {
   const TaxTypes = repo(TaxType);
   const Colors = repo(Color);
   const Units = repo(Unit);
@@ -50,8 +62,12 @@ export async function hydrateProductInfo(product: ProductRelationForeignKeys) {
   const Sizes = repo(Size);
   const Brands = repo(Brand);
 
-  const unit = await findOneByIdOrFail(Units, product.unitId, UNIT_NOT_FOUND);
-  const category = await findOneByIdOrFail(
+  const unit = await findOneByIdOrFailNullable(
+    Units,
+    product.unitId,
+    UNIT_NOT_FOUND,
+  );
+  const category = await findOneByIdOrFailNullable(
     Categories,
     product.categoryId,
     CATEGORY_NOT_FOUND,
@@ -87,7 +103,7 @@ export async function hydrateProductInfo(product: ProductRelationForeignKeys) {
     BRAND_NOT_FOUND,
   );
 
-  return {
+  return cleanObject({
     taxType,
     unit,
     category,
@@ -95,26 +111,38 @@ export async function hydrateProductInfo(product: ProductRelationForeignKeys) {
     shape,
     size,
     brand,
-  };
+  });
 }
 
-async function findOneByIdOrFail<T extends { id: number }>(
-  repo: Repository<T>,
-  id: number,
-  ErrorCtor: new (...args: any[]) => Error,
-): Promise<T> {
-  const product = await repo.findOneBy({ id } as FindOptionsWhere<T>);
-  if (!product) throw new ErrorCtor();
-  return product;
-}
+// async function findOneByIdOrFail<T extends { id: number }>(
+//   repo: Repository<T>,
+//   id: number,
+//   ErrorCtor: new (...args: any[]) => Error,
+// ): Promise<T> {
+//   const product = await repo.findOneBy({ id } as FindOptionsWhere<T>);
+//   if (!product) throw new ErrorCtor();
+//   return product;
+// }
 
 async function findOneByIdOrFailNullable<T extends { id: number }>(
   repo: Repository<T>,
   id: number | null | undefined,
   ErrorCtor: new (...args: any[]) => Error,
-): Promise<T | null> {
-  if (!id) return null;
+): Promise<T | null | undefined> {
+  if (id === null) return null;
+  if (id === undefined) return;
   const product = await repo.findOneBy({ id } as FindOptionsWhere<T>);
   if (!product) throw new ErrorCtor();
   return product;
+}
+
+function cleanObject(o: {
+  [key in keyof HydratedRelations]: HydratedRelations[key] | undefined;
+}): HydratedRelations {
+  for (const key in o) {
+    if (o[key as keyof HydratedRelations] === undefined)
+      delete o[key as keyof HydratedRelations];
+  }
+
+  return o as HydratedRelations;
 }
