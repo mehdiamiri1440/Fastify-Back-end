@@ -12,9 +12,9 @@ import { Shape } from '../configuration/models/Shape';
 import { Size } from './models/Size';
 
 interface ProductRelationForeignKeys {
-  taxTypeId: number;
   unitId: number;
   categoryId: number;
+  taxTypeId?: number;
   colorId?: number;
   shapeId?: number;
   sizeId?: number;
@@ -50,17 +50,17 @@ export async function hydrateProductInfo(product: ProductRelationForeignKeys) {
   const Sizes = repo(Size);
   const Brands = repo(Brand);
 
-  const taxType = await findOneByIdOrFail(
-    TaxTypes,
-    product.taxTypeId,
-    TAX_TYPE_NOT_FOUND,
-  );
-
   const unit = await findOneByIdOrFail(Units, product.unitId, UNIT_NOT_FOUND);
   const category = await findOneByIdOrFail(
     Categories,
     product.categoryId,
     CATEGORY_NOT_FOUND,
+  );
+
+  const taxType = await findOneByIdOrFailNullable(
+    TaxTypes,
+    product.taxTypeId,
+    TAX_TYPE_NOT_FOUND,
   );
 
   const color = await findOneByIdOrFailNullable(

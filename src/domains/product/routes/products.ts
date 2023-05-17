@@ -40,13 +40,13 @@ const InputProduct = Type.Composite([
     'content',
   ]),
   Type.Object({
-    unitId: Type.Number(),
-    categoryId: Type.Number(),
-    taxTypeId: Type.Number(),
-    colorId: Type.Optional(Type.Number()),
-    shapeId: Type.Optional(Type.Number()),
-    sizeId: Type.Optional(Type.Number()),
-    brandId: Type.Optional(Type.Number()),
+    unitId: Type.Integer(),
+    categoryId: Type.Integer(),
+    taxTypeId: Type.Optional(Type.Integer()),
+    colorId: Type.Optional(Type.Integer()),
+    shapeId: Type.Optional(Type.Integer()),
+    sizeId: Type.Optional(Type.Integer()),
+    brandId: Type.Optional(Type.Integer()),
   }),
 ]);
 
