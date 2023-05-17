@@ -230,6 +230,26 @@ it('should return all roles', async () => {
   );
 });
 
+it('should get user by id', async () => {
+  assert(app);
+  assert(user);
+  assert(roleId);
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/roles/' + roleId,
+  });
+
+  expect(response.statusCode).toBe(200);
+  expect(response.json().data).toMatchObject({
+    id: roleId,
+    ...roleData,
+    createdAt: expect.any(String),
+    updatedAt: expect.any(String),
+    deletedAt: null,
+  });
+});
+
 it('should update role', async () => {
   assert(app);
   assert(user);

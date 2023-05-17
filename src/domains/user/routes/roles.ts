@@ -124,6 +124,25 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   });
   app.route({
     method: 'GET',
+    url: '/:id',
+    schema: {
+      security: [
+        {
+          OAuth2: ['user@role::list'],
+        },
+      ],
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+    },
+    async handler(req) {
+      return await Roles.findOneOrFail({
+        where: { id: req.params.id },
+      });
+    },
+  });
+  app.route({
+    method: 'GET',
     url: '/:id/permissions',
     schema: {
       security: [
