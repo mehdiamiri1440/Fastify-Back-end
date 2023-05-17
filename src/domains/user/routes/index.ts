@@ -87,7 +87,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       const user = await Users.findOne({
         where: { id: req.user.id },
-        loadRelationIds: true,
+        relations: { role: true, creator: true },
       });
 
       return {
