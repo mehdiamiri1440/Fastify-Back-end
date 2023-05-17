@@ -54,8 +54,8 @@ export class Product implements Static<typeof ProductSchema> {
   @Column({ nullable: true })
   weight!: number;
 
-  @ManyToOne(() => TaxType)
-  taxType!: Relation<TaxType>;
+  @ManyToOne(() => TaxType, { nullable: true })
+  taxType!: Relation<TaxType> | null;
 
   @OneToMany(
     () => ProductSupplier,
