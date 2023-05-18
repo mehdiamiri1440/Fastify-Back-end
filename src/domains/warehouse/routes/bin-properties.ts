@@ -32,6 +32,24 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   });
 
   app.route({
+    method: 'GET',
+    url: '/:id',
+    schema: {
+      security: [
+        {
+          OAuth2: ['warehouse@bin-property::list'],
+        },
+      ],
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+    },
+    async handler(req) {
+      return await BinProperties.findOneByOrFail({ id: req.params.id });
+    },
+  });
+
+  app.route({
     method: 'POST',
     url: '/',
     schema: {
@@ -79,6 +97,24 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       const { id } = await BinProperties.findOneByOrFail({ id: req.params.id });
       await BinProperties.update({ id }, req.body);
+    },
+  });
+  app.route({
+    method: 'DELETE',
+    url: '/:id',
+    schema: {
+      security: [
+        {
+          OAuth2: ['warehouse@bin-property::delete'],
+        },
+      ],
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+    },
+    async handler(req) {
+      const { id } = await BinProperties.findOneByOrFail({ id: req.params.id });
+      await BinProperties.delete({ id });
     },
   });
 };

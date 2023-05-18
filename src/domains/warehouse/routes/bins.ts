@@ -33,7 +33,31 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      return new TableQueryBuilder(Bins, req).exec();
+      return new TableQueryBuilder(Bins, req)
+        .relation(() => {
+          return { size: true, property: true, warehouse: true };
+        })
+        .exec();
+    },
+  });
+  app.route({
+    method: 'GET',
+    url: '/:id',
+    schema: {
+      security: [
+        {
+          OAuth2: ['warehouse@bin::list'],
+        },
+      ],
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+    },
+    async handler(req) {
+      return await Bins.findOneOrFail({
+        where: { id: req.params.id },
+        relations: { size: true, property: true, warehouse: true },
+      });
     },
   });
 

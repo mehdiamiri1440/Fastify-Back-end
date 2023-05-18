@@ -21,8 +21,9 @@ let staffId: number;
 
 const sizeData = {
   title: 'big',
-  length: '1',
-  width: '2',
+  width: 1,
+  height: 2,
+  depth: 3,
 };
 const propertyData = {
   title: 'normal',
@@ -87,6 +88,23 @@ it('should create a bin size', async () => {
   });
 });
 
+it('should get bin size by id', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/bin-sizes/' + sizeId,
+  });
+  expect(response.json().data).toMatchObject({
+    id: sizeId,
+    ...sizeData,
+    createdAt: expect.any(String),
+    updatedAt: expect.any(String),
+    deletedAt: null,
+  });
+});
+
 it('should get list of bin sizes', async () => {
   assert(app);
   assert(user);
@@ -140,6 +158,23 @@ it('should create a bin property', async () => {
       deletedAt: null,
     },
     meta: {},
+  });
+});
+
+it('should get bin property by id', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/bin-properties/' + propertyId,
+  });
+  expect(response.json().data).toMatchObject({
+    id: propertyId,
+    ...propertyData,
+    createdAt: expect.any(String),
+    updatedAt: expect.any(String),
+    deletedAt: null,
   });
 });
 
@@ -282,6 +317,23 @@ it('should create a bin', async () => {
   });
 });
 
+it('should get bin by id', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/bins/' + binId,
+  });
+  expect(response.json().data).toMatchObject({
+    id: binId,
+    ...binData,
+    createdAt: expect.any(String),
+    updatedAt: expect.any(String),
+    deletedAt: null,
+  });
+});
+
 it('should get list of bin', async () => {
   assert(app);
   assert(user);
@@ -295,9 +347,9 @@ it('should get list of bin', async () => {
       expect.objectContaining({
         id: binId,
         ...binData,
-        size: sizeId,
-        property: propertyId,
-        warehouse: warehouseId,
+        size: expect.objectContaining({ id: sizeId }),
+        property: expect.objectContaining({ id: propertyId }),
+        warehouse: expect.objectContaining({ id: warehouseId }),
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         deletedAt: null,
@@ -336,6 +388,31 @@ it('should delete a bin', async () => {
 
   expect(response.statusCode).toBe(200);
 });
+
+it('should delete bin property', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'DELETE',
+    url: '/bin-properties/' + propertyId,
+  });
+
+  expect(response.statusCode).toBe(200);
+});
+
+it('should delete bin size', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'DELETE',
+    url: '/bin-sizes/' + sizeId,
+  });
+
+  expect(response.statusCode).toBe(200);
+});
+
 it('check that our user is available for staff', async () => {
   assert(app);
   assert(user);

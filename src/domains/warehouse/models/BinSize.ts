@@ -22,11 +22,14 @@ export class BinSize implements Static<typeof BinSizeSchemaWithoutRelations> {
   @Column({ nullable: false })
   title!: string;
 
-  @Column({ type: 'text', nullable: true })
-  width!: string | null;
+  @Column({ nullable: false })
+  width!: number;
 
-  @Column({ type: 'text', nullable: true })
-  length!: string | null;
+  @Column({ nullable: false })
+  height!: number;
+
+  @Column({ nullable: false })
+  depth!: number;
 
   @ManyToOne(() => User)
   creator!: Relation<User>;
