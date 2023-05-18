@@ -26,7 +26,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       const { id } = req.params;
 
-      const { unit, binProducts } = await Products.findOneOrFail({
+      const { unit, binProducts, size } = await Products.findOneOrFail({
         where: { id },
         relations: {
           binProducts: {
@@ -35,6 +35,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             },
           },
           unit: true,
+          size: true,
         },
         select: {
           id: true,
@@ -61,6 +62,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       return binProducts.map((binProduct) => ({
         ...binProduct,
         unit,
+        size,
       }));
     },
   });

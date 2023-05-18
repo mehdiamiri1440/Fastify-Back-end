@@ -17,6 +17,6 @@ expect.extend({
 
 declare module 'expect' {
   interface Matchers<R extends void | Promise<void>, T = unknown> {
-    statusCodeToBe(expectedStatusCode: number): R;
+    statusCodeToBe(expected: number): R;
   }
 }

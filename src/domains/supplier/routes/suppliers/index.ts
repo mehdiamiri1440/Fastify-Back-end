@@ -160,8 +160,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       await Suppliers.softDelete({ id });
     },
   });
+
   await app.register(import('./contacts'));
   await app.register(import('./documents'));
+  await app.register(import('./products'));
 };
 
 export default plugin;
