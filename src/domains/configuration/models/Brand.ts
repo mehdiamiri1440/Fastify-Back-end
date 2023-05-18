@@ -1,17 +1,16 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  CreateDateColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
-  Relation,
-} from 'typeorm';
-import { User } from '$src/domains/user/models/User';
-import { Static } from '@sinclair/typebox';
 import { BrandSchema } from '$src/domains/configuration/schemas/brand.schema';
-import { Type } from '@sinclair/typebox';
+import { User } from '$src/domains/user/models/User';
+import { Static, Type } from '@sinclair/typebox';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Relation,
+  UpdateDateColumn,
+} from 'typeorm';
 
 const BrandSchemaWithoutRelations = Type.Omit(BrandSchema, ['creator']);
 
@@ -19,6 +18,9 @@ const BrandSchemaWithoutRelations = Type.Omit(BrandSchema, ['creator']);
 export class Brand implements Static<typeof BrandSchemaWithoutRelations> {
   @PrimaryGeneratedColumn()
   id!: number;
+
+  @Column({ type: 'varchar', nullable: true })
+  logoFileId!: string | null;
 
   @Column({ nullable: false, unique: true })
   name!: string;

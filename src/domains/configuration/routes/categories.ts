@@ -26,7 +26,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      return new TableQueryBuilder(Categories, req).exec();
+      return new TableQueryBuilder(Categories, req)
+        .relation(() => ({
+          parent: true,
+        }))
+        .exec();
     },
   });
   app.route({
@@ -38,17 +42,18 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['configuration@category::create'],
         },
       ],
-      body: Type.Omit(CategorySchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Pick(CategorySchema, ['name', 'parentId']),
     },
     async handler(req) {
+      const { name, parentId } = req.body;
+
+      const parent = parentId
+        ? await Categories.findOneByOrFail({ id: parentId })
+        : null;
+
       return await Categories.save({
-        ...req.body,
+        name,
+        parent,
         creator: { id: req.user.id },
       });
     },
@@ -62,20 +67,21 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['configuration@category::update'],
         },
       ],
-      body: Type.Omit(CategorySchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Pick(CategorySchema, ['name', 'parentId']),
       params: Type.Object({
         id: Type.Number(),
       }),
     },
     async handler(req) {
+      const { name, parentId } = req.body;
+
       const { id } = await Categories.findOneByOrFail({ id: req.params.id });
-      await Categories.update({ id }, req.body);
+
+      const parent = parentId
+        ? await Categories.findOneByOrFail({ id: parentId })
+        : null;
+
+      await Categories.update({ id }, { name, parent });
     },
   });
 };

@@ -30,11 +30,12 @@ it('should create a brand', async () => {
   const response = await user.inject({
     method: 'POST',
     url: '/',
-    payload: { name: 'test' },
+    payload: { name: 'test', logoFileId: 'file.jpg' },
   });
   expect(response.json()).toMatchObject({
     data: {
       name: 'test',
+      logoFileId: 'file.jpg',
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
       deletedAt: null,
@@ -57,6 +58,7 @@ it('should get list of brands', async () => {
       expect.objectContaining({
         id: brandId,
         name: 'test',
+        logoFileId: 'file.jpg',
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         deletedAt: null,
@@ -72,7 +74,7 @@ it('should update a brand', async () => {
   const response = await user.inject({
     method: 'PUT',
     url: '/' + brandId,
-    payload: { name: 'edit' },
+    payload: { name: 'edit', logoFileId: 'file.jpg' },
   });
 
   expect(response.statusCode).toBe(200);
