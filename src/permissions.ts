@@ -83,12 +83,15 @@ export default {
   'warehouse@bin-size::list':
     'with this permission you can get list of bin sizes',
   'warehouse@bin-size::update': 'with this permission you can edit bin size',
+  'warehouse@bin-size::delete': 'with this permission you can delete bin size',
   'warehouse@bin-property::create':
     'with this permission you can add new property',
   'warehouse@bin-property::list':
     'with this permission you can get list of properties',
   'warehouse@bin-property::update':
     'with this permission you can edit bin property',
+  'warehouse@bin-property::delete':
+    'with this permission you can delete bin property',
 
   // configuration
   'configuration@unit::list': 'with this permission you can get list of units',
