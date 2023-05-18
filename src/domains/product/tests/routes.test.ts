@@ -80,7 +80,7 @@ const createSampleProduct = async (overrides?: DeepPartial<Product>) =>
     ...overrides,
   });
 
-const createSampleSupplier = async () =>
+const createSampleSupplier = async (overrides?: DeepPartial<Supplier>) =>
   repo(Supplier).save({
     name: 'test',
     cif: 'cif',
@@ -94,6 +94,7 @@ const createSampleSupplier = async () =>
     creator: {
       id: 1,
     },
+    ...overrides,
   });
 
 it('GET /products/:id should be working', async () => {
@@ -662,6 +663,89 @@ describe('Search', () => {
         description: 'Samsung 13 pro',
       },
     ]);
+  });
+});
+
+describe('Suppliers', () => {
+  describe('Search', () => {
+    const initData = async () => {
+      await disableForeignKeyCheck();
+      const p1 = await createSampleProduct();
+      const p2 = await createSampleProduct();
+      const s1 = await createSampleSupplier();
+      const s2 = await createSampleSupplier({ name: 'hey' });
+
+      await repo(ProductSupplier).save({
+        product: p1,
+        supplier: s1,
+        creator: { id: 1 },
+      });
+
+      await repo(ProductSupplier).save({
+        product: p2,
+        supplier: s2,
+        creator: { id: 1 },
+      });
+
+      await repo(ProductSupplier).save({
+        product: p2,
+        supplier: s1,
+        creator: { id: 1 },
+      });
+
+      await enableForeignKeyCheck();
+
+      return {
+        s1,
+        s2,
+        p1,
+        p2,
+      };
+    };
+
+    it('GET /products/:id/free-to-add-suppliers should be working', async () => {
+      assert(user);
+      const { s2, p1 } = await initData();
+
+      const response = await user.inject({
+        method: 'GET',
+        url: `/products/${p1.id}/free-to-add-suppliers`,
+      });
+
+      expect(response).statusCodeToBe(200);
+      expect(response.json().data).toMatchObject([
+        {
+          id: s2.id,
+          name: s2.name,
+        },
+      ]);
+    });
+
+    it('GET /products/:id/free-to-add-suppliers should be working with search', async () => {
+      assert(user);
+      const { s2, p1 } = await initData();
+
+      const response = await user.inject({
+        method: 'GET',
+        url: `/products/${p1.id}/free-to-add-suppliers?search=hev`,
+      });
+
+      expect(response).statusCodeToBe(200);
+      expect(response.json().data).toMatchObject([]);
+
+      const response2 = await user.inject({
+        method: 'GET',
+        url: `/products/${p1.id}/free-to-add-suppliers?search=hey`,
+      });
+
+      expect(response2).statusCodeToBe(200);
+      expect(response2.json().data).toMatchObject([
+        {
+          id: s2.id,
+          name: s2.name,
+        },
+      ]);
+    });
   });
 });
 

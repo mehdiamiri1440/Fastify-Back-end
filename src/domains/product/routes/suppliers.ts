@@ -1,11 +1,11 @@
-import { ResponseShape } from '$src/infra/Response';
+import { Supplier } from '$src/domains/supplier/models/Supplier';
+import { Response, ResponseShape } from '$src/infra/Response';
 import { repo } from '$src/infra/utils/repo';
+import createError from '@fastify/error';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
-import { ProductSupplier } from '../models/ProductSupplier';
 import { Product } from '../models/Product';
-import { Supplier } from '$src/domains/supplier/models/Supplier';
-import createError from '@fastify/error';
+import { ProductSupplier } from '../models/ProductSupplier';
 
 const SUPPLIER_NOT_FOUND = createError(
   'SUPPLIER_NOT_FOUND',
@@ -26,10 +26,50 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
   app.register(ResponseShape);
 
-  // POST /products/:id/suppliers
-  app.route({
-    method: 'POST',
-    url: '/products/:id/suppliers',
+  app.get('/products/:id/free-to-add-suppliers', {
+    schema: {
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      querystring: Type.Object({
+        search: Type.Optional(Type.String()),
+        pageSize: Type.Integer({ minimum: 1, default: 10 }),
+        page: Type.Integer({ minimum: 1, default: 1 }),
+      }),
+      security: [
+        {
+          OAuth2: ['product@product-suppliers::create'],
+        },
+      ],
+    },
+    async handler(req) {
+      const { page, pageSize, search } = req.query;
+
+      // list of all suppliers without suppliers of current product
+      const [rows, total] = await Suppliers.createQueryBuilder('supplier')
+        .where(
+          `supplier.id NOT IN (
+            SELECT product_supplier.supplier_id 
+            FROM product_supplier
+            WHERE product_supplier.product_id = :productId
+            AND product_supplier.deleted_at IS NULL
+          )`,
+        )
+        .andWhere(`supplier.name like :search`, { search: `%${search ?? ''}%` })
+        .setParameter('productId', req.params.id)
+        .skip((page - 1) * pageSize)
+        .take(pageSize)
+        .getManyAndCount();
+
+      return new Response(rows, {
+        page,
+        pageSize,
+        total,
+      });
+    },
+  });
+
+  app.post('/products/:id/suppliers', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -76,10 +116,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // DELETE /product-suppliers/:id
-  app.route({
-    method: 'DELETE',
-    url: '/product-suppliers/:id',
+  app.delete('/product-suppliers/:id', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -101,10 +138,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // PUT /product-suppliers/:id
-  app.route({
-    method: 'PUT',
-    url: '/product-suppliers/:id',
+  app.put('/product-suppliers/:id', {
     schema: {
       params: Type.Object({
         id: Type.Number(),

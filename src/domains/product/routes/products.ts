@@ -110,7 +110,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         .orWhere(
           `to_tsvector('english', search_text) @@ to_tsquery('english', :q)`,
         )
-        .setParameters({ q: toTsQuery(q), like: `%${q}%` })
+        .setParameters({ q: toTsQuery(q), like: `%${q ?? ''}%` })
         .skip((page - 1) * pageSize)
         .take(pageSize)
         .getManyAndCount();
