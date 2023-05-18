@@ -1,4 +1,7 @@
-import { RoleSchema } from '$src/domains/user/schemas/role.schema';
+import {
+  RolePermissionsSchema,
+  RoleSchema,
+} from '$src/domains/user/schemas/role.schema';
 import { repo } from '$src/infra/utils/repo';
 import { ResponseShape } from '$src/infra/Response';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
@@ -9,6 +12,7 @@ import { Role } from '../../user/models/Role';
 import { RolePermission } from '../models/RolePermission';
 import { DeepPartial } from 'typeorm';
 import AppDataSource from '$src/DataSource';
+import { RoleService } from '$src/domains/user/services/role.service';
 
 const Roles = repo(Role);
 const RolePermissions = repo(RolePermission);
@@ -48,7 +52,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['user@role::create'],
         },
       ],
-      body: Type.Omit(RoleSchema, [
+      body: Type.Omit(Type.Composite([RoleSchema, RolePermissionsSchema]), [
         'id',
         'creator',
         'createdAt',
@@ -57,9 +61,17 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ]),
     },
     async handler(req) {
-      return await Roles.save({
-        ...req.body,
-        creator: { id: req.user.id },
+      return await AppDataSource.transaction(async (manager) => {
+        const service = new RoleService(manager, req.user.id);
+
+        // create role
+        const { title, isActive } = req.body;
+        const role = await service.createRole({ title, isActive });
+
+        // update role permissions
+        await service.updatePermissionsOfRole(role.id, req.body.permissions);
+
+        return role;
       });
     },
   });
@@ -72,7 +84,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['user@role::update'],
         },
       ],
-      body: Type.Omit(RoleSchema, [
+      body: Type.Omit(Type.Composite([RoleSchema, RolePermissionsSchema]), [
         'id',
         'creator',
         'createdAt',
@@ -84,8 +96,19 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      const { id } = await Roles.findOneByOrFail({ id: req.params.id });
-      await Roles.update({ id }, req.body);
+      return await AppDataSource.transaction(async (manager) => {
+        const service = new RoleService(manager, req.user.id);
+
+        // update role
+        const { title, isActive } = req.body;
+        await service.updateRole(req.params.id, { title, isActive });
+
+        // update role permissions
+        await service.updatePermissionsOfRole(
+          req.params.id,
+          req.body.permissions,
+        );
+      });
     },
   });
   app.route({
@@ -187,26 +210,17 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Number(),
       }),
-      body: Type.Object({ permissions: Type.Array(Type.String()) }),
+      body: RolePermissionsSchema,
     },
     async handler(req) {
       return await AppDataSource.transaction(async (manager) => {
-        const { id } = await manager
-          .getRepository(Role)
-          .findOneByOrFail({ id: req.params.id });
-        // create list that new permissions assigned to role
-        const newRolePermissions: DeepPartial<RolePermission>[] = [];
-        for (const permission of req.body.permissions) {
-          newRolePermissions.push({ role: { id }, permission });
-        }
+        const service = new RoleService(manager, req.user.id);
 
-        // delete old permissions
-        await manager.getRepository(RolePermission).delete({
-          role: { id },
-        });
-
-        // saving new permissions
-        await manager.getRepository(RolePermission).save(newRolePermissions);
+        // update role permissions
+        await service.updatePermissionsOfRole(
+          req.params.id,
+          req.body.permissions,
+        );
       });
     },
   });

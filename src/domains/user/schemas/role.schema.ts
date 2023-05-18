@@ -15,3 +15,7 @@ export const RoleSchema = Type.Object({
     ]),
   ),
 });
+
+export const RolePermissionsSchema = Type.Object({
+  permissions: Type.Array(Type.String()),
+});
