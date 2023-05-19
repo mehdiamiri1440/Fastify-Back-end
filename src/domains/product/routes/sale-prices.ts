@@ -5,6 +5,8 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { Product } from '../models/Product';
 import { ProductSalePrice } from '../models/ProductSalePrice';
+import { ListQueryOptions } from '$src/infra/tables/schema_builder';
+import { TableQueryBuilder } from '$src/infra/tables/Table';
 
 const PRODUCT_NOT_FOUND = createError(
   'PRODUCT_NOT_FOUND',
@@ -25,6 +27,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Number(),
       }),
+      querystring: ListQueryOptions({
+        filterable: [],
+        orderable: ['id'],
+        searchable: [],
+      }),
       security: [
         {
           OAuth2: ['product@product-sale-prices::list'],
@@ -32,14 +39,13 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ],
     },
     async handler(req) {
-      const productId = req.params.id;
-      const product = await Products.findOne({
-        where: { id: productId },
-        relations: ['salePrices'],
-      });
-      if (!product) throw new PRODUCT_NOT_FOUND();
-      const currentPrice = product.salePrices.pop();
-      return { currentPrice, history: product.salePrices };
+      const { id } = req.params;
+
+      return new TableQueryBuilder(ProductSalePrices, req)
+        .where(() => ({
+          product: { id },
+        }))
+        .exec();
     },
   });
 

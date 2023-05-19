@@ -754,6 +754,7 @@ describe('Content', async () => {
     assert(user);
     await disableForeignKeyCheck();
     const product = await createSampleProduct();
+    await enableForeignKeyCheck();
 
     const { identifiers: tags } = await repo(Tag).insert([
       {
@@ -808,5 +809,38 @@ describe('Content', async () => {
         },
       ],
     });
+  });
+});
+
+describe('Sale Price', () => {
+  it('GET and POST /products/:id/sale-prices should be working', async () => {
+    assert(user);
+    await disableForeignKeyCheck();
+    const product = await createSampleProduct();
+    await enableForeignKeyCheck();
+
+    const createResponse = await user.inject({
+      method: 'POST',
+      url: `/products/${product.id}/sale-prices`,
+      payload: {
+        price: 150,
+      },
+    });
+
+    expect(createResponse).statusCodeToBe(200);
+
+    const listResponse = await user.inject({
+      method: 'GET',
+      url: `/products/${product.id}/sale-prices`,
+    });
+
+    expect(listResponse).statusCodeToBe(200);
+    expect(listResponse.json().data).toMatchObject([
+      {
+        id: 1,
+        price: 150,
+        createdAt: expect.any(String),
+      },
+    ]);
   });
 });
