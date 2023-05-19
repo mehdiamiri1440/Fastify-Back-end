@@ -25,8 +25,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ],
       querystring: ListQueryOptions({
         filterable: ['name'],
-        orderable: ['name'],
-        searchable: ['name'],
+        orderable: ['id', 'name'],
+        searchable: ['id', 'name'],
       }),
     },
     async handler(req) {

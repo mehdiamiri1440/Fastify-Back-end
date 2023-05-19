@@ -7,6 +7,7 @@ import { FastifyInstance } from 'fastify';
 import routes from '../routes/categories';
 import { Category } from '../models/Category';
 import { repo } from '$src/infra/utils/repo';
+import '$src/infra/test/statusCodeExpect';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -32,6 +33,9 @@ it('should create a category without parent', async () => {
     url: '/',
     payload: { name: 'test', parentId: null },
   });
+
+  expect(response).statusCodeToBe(200);
+
   expect(response.json()).toMatchObject({
     data: {
       name: 'test',
@@ -52,6 +56,9 @@ it('should create a category with parent', async () => {
     url: '/',
     payload: { name: 'test', parentId: null },
   });
+
+  expect(response).statusCodeToBe(200);
+
   expect(response.json()).toMatchObject({
     data: {
       name: 'test',
@@ -81,14 +88,9 @@ it('should get list of categories', async () => {
     url: '/',
   });
 
+  expect(response).statusCodeToBe(200);
+
   expect(response.json().data).toMatchObject([
-    {
-      id: c1.id,
-      name: 'test1',
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String),
-      deletedAt: null,
-    },
     {
       id: c2.id,
       name: 'test2',
@@ -96,6 +98,13 @@ it('should get list of categories', async () => {
         id: c1.id,
         name: 'test1',
       },
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+      deletedAt: null,
+    },
+    {
+      id: c1.id,
+      name: 'test1',
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
       deletedAt: null,
@@ -126,7 +135,7 @@ it('should update a category', async () => {
     payload: { name: 'edit', parentId: null },
   });
 
-  expect(responseA.statusCode).toBe(200);
+  expect(responseA).statusCodeToBe(200);
 
   expect(
     await repo(Category).findOneOrFail({
@@ -146,7 +155,7 @@ it('should update a category', async () => {
     payload: { name: 'edit', parentId: c3.id },
   });
 
-  expect(responseB.statusCode).toBe(200);
+  expect(responseB).statusCodeToBe(200);
 
   expect(
     await repo(Category).findOneOrFail({

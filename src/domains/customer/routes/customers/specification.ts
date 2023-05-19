@@ -1,22 +1,11 @@
+import { Customer } from '$src/domains/customer/models/Customer';
+import { Nationality } from '$src/domains/customer/models/Nationality';
+import { CustomerSchema } from '$src/domains/customer/schemas/customer.schema';
+import { isBusiness } from '$src/domains/customer/statics/subscriberTypes';
 import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
-import { Customer } from '$src/domains/customer/models/Customer';
-import { CustomerSchema } from '$src/domains/customer/schemas/customer.schema';
-import { isBusiness } from '$src/domains/customer/statics/subscriberTypes';
-import { Nationality } from '$src/domains/customer/models/Nationality';
-import createError from '@fastify/error';
-
-const NOT_NEED_BUSINESS_DATA = createError(
-  'NOT_NEED_BUSINESS_DATA',
-  'this subscriber type not need business data',
-  409,
-);
-const NEED_BUSINESS_DATA = createError(
-  'NEED_BUSINESS_DATA',
-  'this subscriber type need business data',
-  409,
-);
+import { validateCustomerData } from '../../utils';
 
 const Customers = repo(Customer);
 const Nationalities = repo(Nationality);
@@ -36,10 +25,18 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      return await Customers.findOneOrFail({
+      const entity = await Customers.findOneOrFail({
         where: { id: req.params.id },
-        loadRelationIds: true,
+        relations: {
+          addresses: true,
+          nationality: true,
+        },
       });
+
+      return {
+        ...entity,
+        isBusiness: isBusiness(entity.subscriberType),
+      };
     },
   });
   app.route({
@@ -63,28 +60,25 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ]),
     },
     async handler(req) {
-      // validating references
+      const {
+        nationalityId,
+        businessName,
+        businessFiscalId,
+        businessDocumentType,
+        subscriberType,
+        ...restBody
+      } = req.body;
+
       const nationality = await Nationalities.findOneByOrFail({
-        id: req.body.nationality,
+        id: nationalityId,
       });
 
-      // check if subscriber type need business data, business data exist else business data must not exist
-      const allBusinessData =
-        req.body.businessName &&
-        req.body.businessFiscalId &&
-        req.body.businessDocumentType;
-      const anyBusinessData =
-        req.body.businessName ||
-        req.body.businessFiscalId ||
-        req.body.businessDocumentType;
-
-      const needBusinessData = isBusiness(req.body.subscriberType);
-
-      if (needBusinessData) {
-        if (!allBusinessData) throw new NEED_BUSINESS_DATA();
-      } else {
-        if (anyBusinessData) throw new NOT_NEED_BUSINESS_DATA();
-      }
+      validateCustomerData({
+        businessName,
+        businessFiscalId,
+        businessDocumentType,
+        subscriberType,
+      });
 
       const { id } = await Customers.findOneByOrFail({
         id: req.params.id,
@@ -92,7 +86,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       await Customers.update(
         { id },
         {
-          ...req.body,
+          ...restBody,
+          businessName,
+          businessFiscalId,
+          businessDocumentType,
+          subscriberType,
           nationality,
         },
       );

@@ -19,9 +19,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:id/documents',
     schema: {
       querystring: ListQueryOptions({
-        filterable: ['name'],
-        orderable: ['name'],
-        searchable: ['name'],
+        filterable: [],
+        orderable: [],
+        searchable: [],
       }),
       security: [
         {
@@ -55,21 +55,14 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Number(),
       }),
-      body: Type.Omit(DocumentSchema, [
-        'id',
-        'customer',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Pick(DocumentSchema, ['fileId']),
     },
     async handler(req) {
       // validating references
       const customer = await Customers.findOneByOrFail({ id: req.params.id });
 
       return await Documents.save({
-        ...req.body,
+        fileId: req.body.fileId,
         customer,
         creator: { id: req.user.id },
       });

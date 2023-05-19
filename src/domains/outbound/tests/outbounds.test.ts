@@ -1,5 +1,6 @@
 import AppDataSource from '$src/DataSource';
 import { Unit } from '$src/domains/configuration/models/Unit';
+import '$src/infra/test/statusCodeExpect';
 import {
   TestUser,
   createTestFastifyApp,
@@ -13,7 +14,6 @@ import { FastifyInstance } from 'fastify';
 import { describe } from 'node:test';
 import 'reflect-metadata';
 import { Product } from '../../product/models/Product';
-import { Supplier } from '../../supplier/models/Supplier';
 import { Warehouse } from '../../warehouse/models/Warehouse';
 import { WarehouseStaff } from '../../warehouse/models/WarehouseStaff';
 import routes from '../routes/outbounds';
@@ -89,7 +89,7 @@ describe('Create Outbound', () => {
       },
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const body = response.json();
     expect(body).toMatchObject({
       data: {
@@ -117,7 +117,7 @@ describe('Get Outbound', () => {
       url: '/',
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const body = response.json();
     expect(body).toMatchObject({
       data: [
@@ -141,7 +141,7 @@ describe('Get Outbound', () => {
       url: '/1',
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const body = response.json();
     expect(body).toMatchObject({
       data: {
@@ -185,7 +185,7 @@ describe('Set CustomerId', () => {
       },
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const body = response.json();
     expect(body).toMatchObject({
       data: {
@@ -207,7 +207,7 @@ describe('Confirm Order', () => {
       url: '/1/confirm-order',
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const body = response.json();
     expect(body).toMatchObject({
       data: {

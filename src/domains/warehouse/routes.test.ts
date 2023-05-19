@@ -1,13 +1,12 @@
-import 'reflect-metadata';
-
 import AppDataSource from '$src/DataSource';
+import { User } from '$src/domains/user/models/User';
+import '$src/infra/test/statusCodeExpect';
 import { createTestFastifyApp, TestUser } from '$src/infra/test/utils';
+import { repo } from '$src/infra/utils/repo';
 import { afterAll, beforeAll, expect, it } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance } from 'fastify';
 import routes from './routes';
-import { repo } from '$src/infra/utils/repo';
-import { User } from '$src/domains/user/models/User';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -136,7 +135,7 @@ it('should update a bin size', async () => {
     payload: { ...sizeData, title: 'edited' },
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should create a bin property', async () => {
@@ -209,7 +208,7 @@ it('should update a bin property', async () => {
     payload: { ...propertyData, title: 'edited' },
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should create a warehouse', async () => {
@@ -264,7 +263,7 @@ it('should get a warehouse', async () => {
     url: '/warehouses/' + warehouseId,
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
   expect(response.json().data).toMatchObject({
     id: warehouseId,
     ...warehouseData,
@@ -284,7 +283,7 @@ it('should update a warehouse', async () => {
     payload: { ...warehouseData, supervisor: userId, name: 'edited' },
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should create a bin', async () => {
@@ -374,7 +373,7 @@ it('should update a bin', async () => {
     },
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should delete a bin', async () => {
@@ -386,7 +385,7 @@ it('should delete a bin', async () => {
     url: '/bins/' + binId,
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should delete bin property', async () => {
@@ -398,7 +397,7 @@ it('should delete bin property', async () => {
     url: '/bin-properties/' + propertyId,
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should delete bin size', async () => {
@@ -410,7 +409,7 @@ it('should delete bin size', async () => {
     url: '/bin-sizes/' + sizeId,
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('check that our user is available for staff', async () => {
@@ -511,7 +510,7 @@ it('should delete a bin', async () => {
     url: '/warehouse-staffs/' + staffId,
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should get empty list of staffs assigned to a warehouse', async () => {
@@ -548,5 +547,5 @@ it('should delete a warehouse', async () => {
     url: '/warehouses/' + warehouseId,
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });

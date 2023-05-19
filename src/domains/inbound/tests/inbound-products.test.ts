@@ -1,26 +1,27 @@
+import AppDataSource from '$src/DataSource';
+import { Unit } from '$src/domains/configuration/models/Unit';
+import { BinProduct } from '$src/domains/product/models/BinProduct';
+import { Bin } from '$src/domains/warehouse/models/Bin';
+import '$src/infra/test/statusCodeExpect';
 import {
   createTestFastifyApp,
   disableForeignKeyCheck,
   enableForeignKeyCheck,
   TestUser,
 } from '$src/infra/test/utils';
+import { repo } from '$src/infra/utils/repo';
 import { afterAll, beforeAll, expect, it } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance } from 'fastify';
-import routes from '../routes/inbound-products';
+import { describe } from 'node:test';
+import { DeepPartial } from 'typeorm';
 import { Product } from '../../product/models/Product';
 import { Supplier } from '../../supplier/models/Supplier';
-import { describe } from 'node:test';
 import { Warehouse } from '../../warehouse/models/Warehouse';
 import { WarehouseStaff } from '../../warehouse/models/WarehouseStaff';
 import { Inbound, InboundStatus, InboundType } from '../models/Inbound';
 import { InboundProduct } from '../models/InboundProduct';
-import { Unit } from '$src/domains/configuration/models/Unit';
-import AppDataSource from '$src/DataSource';
-import { repo } from '$src/infra/utils/repo';
-import { DeepPartial } from 'typeorm';
-import { Bin } from '$src/domains/warehouse/models/Bin';
-import { BinProduct } from '$src/domains/product/models/BinProduct';
+import routes from '../routes/inbound-products';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -138,11 +139,17 @@ describe('InboundProduct list', () => {
       url: '/',
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const body = response.json();
 
     expect(body.data).toHaveLength(2);
     expect(body.data).toMatchObject([
+      {
+        id: expect.any(Number),
+        createdAt: expect.any(String),
+        requestedQuantity: 20,
+        actualQuantity: 21,
+      },
       {
         id: expect.any(Number),
         createdAt: expect.any(String),
@@ -160,12 +167,6 @@ describe('InboundProduct list', () => {
             name: product.unit.name,
           },
         },
-      },
-      {
-        id: expect.any(Number),
-        createdAt: expect.any(String),
-        requestedQuantity: 20,
-        actualQuantity: 21,
       },
     ]);
   });
@@ -209,7 +210,7 @@ describe('Update InboundProduct', () => {
       },
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const body = response.json();
 
     expect(body).toMatchObject({
@@ -260,7 +261,7 @@ describe('Update InboundProduct', () => {
       },
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
 
     const entity = await InboundProducts.findOne({
       where: { id: inboundProduct.id },
@@ -306,7 +307,7 @@ describe('Delete InboundProduct', () => {
       url: `/${inboundProduct.id}`,
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const body = response.json();
 
     expect(body).toMatchObject({
@@ -398,7 +399,7 @@ describe('Sorting', () => {
       },
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
 
     expect(
       await repo(InboundProduct).findOneByOrFail({ id: inboundProduct.id }),

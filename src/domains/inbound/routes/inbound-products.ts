@@ -59,8 +59,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     schema: {
       querystring: ListQueryOptions({
         filterable: ['status'],
-        orderable: ['code', 'status', 'creator.fullName', 'createdAt'],
-        searchable: ['code', 'creator.fullName'],
+        orderable: ['id', 'status', 'creator.fullName', 'createdAt'],
+        searchable: ['id', 'creator.fullName'],
       }),
       security: [
         {

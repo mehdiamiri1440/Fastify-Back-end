@@ -1,12 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
 import Fastify, { FastifyInstance } from 'fastify';
 import { Client } from 'minio';
-import plugin, { Options } from './plugin';
+import plugin from './plugin';
 // see https://github.com/fastify/light-my-request/issues/35
+import '$src/infra/test/statusCodeExpect';
 import FormData from 'form-data';
+import assert from 'node:assert';
 import { createReadStream } from 'node:fs';
 import { join } from 'node:path';
-import assert from 'node:assert';
 
 async function ensureBucket(client: Client, bucketName: string) {
   // Check if the bucket already exists
@@ -104,7 +105,7 @@ describe('Upload, download', () => {
       headers: form.getHeaders(),
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     expect(JSON.parse(response.payload)).toHaveProperty('filename');
   });
 
@@ -120,7 +121,7 @@ describe('Upload, download', () => {
       url: `/test.txt`,
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     expect(response.body).toBe('hety');
   });
 });

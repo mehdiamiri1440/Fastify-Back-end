@@ -32,9 +32,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       querystring: ListQueryOptions({
-        filterable: ['name'],
-        orderable: ['name'],
-        searchable: ['name'],
+        filterable: [],
+        orderable: [],
+        searchable: [],
       }),
       params: Type.Object({
         id: Type.Number(),

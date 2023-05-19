@@ -15,12 +15,12 @@ export const allSubscriberTypes = [
   ...normalSubscriberTypes,
 ] as const;
 
+export type SubscriberType = (typeof allSubscriberTypes)[number];
+
 const businessSubscriberTypesSchema = StringEnum([...businessSubscriberTypes]);
-const normalSubscriberTypesSchema = StringEnum([...normalSubscriberTypes]);
+
 export function isBusiness(
-  subscriberType:
-    | Static<typeof businessSubscriberTypesSchema>
-    | Static<typeof normalSubscriberTypesSchema>,
+  subscriberType: SubscriberType,
 ): subscriberType is Static<typeof businessSubscriberTypesSchema> {
   return businessSubscriberTypes.includes(
     subscriberType as Static<typeof businessSubscriberTypesSchema>,

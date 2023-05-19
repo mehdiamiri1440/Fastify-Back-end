@@ -1,5 +1,8 @@
 import AppDataSource from '$src/DataSource';
 import { Unit } from '$src/domains/configuration/models/Unit';
+import { BinProduct } from '$src/domains/product/models/BinProduct';
+import { Bin } from '$src/domains/warehouse/models/Bin';
+import '$src/infra/test/statusCodeExpect';
 import {
   TestUser,
   createTestFastifyApp,
@@ -15,12 +18,10 @@ import 'reflect-metadata';
 import { Product } from '../../product/models/Product';
 import { Warehouse } from '../../warehouse/models/Warehouse';
 import { WarehouseStaff } from '../../warehouse/models/WarehouseStaff';
-import routes from '../routes/outbound-products';
-import { OutboundProduct } from '../models/OutboundProduct';
 import { Outbound, OutboundStatus } from '../models/Outbound';
-import { BinProduct } from '$src/domains/product/models/BinProduct';
-import { Bin } from '$src/domains/warehouse/models/Bin';
+import { OutboundProduct } from '../models/OutboundProduct';
 import { OutboundProductSupply } from '../models/OutboundProductSupply';
+import routes from '../routes/outbound-products';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -107,7 +108,7 @@ describe('Update OutboundProduct', () => {
       },
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const body = response.json();
 
     expect(body).toMatchObject({
@@ -208,7 +209,7 @@ describe('Supply', () => {
       url: `/${outboundProduct.id}/supply-state`,
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const body = response.json();
     expect(body).toMatchObject({
       data: {
@@ -253,7 +254,7 @@ describe('Supply', () => {
       },
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const result = response.json();
 
     const stateResponse = await user.inject({
@@ -303,7 +304,7 @@ describe('Supply', () => {
       url: `/${outboundProduct.id}/supplies/${bin1.id}`,
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const result = response.json();
 
     const stateResponse = await user.inject({
