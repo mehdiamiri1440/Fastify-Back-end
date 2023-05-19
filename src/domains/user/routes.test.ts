@@ -1,15 +1,14 @@
-import 'reflect-metadata';
 import AppDataSource from '$src/DataSource';
+import '$src/infra/test/statusCodeExpect';
 import { createTestFastifyApp, TestUser } from '$src/infra/test/utils';
+import { repo } from '$src/infra/utils/repo';
 import permissions from '$src/permissions';
 import { afterAll, beforeAll, expect, it } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance } from 'fastify';
-import { repo } from '$src/infra/utils/repo';
 import { Role } from './models/Role';
-import routes from './routes';
-import exp from 'constants';
 import { User } from './models/User';
+import routes from './routes';
 
 let app: FastifyInstance | undefined;
 let user: TestUser;
@@ -76,7 +75,7 @@ it('should get role by id', async () => {
     url: '/roles/' + roleId,
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
   expect(response.json().data).toMatchObject({
     id: roleId,
     ...roleData,
@@ -150,7 +149,7 @@ it('should update role and permissions of role', async () => {
     payload: { id: roleId, ...roleData, permissions: [] },
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should get role by id after edit', async () => {
@@ -163,7 +162,7 @@ it('should get role by id after edit', async () => {
     url: '/roles/' + roleId,
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
   expect(response.json().data).toMatchObject({
     id: roleId,
     ...roleData,
@@ -255,7 +254,7 @@ it('should delete permission of role', async () => {
     url: '/roles/' + roleId + '/permissions/testPermission',
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should return all permissions after editing role and removed new', async () => {
@@ -312,7 +311,7 @@ it('should login', async () => {
     },
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
   const body = response.json();
   expect(body).toMatchObject({
     access_token: expect.any(String),
@@ -348,7 +347,7 @@ it('should deactive user', async () => {
     payload: { isActive: false },
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should not login when user is not active', async () => {
@@ -377,7 +376,7 @@ it('should active user', async () => {
     payload: { isActive: true },
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should deactive role', async () => {
@@ -390,7 +389,7 @@ it('should deactive role', async () => {
     payload: { isActive: false },
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should login but with empty scope', async () => {
@@ -406,7 +405,7 @@ it('should login but with empty scope', async () => {
     },
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
   const body = response.json();
   expect(body).toMatchObject({
     access_token: expect.any(String),
@@ -426,7 +425,7 @@ it('should active role', async () => {
     payload: { isActive: true },
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should create and delete a user without phone number', async () => {
@@ -501,7 +500,7 @@ it('should get user by id', async () => {
     url: '/users/' + userId,
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
   expect(response.json().data).toMatchObject({
     id: userId,
     ...userData,
@@ -528,7 +527,7 @@ it('should update user', async () => {
     },
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should delete user', async () => {
@@ -540,7 +539,7 @@ it('should delete user', async () => {
     url: '/users/' + userId,
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should delete role', async () => {
@@ -552,7 +551,7 @@ it('should delete role', async () => {
     url: '/roles/' + roleId,
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should return permissions', async () => {

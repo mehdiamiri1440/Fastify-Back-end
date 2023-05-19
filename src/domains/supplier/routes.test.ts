@@ -1,14 +1,15 @@
 import 'reflect-metadata';
 
+import AppDataSource from '$src/DataSource';
+import '$src/infra/test/statusCodeExpect';
 import { createTestFastifyApp, TestUser } from '$src/infra/test/utils';
+import { repo } from '$src/infra/utils/repo';
 import { afterAll, beforeAll, expect, it } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance } from 'fastify';
-import routes from './routes';
-import AppDataSource from '$src/DataSource';
-import { Language } from './models/Language';
-import { repo } from '$src/infra/utils/repo';
 import { describe } from 'node:test';
+import { Language } from './models/Language';
+import routes from './routes';
 
 const Languages = repo(Language);
 let app: FastifyInstance | undefined;
@@ -148,7 +149,7 @@ describe('flow', () => {
       payload: { ...supplierData, name: 'edited' },
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
   });
 
   it('should create a contact for supplier', async () => {
@@ -205,7 +206,7 @@ describe('flow', () => {
       payload: { ...contactData, name: 'edited' },
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
   });
 
   it('should delete contact of supplier', async () => {
@@ -217,7 +218,7 @@ describe('flow', () => {
       url: '/suppliers/' + supplierId + '/contacts/' + contactId,
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
   });
 
   it('should create a document for supplier', async () => {
@@ -250,6 +251,9 @@ describe('flow', () => {
       method: 'GET',
       url: '/suppliers/' + supplierId + '/documents',
     });
+
+    expect(response).statusCodeToBe(200);
+
     expect(response.json().data).toMatchObject(
       expect.arrayContaining([
         expect.objectContaining({
@@ -273,7 +277,7 @@ describe('flow', () => {
       url: '/suppliers/' + supplierId + '/documents/' + documentId,
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
   });
 
   it('should delete supplier', async () => {
@@ -285,6 +289,6 @@ describe('flow', () => {
       url: '/suppliers/' + supplierId,
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
   });
 });

@@ -1,13 +1,12 @@
-import 'reflect-metadata';
-
+import AppDataSource from '$src/DataSource';
 import { createTestFastifyApp, TestUser } from '$src/infra/test/utils';
+import { repo } from '$src/infra/utils/repo';
 import { afterAll, beforeAll, expect, it } from '@jest/globals';
 import assert from 'assert';
-import fastify, { FastifyInstance } from 'fastify';
-import routes from './routes';
-import AppDataSource from '$src/DataSource';
+import { FastifyInstance } from 'fastify';
 import { Nationality } from './models/Nationality';
-import { repo } from '$src/infra/utils/repo';
+import routes from './routes';
+import '$src/infra/test/statusCodeExpect';
 
 const Nationalities = repo(Nationality);
 let app: FastifyInstance | undefined;
@@ -96,7 +95,7 @@ it('should create a customer', async () => {
   const response = await user.inject({
     method: 'POST',
     url: '/customers',
-    payload: { ...customerData, nationality: nId },
+    payload: { ...customerData, nationalityId: nId },
   });
 
   expect(response.json()).toMatchObject({
@@ -120,18 +119,19 @@ it('should return all customers', async () => {
     method: 'GET',
     url: '/customers',
   });
-  expect(response.json().data).toMatchObject(
-    expect.arrayContaining([
-      expect.objectContaining({
-        id: customerId,
-        ...customerData,
-        nationality: nId,
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-        deletedAt: null,
-      }),
-    ]),
-  );
+  expect(response.json().data).toMatchObject([
+    {
+      id: customerId,
+      ...customerData,
+      nationality: {
+        id: nId,
+        title: expect.any(String),
+      },
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+      deletedAt: null,
+    },
+  ]);
 });
 
 it('should update customer specification', async () => {
@@ -141,10 +141,10 @@ it('should update customer specification', async () => {
   const response = await user.inject({
     method: 'PUT',
     url: '/customers/' + customerId + '/specification',
-    payload: { ...customerData, nationality: nId, name: 'edited' },
+    payload: { ...customerData, nationalityId: nId, name: 'edited' },
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should get customer specification', async () => {
@@ -156,17 +156,18 @@ it('should get customer specification', async () => {
     url: '/customers/' + customerId + '/specification',
   });
 
-  expect(response.json().data).toMatchObject(
-    expect.objectContaining({
-      id: customerId,
-      ...customerData,
-      name: 'edited',
-      nationality: nId,
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String),
-      deletedAt: null,
-    }),
-  );
+  expect(response.json().data).toMatchObject({
+    id: customerId,
+    ...customerData,
+    name: 'edited',
+    nationality: {
+      id: nId,
+      title: expect.any(String),
+    },
+    createdAt: expect.any(String),
+    updatedAt: expect.any(String),
+    deletedAt: null,
+  });
 });
 
 it('should create a contact for customer', async () => {
@@ -199,18 +200,19 @@ it('should return all contact of customer', async () => {
     method: 'GET',
     url: '/customers/' + customerId + '/contacts',
   });
-  expect(response.json().data).toMatchObject(
-    expect.arrayContaining([
-      expect.objectContaining({
-        id: contactId,
-        ...contactData,
-        customer: customerId,
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-        deletedAt: null,
-      }),
-    ]),
-  );
+
+  expect(response).statusCodeToBe(200);
+
+  expect(response.json().data).toMatchObject([
+    {
+      id: contactId,
+      ...contactData,
+      customer: customerId,
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+      deletedAt: null,
+    },
+  ]);
 });
 
 it('should update a contact of customer', async () => {
@@ -223,7 +225,7 @@ it('should update a contact of customer', async () => {
     payload: { ...contactData, name: 'edited' },
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should delete contact of customer', async () => {
@@ -235,7 +237,7 @@ it('should delete contact of customer', async () => {
     url: '/customers/' + customerId + '/contacts/' + contactId,
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should create a document for customer', async () => {
@@ -247,6 +249,8 @@ it('should create a document for customer', async () => {
     url: '/customers/' + customerId + '/documents',
     payload: { fileId: 'testFileId' },
   });
+
+  expect(response).statusCodeToBe(200);
 
   expect(response.json()).toMatchObject({
     data: {
@@ -268,6 +272,9 @@ it('should return all documents of customer', async () => {
     method: 'GET',
     url: '/customers/' + customerId + '/documents',
   });
+
+  expect(response).statusCodeToBe(200);
+
   expect(response.json().data).toMatchObject(
     expect.arrayContaining([
       expect.objectContaining({
@@ -291,7 +298,7 @@ it('should delete document of customer', async () => {
     url: '/customers/' + customerId + '/documents/' + documentId,
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should update customer address for first time', async () => {
@@ -304,7 +311,7 @@ it('should update customer address for first time', async () => {
     payload: { ...addressData },
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should get customer address', async () => {
@@ -337,7 +344,7 @@ it('should update customer address after first time', async () => {
     payload: { ...addressData, stairway: 'edited' },
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 it('should update customer bank for first time', async () => {
   assert(app);
@@ -349,7 +356,7 @@ it('should update customer bank for first time', async () => {
     payload: { iban: 'ES4920802421432544428435' },
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should get customer bank', async () => {
@@ -382,7 +389,7 @@ it('should update customer bank after first time', async () => {
     payload: { iban: 'ES1600753513832862583447' },
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should not update customer bank', async () => {
@@ -407,5 +414,5 @@ it('should delete customer', async () => {
     url: '/customers/' + customerId,
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });

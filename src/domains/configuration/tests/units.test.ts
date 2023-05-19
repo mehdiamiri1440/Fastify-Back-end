@@ -5,6 +5,7 @@ import { afterAll, beforeAll, expect, it } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance } from 'fastify';
 import routes from '../routes/units';
+import '$src/infra/test/statusCodeExpect';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -75,5 +76,5 @@ it('should update a unit', async () => {
     payload: { name: 'edit' },
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });

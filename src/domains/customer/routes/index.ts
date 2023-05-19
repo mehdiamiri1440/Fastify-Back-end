@@ -7,6 +7,7 @@ import { Nationality } from '../models/Nationality';
 import {
   normalSubscriberTypes,
   businessSubscriberTypes,
+  allSubscriberTypes,
 } from '$src/domains/customer/statics/subscriberTypes';
 import { allDocumentTypes } from '$src/domains/customer/statics/documentTypes';
 const Nationalities = repo(Nationality);
@@ -32,14 +33,14 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/subscriber-types',
     async handler() {
-      return { normalSubscriberTypes, businessSubscriberTypes };
+      return allSubscriberTypes;
     },
   });
   app.route({
     method: 'GET',
     url: '/document-types',
     async handler() {
-      return { allDocumentTypes };
+      return allDocumentTypes;
     },
   });
 };

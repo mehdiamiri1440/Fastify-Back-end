@@ -2,10 +2,11 @@ import { Type } from '@sinclair/typebox';
 
 export const ContactSchema = Type.Object({
   id: Type.Number(),
-  name: Type.Union([Type.String({ minLength: 1 }), Type.Null()]),
-  surName: Type.Union([Type.String({ minLength: 1 }), Type.Null()]),
+
   customer: Type.Number(),
-  position: Type.Union([Type.String({ minLength: 1 }), Type.Null()]),
+  position: Type.Union([Type.Null(), Type.String({ minLength: 1 })]),
+  name: Type.Union([Type.Null(), Type.String({ minLength: 1 })]),
+  surName: Type.Union([Type.Null(), Type.String({ minLength: 1 })]),
   email: Type.String({ format: 'email' }),
   phoneNumber: Type.String({ minLength: 1 }),
   creator: Type.Number(),

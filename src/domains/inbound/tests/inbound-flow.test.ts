@@ -1,5 +1,10 @@
 import AppDataSource from '$src/DataSource';
 import { Unit } from '$src/domains/configuration/models/Unit';
+import { BinProduct } from '$src/domains/product/models/BinProduct';
+import { ProductStockHistory } from '$src/domains/product/models/ProductStockHistory';
+import { Supplier } from '$src/domains/supplier/models/Supplier';
+import { Bin } from '$src/domains/warehouse/models/Bin';
+import '$src/infra/test/statusCodeExpect';
 import {
   TestUser,
   createTestFastifyApp,
@@ -14,12 +19,6 @@ import { Product } from '../../product/models/Product';
 import { Warehouse } from '../../warehouse/models/Warehouse';
 import { WarehouseStaff } from '../../warehouse/models/WarehouseStaff';
 import routes from '../routes';
-import { Bin } from '$src/domains/warehouse/models/Bin';
-import { BinProduct } from '$src/domains/product/models/BinProduct';
-import { User } from '$src/domains/user/models/User';
-import { Role } from '$src/domains/user/models/Role';
-import { Supplier } from '$src/domains/supplier/models/Supplier';
-import { ProductStockHistory } from '$src/domains/product/models/ProductStockHistory';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -108,7 +107,7 @@ afterAll(async () => {
 const inject = async (options: InjectOptions) => {
   assert(user);
   const response = await user.inject(options);
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 
   if (
     response.headers['content-type']?.toString().startsWith('application/json')

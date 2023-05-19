@@ -1,25 +1,13 @@
-import { ResponseShape } from '$src/infra/Response';
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { repo } from '$src/infra/utils/repo';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
-import { TableQueryBuilder } from '$src/infra/tables/Table';
-import { Type } from '@sinclair/typebox';
-import { CustomerSchema } from '$src/domains/customer/schemas/customer.schema';
 import { Customer } from '$src/domains/customer/models/Customer';
 import { Nationality } from '$src/domains/customer/models/Nationality';
-import createError from '@fastify/error';
-import { isBusiness } from '$src/domains/customer/statics/subscriberTypes';
-
-const NOT_NEED_BUSINESS_DATA = createError(
-  'NOT_NEED_BUSINESS_DATA',
-  'this subscriber type not need business data',
-  409,
-);
-const NEED_BUSINESS_DATA = createError(
-  'NEED_BUSINESS_DATA',
-  'this subscriber type need business data',
-  409,
-);
+import { CustomerSchema } from '$src/domains/customer/schemas/customer.schema';
+import { ResponseShape } from '$src/infra/Response';
+import { TableQueryBuilder } from '$src/infra/tables/Table';
+import { ListQueryOptions } from '$src/infra/tables/schema_builder';
+import { repo } from '$src/infra/utils/repo';
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { Type } from '@sinclair/typebox';
+import { validateCustomerData } from '../../utils';
 
 const Customers = repo(Customer);
 const Nationalities = repo(Nationality);
@@ -37,13 +25,18 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       querystring: ListQueryOptions({
-        filterable: ['name'],
-        orderable: ['name'],
-        searchable: ['name'],
+        filterable: ['isActive'],
+        orderable: ['id', 'name', 'fiscalId', 'email', 'createdAt', 'isActive'],
+        searchable: ['id', 'name', 'fiscalId', 'email'],
       }),
     },
     async handler(req) {
-      return new TableQueryBuilder(Customers, req).exec();
+      return new TableQueryBuilder(Customers, req)
+        .relation(() => ({
+          addresses: true,
+          nationality: true,
+        }))
+        .exec();
     },
   });
 
@@ -65,31 +58,32 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ]),
     },
     async handler(req) {
-      // validating references
+      const {
+        nationalityId,
+        businessName,
+        businessFiscalId,
+        businessDocumentType,
+        subscriberType,
+        ...restBody
+      } = req.body;
+
       const nationality = await Nationalities.findOneByOrFail({
-        id: req.body.nationality,
+        id: nationalityId,
       });
 
-      // check if subscriber type need business data, business data exist else business data must not exist
-      const allBusinessData =
-        req.body.businessName &&
-        req.body.businessFiscalId &&
-        req.body.businessDocumentType;
-      const anyBusinessData =
-        req.body.businessName ||
-        req.body.businessFiscalId ||
-        req.body.businessDocumentType;
-
-      const needBusinessData = isBusiness(req.body.subscriberType);
-
-      if (needBusinessData) {
-        if (!allBusinessData) throw new NEED_BUSINESS_DATA();
-      } else {
-        if (anyBusinessData) throw new NOT_NEED_BUSINESS_DATA();
-      }
+      validateCustomerData({
+        businessName,
+        businessFiscalId,
+        businessDocumentType,
+        subscriberType,
+      });
 
       return await Customers.save({
-        ...req.body,
+        ...restBody,
+        businessName,
+        businessFiscalId,
+        businessDocumentType,
+        subscriberType,
         nationality,
         creator: { id: req.user.id },
       });

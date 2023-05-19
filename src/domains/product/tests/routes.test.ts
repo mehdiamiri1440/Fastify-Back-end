@@ -133,7 +133,7 @@ it('GET /products/:id should be working', async () => {
     url: `/products/${product.id}`,
   });
 
-  expect(response?.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
   expect(response?.json().data).toMatchObject({
     images: [
       {
@@ -173,7 +173,7 @@ it('POST /products/:id/suppliers should be working', async () => {
     },
   });
 
-  expect(response?.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 
   const supplierProducts = await repo(ProductSupplier).find({
     loadRelationIds: {
@@ -327,7 +327,7 @@ it('POST /products/:id/move-bin-quantity', async () => {
       quantity: 5,
     },
   });
-  expect(response?.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 
   const sourceBinProduct = await repo(BinProduct).findOne({
     where: {
@@ -394,7 +394,7 @@ describe('history', () => {
       method: 'GET',
       url: `/products/${product.id}/history`,
     });
-    expect(response?.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     expect(response?.json().data).toMatchObject([
       {
         quantity: 20,
@@ -467,7 +467,7 @@ describe('bins', () => {
       url: `/products/${product.id}/bins`,
     });
 
-    expect(response?.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const body = await response?.json().data;
 
     expect(body).toHaveLength(2);
@@ -524,7 +524,7 @@ describe('tax types', () => {
       url: `/tax-types`,
     });
 
-    expect(response?.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     expect(response?.json().data).toHaveLength(2);
     expect(response?.json().data).toMatchObject([
       {
@@ -563,7 +563,7 @@ describe('sizes', () => {
       url: `/sizes`,
     });
 
-    expect(response?.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     expect(response?.json().data).toHaveLength(2);
     expect(response?.json().data).toMatchObject([
       {
@@ -627,7 +627,7 @@ describe('inbounds', () => {
       url: `/products/${product.id}/inbounds`,
     });
 
-    expect(response?.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const body = await response?.json().data;
 
     expect(body).toHaveLength(2);
@@ -656,7 +656,7 @@ describe('Search', () => {
       url: `/products/search?q=${encodeURIComponent('def 13')}`,
     });
 
-    expect(response?.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     expect(response?.json().data).toMatchObject([
       {
         name: 'def',

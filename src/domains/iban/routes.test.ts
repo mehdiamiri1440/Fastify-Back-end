@@ -1,11 +1,12 @@
 import 'reflect-metadata';
 
+import AppDataSource from '$src/DataSource';
+import '$src/infra/test/statusCodeExpect';
 import { createTestFastifyApp, TestUser } from '$src/infra/test/utils';
 import { afterAll, beforeAll, expect, it } from '@jest/globals';
 import assert from 'assert';
-import fastify, { FastifyInstance } from 'fastify';
+import { FastifyInstance } from 'fastify';
 import routes from './routes';
-import AppDataSource from '$src/DataSource';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -31,7 +32,7 @@ it('should validate iban', async () => {
     url: '/iban/validate/ES2820958297603648596978',
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
   expect(response.json().data).toMatchObject({
     bic: expect.any(String),
     bankName: expect.any(String),

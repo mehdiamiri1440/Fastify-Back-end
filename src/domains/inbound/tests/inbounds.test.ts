@@ -1,9 +1,12 @@
+import AppDataSource from '$src/DataSource';
+import '$src/infra/test/statusCodeExpect';
 import {
   TestUser,
   createTestFastifyApp,
   disableForeignKeyCheck,
   enableForeignKeyCheck,
 } from '$src/infra/test/utils';
+import { repo } from '$src/infra/utils/repo';
 import { afterAll, beforeAll, expect, it } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance } from 'fastify';
@@ -15,8 +18,6 @@ import { Warehouse } from '../../warehouse/models/Warehouse';
 import { WarehouseStaff } from '../../warehouse/models/WarehouseStaff';
 import { Inbound } from '../models/Inbound';
 import routes from '../routes/inbounds';
-import AppDataSource from '$src/DataSource';
-import { repo } from '$src/infra/utils/repo';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -106,7 +107,7 @@ describe('Create Inbound', () => {
         driverId: 1,
       },
     });
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const body = response.json();
     expect(body).toMatchObject({
       data: {
@@ -145,7 +146,7 @@ describe('Create Inbound', () => {
       },
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const body = response.json();
     expect(body).toMatchObject({
       data: {
@@ -173,12 +174,12 @@ describe('Get Inbound', () => {
       url: '/',
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const body = response.json();
     expect(body).toMatchObject({
       data: [
         {
-          type: 'new',
+          type: 'returned',
           status: 'pre_delivery',
           creator: { fullName: 'tester tester' },
           code: expect.any(String),
@@ -186,7 +187,7 @@ describe('Get Inbound', () => {
           updatedAt: expect.any(String),
         },
         {
-          type: 'returned',
+          type: 'new',
           status: 'pre_delivery',
           creator: { fullName: 'tester tester' },
           code: expect.any(String),
@@ -206,7 +207,7 @@ describe('Get Inbound', () => {
       url: '/1',
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const body = response.json();
     expect(body).toMatchObject({
       data: {
@@ -249,7 +250,7 @@ describe('Delete Inbound', () => {
       url: '/1',
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const body = response.json();
 
     expect(body).toMatchObject({

@@ -29,10 +29,12 @@ export function ListQueryOptions(options: Options) {
     order: {
       type: 'string',
       enum: ['asc', 'desc'],
+      default: 'desc',
     },
     orderBy: {
       type: 'string',
-      enum: options.orderable,
+      enum: options.orderable.length ? options.orderable : ['id'],
+      default: options.orderable[0] ?? 'id',
     },
     ...Object.fromEntries(
       options.filterable.map((key) => [`filter.${key}`, { type: 'string' }]),

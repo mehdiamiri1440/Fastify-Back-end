@@ -8,6 +8,8 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   Relation,
+  Index,
+  OneToMany,
 } from 'typeorm';
 import { Nationality } from './Nationality';
 import {
@@ -16,10 +18,11 @@ import {
   documentType,
 } from '../schemas/customer.schema';
 import { Static, Type } from '@sinclair/typebox';
+import { CustomerAddress } from './Address';
 
 const CustomerSchemaWithoutRelations = Type.Omit(CustomerSchema, [
   'creator',
-  'nationality',
+  'nationalityId',
 ]);
 
 @Entity()
@@ -43,6 +46,10 @@ export class Customer implements Static<typeof CustomerSchemaWithoutRelations> {
   businessDocumentType!: Static<typeof documentType> | null;
 
   @Column({ nullable: false })
+  @Index({
+    unique: true,
+    where: `(deleted_at IS NULL)`,
+  })
   fiscalId!: string;
 
   @Column({ type: 'text', nullable: true })
@@ -56,6 +63,12 @@ export class Customer implements Static<typeof CustomerSchemaWithoutRelations> {
 
   @ManyToOne(() => Nationality, { nullable: false })
   nationality!: Relation<Nationality>;
+
+  @OneToMany(
+    () => CustomerAddress,
+    (customerAddress) => customerAddress.customer,
+  )
+  addresses!: CustomerAddress[];
 
   @Column({ nullable: false })
   birthday!: string;

@@ -3,9 +3,10 @@ import Fastify, { FastifyInstance } from 'fastify';
 import { Client } from 'minio';
 import plugin, { Options } from './plugin';
 // see https://github.com/fastify/light-my-request/issues/35
+import '$src/infra/test/statusCodeExpect';
+import assert from 'node:assert';
 import { createReadStream } from 'node:fs';
 import { join } from 'node:path';
-import assert from 'node:assert';
 
 async function ensureBucket(client: Client, bucketName: string) {
   // Check if the bucket already exists
@@ -99,7 +100,7 @@ describe.skip('file plugin smoke test', () => {
       url: `/image.jpg`,
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     expect(response.headers).toMatchObject({
       'content-type': 'image/webp',
     });
@@ -118,7 +119,7 @@ describe.skip('file plugin smoke test', () => {
       url: `/image.jpg?thumbnail=true`,
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     expect(response.headers).toMatchObject({
       'content-type': 'image/webp',
     });
