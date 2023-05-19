@@ -20,7 +20,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       assert(HUB_API_ADDRESS);
       assert(HUB_TOKEN);
       const { name } = req.query;
-      const result = await fetch(
+      const response = await fetch(
         `${HUB_API_ADDRESS}/gf-clients?size=10&include=true&filter=filter%5Bname%5D%5Blike%5D%3D%25${encodeURI(
           name,
         )}%25&order=order%5BcreationDate%5D%3Ddesc`,
@@ -31,7 +31,15 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           }),
         },
       );
-      return await result.json();
+
+      assert(
+        response.ok,
+        `Failed to fetch customers. statusCode: ${response.status}`,
+      );
+
+      const { data } = (await response.json()) as any;
+      response;
+      return data;
     },
   });
 };
