@@ -5,11 +5,13 @@ import {
 } from '$src/infra/tables/schema_builder';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Response } from '$src/infra/Response';
+import { Type } from '@sinclair/typebox';
 import {
   generateQueryParamForPaginationAndOrder,
   getCities,
   getLikeFilter,
   getNumber,
+  getPostal,
   getProvince,
   getStreets,
 } from './service';
@@ -164,6 +166,27 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'GET',
     url: '/postal-codes',
+    schema: {
+      querystring: Type.Object({
+        cityCode: Type.String(),
+      }),
+    },
+    async handler(req) {
+      const { postalCodes, meta } = await getPostal(
+        new URLSearchParams({
+          city_code: req.query.cityCode,
+        }),
+      );
+      return new Response(postalCodes, {
+        page: meta.current_page,
+        total: meta.total,
+      });
+    },
+  });
+
+  app.route({
+    method: 'GET',
+    url: '/numbers',
     schema: {
       querystring: ListQueryOptions({
         filterable: [],

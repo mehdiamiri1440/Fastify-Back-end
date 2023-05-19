@@ -7,6 +7,12 @@ export function provinceDto(province: any) {
   };
 }
 
+export function postalDto(postal: any) {
+  return {
+    postal_code: postal.postal_code,
+  };
+}
+
 export function cityDto(city: any) {
   return {
     id: city.id,

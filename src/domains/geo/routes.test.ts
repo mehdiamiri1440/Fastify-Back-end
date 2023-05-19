@@ -40,6 +40,8 @@ it('should get first provinces', async () => {
   });
 });
 
+let aCityCode: string | null = null;
+
 it('should get first city', async () => {
   assert(app);
 
@@ -48,17 +50,17 @@ it('should get first city', async () => {
     url: '/cities?page=1&pageSize=1',
   });
 
-  expect(response.json()).toMatchObject({
-    data: [
-      {
-        code: expect.any(String),
-        formated_name: expect.any(String),
-        id: expect.any(Number),
-        name: expect.any(String),
-      },
-    ],
-    meta: expect.any(Object),
-  });
+  const data = response.json().data;
+  expect(data).toMatchObject([
+    {
+      code: expect.any(String),
+      formated_name: expect.any(String),
+      id: expect.any(Number),
+      name: expect.any(String),
+    },
+  ]);
+
+  aCityCode = data.code;
 });
 
 it('should get first street', async () => {
@@ -82,12 +84,26 @@ it('should get first street', async () => {
   });
 });
 
+it('should get first postal code', async () => {
+  assert(app);
+
+  const response = await app.inject({
+    method: 'GET',
+    url: '/postal-codes?page=1&pageSize=1&cityCode=' + aCityCode,
+  });
+
+  const data = response.json().data;
+  expect(data[0]).toMatchObject({
+    postal_code: expect.any(String),
+  });
+});
+
 it('should get first number', async () => {
   assert(app);
 
   const response = await app.inject({
     method: 'GET',
-    url: '/postal-codes?page=1&pageSize=1',
+    url: '/numbers?page=1&pageSize=1',
   });
 
   expect(response.json()).toMatchObject({
