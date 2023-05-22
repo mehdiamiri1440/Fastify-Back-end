@@ -164,6 +164,10 @@ it('should get customer specification', async () => {
       id: nId,
       title: expect.any(String),
     },
+    creator: {
+      id: expect.any(Number),
+      fullName: expect.any(String),
+    },
     createdAt: expect.any(String),
     updatedAt: expect.any(String),
     deletedAt: null,
