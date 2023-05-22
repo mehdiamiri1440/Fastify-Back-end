@@ -18,7 +18,7 @@ export class RolePermission {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => Role)
+  @ManyToOne(() => Role, { onDelete: 'CASCADE' })
   role!: Relation<Role>;
 
   @Column({ nullable: false })
