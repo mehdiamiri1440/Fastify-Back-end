@@ -7,6 +7,7 @@ import qs from 'qs';
 
 import type Ajv from 'ajv';
 import AppDataSource from '$src/DataSource';
+import { ajvOptions } from '$src/AjvOptions';
 
 export async function createTestUser() {
   return await repo(User).save({
@@ -63,18 +64,7 @@ export async function createTestFastifyApp() {
   const app = fastify({
     querystringParser: (str) => qs.parse(str, { allowDots: true }),
     pluginTimeout: 20000,
-    ajv: {
-      customOptions: {
-        removeAdditional: true,
-      },
-      plugins: [
-        (ajv: Ajv) => {
-          ajv.addKeyword({ keyword: 'style' });
-          ajv.addKeyword({ keyword: 'explode' });
-          ajv.addKeyword({ keyword: 'allowReserved' });
-        },
-      ],
-    },
+    ajv: ajvOptions,
   });
   await app.register(import('$src/databases/typeorm'));
   await app.register(import('@fastify/jwt'), { secret: 'test' });
