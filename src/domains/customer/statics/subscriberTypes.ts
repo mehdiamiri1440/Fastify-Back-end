@@ -4,7 +4,6 @@ import { Static } from '@sinclair/typebox';
 export const businessSubscriberTypes = ['empresa'] as const;
 
 export const normalSubscriberTypes = [
-  'dropdown',
   'residential',
   'autono',
   'extranger',

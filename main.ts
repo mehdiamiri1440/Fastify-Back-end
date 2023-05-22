@@ -1,24 +1,13 @@
-import qs from 'qs';
+import { ajvOptions } from '$src/AjvOptions';
 import Fastify from 'fastify';
-import type Ajv from 'ajv';
+import qs from 'qs';
 
 async function main() {
   const fastify = Fastify({
     logger: true,
     querystringParser: (str) => qs.parse(str, { allowDots: true }),
     pluginTimeout: 20000,
-    ajv: {
-      customOptions: {
-        removeAdditional: true,
-      },
-      plugins: [
-        (ajv: Ajv) => {
-          ajv.addKeyword({ keyword: 'style' });
-          ajv.addKeyword({ keyword: 'explode' });
-          ajv.addKeyword({ keyword: 'allowReserved' });
-        },
-      ],
-    },
+    ajv: ajvOptions,
   });
 
   const port = process.env.PORT ? Number(process.env.PORT) : 3003;
