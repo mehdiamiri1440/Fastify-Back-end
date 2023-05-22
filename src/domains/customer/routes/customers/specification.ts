@@ -11,9 +11,7 @@ const Customers = repo(Customer);
 const Nationalities = repo(Nationality);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
-  app.route({
-    method: 'GET',
-    url: '/:id/specification',
+  app.get('/:id/specification', {
     schema: {
       security: [
         {
@@ -30,6 +28,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         relations: {
           addresses: true,
           nationality: true,
+          creator: true,
         },
       });
 
@@ -39,9 +38,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       };
     },
   });
-  app.route({
-    method: 'PUT',
-    url: '/:id/specification',
+
+  app.put('/:id/specification', {
     schema: {
       security: [
         {
