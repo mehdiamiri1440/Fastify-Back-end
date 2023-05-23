@@ -34,6 +34,14 @@ const plugin: FastifyPluginAsync<Options> = async (
 ) => {
   app.register(fastifyMultipart);
 
+  const description = () =>
+    [
+      '#### Allowed Mime Types',
+      ...(allowedMimeTypes?.map((t) => `- ${t}`) ?? '- any mime type'),
+      '#### Max Upload Size',
+      `${maxUploadSize ? `${maxUploadSize / 1024 / 1024}MB` : 'unlimited'}`,
+    ].join('\n');
+
   app.route({
     method: 'GET',
     url: '/:filename',
@@ -79,6 +87,7 @@ const plugin: FastifyPluginAsync<Options> = async (
     schema: {
       consumes: ['multipart/form-data'],
       security: schema.security,
+      description: description(),
       body: {
         type: 'object',
         required: ['file'],
