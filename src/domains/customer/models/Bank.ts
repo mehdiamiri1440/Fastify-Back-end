@@ -38,12 +38,12 @@ export class CustomerBank implements Static<typeof BankSchemaWithoutRelations> {
   @ManyToOne(() => User, { nullable: false })
   creator!: Relation<User>;
 
-  @CreateDateColumn({ nullable: false })
+  @CreateDateColumn()
   createdAt!: Date;
 
-  @UpdateDateColumn({ nullable: false })
+  @UpdateDateColumn()
   updatedAt!: Date;
 
-  @DeleteDateColumn({ nullable: true })
+  @DeleteDateColumn()
   deletedAt!: Date;
 }
