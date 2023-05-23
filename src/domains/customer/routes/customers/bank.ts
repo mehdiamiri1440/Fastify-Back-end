@@ -1,18 +1,22 @@
-import { repo } from '$src/infra/utils/repo';
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { Type } from '@sinclair/typebox';
-import { Customer } from '$src/domains/customer/models/Customer';
 import { CustomerBank } from '$src/domains/customer/models/Bank';
+import { Customer } from '$src/domains/customer/models/Customer';
 import { BankSchema } from '$src/domains/customer/schemas/bank.schema';
 import ibanValidator from '$src/infra/ibanValidator';
+import { repo } from '$src/infra/utils/repo';
+import createError from '@fastify/error';
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { Type } from '@sinclair/typebox';
 
-const Banks = repo(CustomerBank);
-const Customers = repo(Customer);
+const CUSTOMER_HAS_NO_BANK = createError(
+  'USER_HAS_NO_BANK',
+  'this customer has no bank data. set bank data for this customer',
+  404,
+);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
-  app.route({
-    method: 'GET',
-    url: '/:id/bank',
+  const CustomerBanks = repo(CustomerBank);
+  const Customers = repo(Customer);
+  app.get('/:id/bank', {
     schema: {
       security: [
         {
@@ -24,22 +28,21 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      // validating references
-      const customer = await Customers.findOneByOrFail({
-        id: req.params.id,
+      const { id } = req.params;
+      const customer = await Customers.findOneByOrFail({ id });
+
+      const bank = await CustomerBanks.findOne({
+        where: { customer: { id: customer.id } },
+        loadRelationIds: true,
       });
 
-      return {
-        ...(await Banks.findOne({
-          where: { customer: { id: customer.id } },
-          loadRelationIds: true,
-        })),
-      };
+      if (!bank) throw new CUSTOMER_HAS_NO_BANK();
+
+      return bank;
     },
   });
-  app.route({
-    method: 'PUT',
-    url: '/:id/bank',
+
+  app.put('/:id/bank', {
     schema: {
       security: [
         {
@@ -49,43 +52,40 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Number(),
       }),
-      body: Type.Omit(BankSchema, [
-        'id',
-        'customer',
-        'bic',
-        'bankName',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Pick(BankSchema, ['iban']),
     },
     async handler(req) {
-      // validating references
-      const customer = await Customers.findOneByOrFail({
-        id: req.params.id,
-      });
+      const { iban } = req.body;
+      const { id } = req.params;
 
-      // validating iban
+      const customer = await Customers.findOneByOrFail({ id });
+
       const { bic, bankName } = await ibanValidator(req.body.iban);
 
-      // saving bank data
-      const bank = await Banks.findOne({
+      const maybeBank = await CustomerBanks.findOne({
         where: { customer: { id: customer.id } },
-        loadRelationIds: true,
       });
-      if (!bank) {
-        await Banks.save({
-          ...req.body,
+
+      let bankId: number;
+      if (!maybeBank) {
+        const bank = await CustomerBanks.save({
+          iban,
           customer,
           bic,
           bankName,
           creator: { id: req.user.id },
         });
+
+        bankId = bank.id;
       } else {
-        const { id } = bank;
-        await Banks.update({ id }, { ...req.body, bic, bankName });
+        await CustomerBanks.update(
+          { id: maybeBank.id },
+          { iban, bic, bankName },
+        );
+        bankId = maybeBank.id;
       }
+
+      return await CustomerBanks.findOneByOrFail({ id: bankId });
     },
   });
 };

@@ -349,6 +349,11 @@ it('should update customer address after first time', async () => {
   });
 
   expect(response).statusCodeToBe(200);
+
+  expect(response.json().data).toMatchObject({
+    id: expect.any(Number),
+    stairway: 'edited',
+  });
 });
 it('should update customer bank for first time', async () => {
   assert(app);
@@ -394,6 +399,13 @@ it('should update customer bank after first time', async () => {
   });
 
   expect(response).statusCodeToBe(200);
+
+  expect(response.json().data).toMatchObject({
+    id: expect.any(Number),
+    iban: 'ES1600753513832862583447',
+    bankName: expect.any(String),
+    bic: expect.any(String),
+  });
 });
 
 it('should not update customer bank', async () => {
@@ -406,7 +418,7 @@ it('should not update customer bank', async () => {
     payload: { iban: 'ES1600753513832862583448' },
   });
 
-  expect(response.statusCode).toBe(400);
+  expect(response).statusCodeToBe(400);
 });
 
 it('should delete customer', async () => {
