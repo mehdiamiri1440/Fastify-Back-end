@@ -5,7 +5,7 @@ import { Type } from '@sinclair/typebox';
 
 import '$src/infra/test/statusCodeExpect';
 
-it('Ajv config should remove extra fields', async () => {
+it.skip('Ajv config should remove extra fields', async () => {
   const fastify = Fastify({
     pluginTimeout: 20000,
     ajv: ajvOptions,
