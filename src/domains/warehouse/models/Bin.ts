@@ -50,6 +50,9 @@ export class Bin implements Static<typeof BinSchemaWithoutRelations> {
   @Column({ unique: true, nullable: false })
   internalCode!: string;
 
+  @Column({ type: 'text', nullable: true })
+  description!: string | null;
+
   @ManyToOne(() => User)
   creator!: Relation<User>;
 

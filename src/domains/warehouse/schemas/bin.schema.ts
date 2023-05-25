@@ -8,6 +8,7 @@ export const BinSchema = Type.Object({
   property: Type.Number(),
   physicalCode: Type.Union([Type.Null(), Type.String()]),
   internalCode: Type.String(),
+  description: Type.Union([Type.Null(), Type.String()]),
   creator: Type.Number(),
   createdAt: Type.Union([Type.Date(), Type.String({ format: 'date-time' })]),
   updatedAt: Type.Union([Type.Date(), Type.String({ format: 'date-time' })]),

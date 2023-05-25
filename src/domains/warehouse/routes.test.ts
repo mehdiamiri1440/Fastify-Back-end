@@ -34,12 +34,14 @@ const warehouseData = {
   streetCode: 'S43.183.00057',
   streetName: 'Quatre',
   postalCode: '43894',
+  number: null,
   description: 'this is just for test',
 };
 const binData = {
   name: 'DI Bin',
   physicalCode: 'physicalCode',
   internalCode: 'internalCode',
+  description: 'this is just for test',
 };
 const userData = {
   firstName: 'Daniel',
