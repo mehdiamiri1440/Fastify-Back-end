@@ -8,6 +8,7 @@ export const WarehouseSchema = Type.Object({
   streetCode: Type.String({ default: 'S43.001.00104' }),
   streetName: Type.String({ default: 'Alicante  en  ur mas en pares' }),
   postalCode: Type.String(),
+  number: Type.Union([Type.Null(), Type.String()]),
   description: Type.Union([Type.Null(), Type.String()]),
   supervisor: Type.Number(),
   creator: Type.Number(),

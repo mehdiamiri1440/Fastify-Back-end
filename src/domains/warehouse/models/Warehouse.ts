@@ -51,6 +51,9 @@ export class Warehouse
   postalCode!: string;
 
   @Column({ type: 'text', nullable: true })
+  number!: string | null;
+
+  @Column({ type: 'text', nullable: true })
   description!: string | null;
 
   @ManyToOne(() => User)
