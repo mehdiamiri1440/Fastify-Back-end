@@ -27,7 +27,7 @@ export async function createTestUser() {
 }
 
 export class TestUser {
-  #token: string;
+  token: string;
   #app: FastifyInstance;
 
   static async create(app: FastifyInstance) {
@@ -45,7 +45,7 @@ export class TestUser {
   }
 
   constructor(app: FastifyInstance, token: string) {
-    this.#token = token;
+    this.token = token;
     this.#app = app;
   }
 
@@ -54,7 +54,7 @@ export class TestUser {
       ...options,
       headers: {
         ...options.headers,
-        Authorization: `Bearer ${this.#token}`,
+        Authorization: `Bearer ${this.token}`,
       },
     });
   }

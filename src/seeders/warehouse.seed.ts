@@ -3,6 +3,9 @@ import { DataSource } from 'typeorm';
 import { User } from '$src/domains/user/models/User';
 import { Role } from '$src/domains/user/models/Role';
 import { Warehouse } from '$src/domains/warehouse/models/Warehouse';
+import { Bin } from '$src/domains/warehouse/models/Bin';
+import { BinSize } from '$src/domains/warehouse/models/BinSize';
+import { BinProperty } from '$src/domains/warehouse/models/BinProperty';
 
 export default class WarehouseSeeder extends Seeder {
   async run(dataSource: DataSource) {
@@ -20,15 +23,32 @@ export default class WarehouseSeeder extends Seeder {
       position: 'warehouse creator',
       isActive: true,
     });
-    await dataSource.getRepository(Warehouse).save({
-      name: 'DI Warehouse',
-      provinceCode: 'P43',
-      cityCode: 'C43.183',
-      streetCode: 'S43.183.00057',
-      streetName: 'Quatre',
-      postalCode: '43894',
-      description: 'this is just for test',
-      supervisor: creator,
+    await dataSource.getRepository(Bin).save({
+      name: 'bin1',
+      warehouse: await dataSource.getRepository(Warehouse).save({
+        name: 'DI Warehouse',
+        provinceCode: 'P43',
+        cityCode: 'C43.183',
+        streetCode: 'S43.183.00057',
+        streetName: 'Quatre',
+        postalCode: '43894',
+        description: 'this is just for test',
+        supervisor: creator,
+        creator,
+      }),
+      size: await dataSource.getRepository(BinSize).save({
+        title: 'sosmall',
+        width: 1,
+        depth: 1,
+        height: 1,
+        creator,
+      }),
+      property: await dataSource.getRepository(BinProperty).save({
+        title: 'normal',
+        creator,
+      }),
+      physicalCode: 'physicalCode',
+      internalCode: 'internalCode',
       creator,
     });
   }
