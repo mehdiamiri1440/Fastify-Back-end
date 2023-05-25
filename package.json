@@ -24,6 +24,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@danielsoheil/csv-parse-typebox": "^0.2.13",
     "@erfanium/fetch-typebox": "^0.2.2",
     "@fastify/cors": "^8.2.1",
     "@fastify/error": "^3.2.0",
@@ -38,6 +39,7 @@
     "@swc/core": "^1.3.39",
     "@tsconfig/node18": "^1.0.1",
     "@types/node": "^18.15.0",
+    "ajv": "^8.12.0",
     "await-to-js": "^3.0.0",
     "bcrypt": "^5.1.0",
     "bson": "^5.2.0",

@@ -97,6 +97,8 @@ const app: FastifyPluginAsync<Options> = async (
 
       await fastify.register(import('./domains/configuration/routes'));
 
+      await fastify.register(import('./domains/importer/routes'));
+
       await fastify.register(import('./domains/geo/routes'), {
         prefix: '/geo',
       });

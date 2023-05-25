@@ -141,6 +141,9 @@ export default {
   'configuration@tag::create': 'with this permission you can add new tag',
   'configuration@tag::update': 'with this permission you can edit tag',
 
+  // importer
+  'importer@upload': 'with this permissions you can insert your csv file data',
+
   // cycle count
   'cycle-count@cycle-count::list':
     'with this permission you can get list of cycle counts',
