@@ -424,6 +424,99 @@ describe('history', () => {
       },
     ]);
   });
+  it('GET /bins/:id/history should be working', async () => {
+    assert(user);
+    await disableForeignKeyCheck();
+
+    const product = await createSampleProduct();
+    const otherProduct = await createSampleProduct();
+
+    const bin = await repo(Bin).save({
+      name: 'bin1',
+      warehouse,
+      internalCode: 'hey1',
+      creator: { id: 1 },
+    });
+
+    await repo(ProductStockHistory).insert([
+      {
+        product,
+        quantity: 10,
+        bin,
+        sourceType: SourceType.INBOUND,
+        sourceId: null,
+        description: 'test',
+        creator: { id: 1 },
+      },
+      {
+        product,
+        quantity: 20,
+        bin,
+        sourceType: SourceType.OUTBOUND,
+        sourceId: null,
+        description: 'test',
+        creator: { id: 1 },
+      },
+      {
+        product: otherProduct,
+        quantity: 30,
+        bin,
+        sourceType: SourceType.OUTBOUND,
+        sourceId: null,
+        description: 'test',
+        creator: { id: 1 },
+      },
+    ]);
+
+    await enableForeignKeyCheck();
+
+    const response = await user.inject({
+      method: 'GET',
+      url: `/bins/${bin.id}/history`,
+    });
+    expect(response).statusCodeToBe(200);
+    expect(response?.json().data).toMatchObject([
+      {
+        quantity: 30,
+        sourceType: 'outbound',
+        creator: {
+          id: 1,
+          fullName: 'tester tester',
+        },
+        product: {
+          id: otherProduct.id,
+          name: otherProduct.name,
+        },
+        createdAt: expect.any(String),
+      },
+      {
+        quantity: 20,
+        sourceType: 'outbound',
+        creator: {
+          id: 1,
+          fullName: 'tester tester',
+        },
+        product: {
+          id: product.id,
+          name: product.name,
+        },
+        createdAt: expect.any(String),
+      },
+      {
+        quantity: 10,
+        sourceType: 'inbound',
+        creator: {
+          id: 1,
+          fullName: 'tester tester',
+        },
+        product: {
+          id: product.id,
+          name: product.name,
+        },
+        createdAt: expect.any(String),
+      },
+    ]);
+  });
 });
 
 describe('bins', () => {
