@@ -477,19 +477,6 @@ describe('history', () => {
     expect(response).statusCodeToBe(200);
     expect(response?.json().data).toMatchObject([
       {
-        quantity: 20,
-        sourceType: 'outbound',
-        creator: {
-          id: 1,
-          fullName: 'tester tester',
-        },
-        product: {
-          id: product.id,
-          name: product.name,
-        },
-        createdAt: expect.any(String),
-      },
-      {
         quantity: 30,
         sourceType: 'outbound',
         creator: {
@@ -499,6 +486,19 @@ describe('history', () => {
         product: {
           id: otherProduct.id,
           name: otherProduct.name,
+        },
+        createdAt: expect.any(String),
+      },
+      {
+        quantity: 20,
+        sourceType: 'outbound',
+        creator: {
+          id: 1,
+          fullName: 'tester tester',
+        },
+        product: {
+          id: product.id,
+          name: product.name,
         },
         createdAt: expect.any(String),
       },

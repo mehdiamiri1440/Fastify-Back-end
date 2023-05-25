@@ -78,7 +78,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
       querystring: ListQueryOptions({
         filterable: ['sourceType'],
-        orderable: ['sourceType', 'bin.name'],
+        orderable: ['id', 'sourceType', 'bin.name'],
         searchable: ['bin.name'],
       }),
       security: [
@@ -114,7 +114,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             name: true,
           },
         }))
-        .order(() => (orderBy ? order.from(req) : { id: 'DESC' }))
         .exec();
     },
   });
