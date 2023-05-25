@@ -69,6 +69,55 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         .exec();
     },
   });
+  app.route({
+    method: 'GET',
+    url: '/bins/:id/history',
+    schema: {
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      querystring: ListQueryOptions({
+        filterable: ['sourceType'],
+        orderable: ['sourceType', 'bin.name'],
+        searchable: ['bin.name'],
+      }),
+      security: [
+        {
+          OAuth2: ['product@product-history::list'],
+        },
+      ],
+    },
+    async handler(req) {
+      const { id } = req.params;
+      const { orderBy } = req.query as ListQueryParams;
+
+      return new TableQueryBuilder(ProductStockHistories, req)
+        .where(() =>
+          where.merge([
+            where.from(req),
+            {
+              bin: { id },
+            },
+          ]),
+        )
+        .relation(() => ({
+          creator: true,
+          product: true,
+        }))
+        .select(() => ({
+          creator: {
+            id: true,
+            fullName: true,
+          },
+          product: {
+            id: true,
+            name: true,
+          },
+        }))
+        .order(() => (orderBy ? order.from(req) : { id: 'DESC' }))
+        .exec();
+    },
+  });
 };
 
 export default plugin;
