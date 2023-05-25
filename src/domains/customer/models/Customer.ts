@@ -70,8 +70,8 @@ export class Customer implements Static<typeof CustomerSchemaWithoutRelations> {
   )
   addresses!: CustomerAddress[];
 
-  @Column({ nullable: false })
-  birthday!: string;
+  @Column({ type: 'text', nullable: true })
+  birthday!: string | null;
 
   @Column({ nullable: false })
   isActive!: boolean;

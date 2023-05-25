@@ -18,7 +18,7 @@ export const CustomerSchema = Type.Object({
   contactFamily1: Type.String(),
   contactFamily2: Type.Union([Type.Null(), Type.String()]),
   nationalityId: Type.Number(),
-  birthday: Type.String({ format: 'date-time' }),
+  birthday: Type.Union([Type.Null(), Type.String({ format: 'date-time' })]),
   isActive: Type.Boolean(),
   creator: Type.Number(),
   createdAt: Type.Union([Type.Date(), Type.String({ format: 'date-time' })]),

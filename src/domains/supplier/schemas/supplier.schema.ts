@@ -1,12 +1,15 @@
 import { Type } from '@sinclair/typebox';
 
+const emailRegex =
+  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+
 export const SupplierSchema = Type.Object({
   id: Type.Number(),
   name: Type.String({ minLength: 1 }),
   cif: Type.String({ minLength: 1 }),
   language: Type.Number(),
   iban: Type.String({ minLength: 1 }),
-  email: Type.String({ format: 'email' }),
+  email: Type.RegEx(emailRegex),
   phoneNumber: Type.String({ minLength: 1 }),
   logoFileId: Type.Union([Type.String({ minLength: 1 }), Type.Null()]),
   accountNumber: Type.String({ minLength: 1 }),
