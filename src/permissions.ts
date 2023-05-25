@@ -140,4 +140,12 @@ export default {
   'configuration@tag::list': 'with this permission you can get list of tags',
   'configuration@tag::create': 'with this permission you can add new tag',
   'configuration@tag::update': 'with this permission you can edit tag',
+
+  // cycle count
+  'cycle-count@cycle-count::list':
+    'with this permission you can get list of cycle counts',
+  'cycle-count@cycle-count::create':
+    'with this permission you can create a cycle count',
+  'cycle-count@cycle-count::update':
+    'with this permission you can update cycle count',
 };

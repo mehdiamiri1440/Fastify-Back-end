@@ -19,6 +19,7 @@ export enum SourceType {
   OUTBOUND = 'outbound',
   MOVE = 'move',
   INIT = 'init',
+  CYCLE_COUNT = 'CYCLE_COUNT',
 }
 
 @Entity()
