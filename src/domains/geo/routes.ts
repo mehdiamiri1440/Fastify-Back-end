@@ -167,16 +167,22 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/postal-codes',
     schema: {
-      querystring: Type.Object({
-        cityCode: Type.String(),
+      querystring: ListQueryOptions({
+        filterable: [],
+        orderable: [],
+        searchable: ['cityCode'],
       }),
     },
     async handler(req) {
-      const { postalCodes, meta } = await getPostal(
-        new URLSearchParams({
-          city_code: req.query.cityCode,
-        }),
-      );
+      const { filter } = req.query as ListQueryParams;
+
+      const queryParams = new URLSearchParams();
+
+      if (typeof filter?.cityCode === 'object' && '$like' in filter.cityCode) {
+        queryParams.append('city_code', filter.cityCode.$like);
+      }
+
+      const { postalCodes, meta } = await getPostal(queryParams);
       return new Response(postalCodes, {
         page: meta.current_page,
         total: meta.total,
