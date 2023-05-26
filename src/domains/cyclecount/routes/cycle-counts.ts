@@ -60,6 +60,40 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
   app.route({
+    method: 'GET',
+    url: '/:id',
+    schema: {
+      security: [
+        {
+          OAuth2: ['cycle-count@cycle-count::list'],
+        },
+      ],
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+    },
+    async handler(req) {
+      const cycleCount = await repo(CycleCount).findOneOrFail({
+        where: { id: req.params.id },
+        relations: {
+          bin: true,
+          product: true,
+          differences: { binProduct: true },
+        },
+      });
+
+      for (const index in cycleCount.differences) {
+        if (cycleCount.differences[index].quantity == null) {
+          cycleCount.differences[index].quantity =
+            cycleCount.differences[index].binProduct.quantity;
+        }
+      }
+
+      return cycleCount;
+    },
+  });
+
+  app.route({
     method: 'POST',
     url: '/',
     schema: {

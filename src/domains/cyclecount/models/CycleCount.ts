@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   Relation,
+  OneToMany,
 } from 'typeorm';
 import { Static, Type } from '@sinclair/typebox';
 import { Bin } from '$src/domains/warehouse/models/Bin';
@@ -17,6 +18,7 @@ import {
   cycleCountType,
 } from '$src/domains/cyclecount/schemas/cyclecount.schema';
 import { cycleCountState } from '$src/domains/cyclecount/schemas/cyclecount.schema';
+import { CycleCountDifference } from '$src/domains/cyclecount/models/Difference';
 
 const CycleCountSchemaWithoutRelations = Type.Omit(CycleCountSchema, [
   'bin',
@@ -43,6 +45,12 @@ export class CycleCount
 
   @ManyToOne(() => Product, { nullable: true })
   product!: Relation<Product>;
+
+  @OneToMany(
+    () => CycleCountDifference,
+    (CycleCountDifference) => CycleCountDifference.cycleCount,
+  )
+  differences!: CycleCountDifference[];
 
   @ManyToOne(() => User, { nullable: true })
   checker!: Relation<User> | null;
