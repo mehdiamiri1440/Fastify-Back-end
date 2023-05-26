@@ -78,32 +78,64 @@ afterEach(async () => {
   await app?.close();
 });
 
-it('should create cycle count for product', async () => {
+it('should create cycle count for product and get that by id', async () => {
   assert(app);
   assert(user);
   assert(product);
-  const response = await user.inject({
-    method: 'POST',
-    url: `/cycle-counts`,
-    payload: {
-      cycleCountType: 'Product',
-      bin: null,
-      product: product.id,
-    },
-  });
+  assert(binProduct);
+  let cycleCount: CycleCount | undefined;
 
-  expect(response.statusCode).toBe(200);
-  const body = response.json();
-  expect(body).toMatchObject({
-    data: {
-      id: expect.any(Number),
-      product: { id: product.id },
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String),
-      deletedAt: null,
-    },
-    meta: {},
-  });
+  {
+    // creating
+    const response = await user.inject({
+      method: 'POST',
+      url: `/cycle-counts`,
+      payload: {
+        cycleCountType: 'Product',
+        bin: null,
+        product: product.id,
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = response.json();
+    expect(body).toMatchObject({
+      data: {
+        id: expect.any(Number),
+        product: { id: product.id },
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        deletedAt: null,
+      },
+      meta: {},
+    });
+    cycleCount = response.json().data;
+  }
+  {
+    // get by id
+    assert(cycleCount);
+    const response = await user.inject({
+      method: 'GET',
+      url: `/cycle-counts/` + cycleCount.id,
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = response.json();
+    expect(body).toMatchObject({
+      data: {
+        id: cycleCount.id,
+        cycleCountState: 'open',
+        cycleCountType: 'Product',
+        product: { id: product.id },
+        bin: null,
+        differences: [{ difference: 0, quantity: binProduct.quantity }],
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        deletedAt: null,
+      },
+      meta: {},
+    });
+  }
 });
 
 const cycleCountWithChangedDifferences = async () => {
