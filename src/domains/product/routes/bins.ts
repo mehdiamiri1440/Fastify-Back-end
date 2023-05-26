@@ -3,11 +3,15 @@ import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { Product } from '../models/Product';
+import { Bin } from '$src/domains/warehouse/models/Bin';
+import { BinProduct } from '$src/domains/product/models/BinProduct';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
 
   const Products = repo(Product);
+  const Bins = repo(Bin);
+  const BinProducts = repo(BinProduct);
 
   // GET /products/:id/histories
   app.route({
@@ -64,6 +68,31 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         unit,
         size,
       }));
+    },
+  });
+
+  app.route({
+    method: 'GET',
+    url: '/bins/:id/products',
+    schema: {
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      security: [
+        {
+          OAuth2: ['product@product-bins::list'],
+        },
+      ],
+    },
+    async handler(req) {
+      const { id } = await Bins.findOneByOrFail({ id: req.params.id });
+
+      return BinProducts.find({
+        where: { bin: { id } },
+        relations: {
+          product: true,
+        },
+      });
     },
   });
 };

@@ -595,6 +595,62 @@ describe('bins', () => {
       },
     ]);
   });
+  it('GET /bins/:id/products should be working', async () => {
+    assert(user);
+    assert(warehouse);
+
+    await disableForeignKeyCheck();
+
+    const bin = await repo(Bin).save({
+      name: 'bin',
+      warehouse,
+      internalCode: 'hey2',
+      creator: { id: 1 },
+    });
+
+    const binProductA = await repo(BinProduct).save({
+      bin,
+      product: await createSampleProduct(),
+
+      quantity: 10,
+      creator: { id: 1 },
+    });
+
+    const binProductB = await repo(BinProduct).save({
+      bin,
+      product: await createSampleProduct(),
+      quantity: 30,
+      creator: { id: 1 },
+    });
+
+    await enableForeignKeyCheck();
+
+    const response = await user.inject({
+      method: 'GET',
+      url: `/bins/${bin.id}/products`,
+    });
+
+    expect(response).statusCodeToBe(200);
+    const body = await response?.json().data;
+
+    expect(body).toHaveLength(2);
+    expect(body).toMatchObject([
+      {
+        id: binProductA.id,
+        product: {
+          id: binProductA.product.id,
+          name: binProductA.product.name,
+        },
+      },
+      {
+        id: binProductB.id,
+        product: {
+          id: binProductB.product.id,
+          name: binProductB.product.name,
+        },
+      },
+    ]);
+  });
 });
 
 describe('tax types', () => {
