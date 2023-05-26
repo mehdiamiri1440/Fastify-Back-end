@@ -226,6 +226,26 @@ export class CycleCountService {
       throw new CYCLE_COUNT_IS_NOT_OPEN();
     }
 
+    const differences = await this.DifferencesRepo.find({
+      where: {
+        cycleCount: { id: cycleCount.id },
+      },
+      relations: {
+        counter: true,
+        binProduct: { bin: true, product: true },
+        cycleCount: true,
+      },
+    });
+
+    for (const difference of differences) {
+      await this.DifferencesRepo.update(
+        { id: difference.id },
+        {
+          quantity: difference.binProduct.quantity,
+        },
+      );
+    }
+
     await this.CycleCountsRepo.update(
       { id: cycleCount.id },
       { checker: { id: this.#userId }, cycleCountState: 'rejected' },
