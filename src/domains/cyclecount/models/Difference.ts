@@ -38,12 +38,6 @@ export class CycleCountDifference
   @Column({ type: 'int', nullable: false })
   difference!: number;
 
-  @Column({ type: 'bit', nullable: true })
-  status!: boolean | null;
-
-  @Column({ type: 'text', nullable: true })
-  description!: string | null;
-
   @ManyToOne(() => User, { nullable: true })
   counter!: Relation<User>;
 

@@ -6,8 +6,6 @@ export const CycleCountDifferenceSchema = Type.Object({
   binProduct: Type.Number(),
   quantity: Type.Union([Type.Number(), Type.Null()]),
   difference: Type.Number(),
-  status: Type.Union([Type.Boolean(), Type.Null()]),
-  description: Type.Union([Type.String(), Type.Null()]),
   counter: Type.Union([Type.Number(), Type.Null()]),
   createdAt: Type.Union([Type.Date(), Type.String({ format: 'date-time' })]),
   updatedAt: Type.Union([Type.Date(), Type.String({ format: 'date-time' })]),
