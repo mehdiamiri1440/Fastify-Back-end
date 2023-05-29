@@ -18,13 +18,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: [],
         },
       ],
-      body: Type.Omit(MessageSchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Pick(MessageSchema, ['subject', 'message']),
     },
     async handler(req) {
       return await Messages.save({ ...req.body, creator: { id: req.user.id } });
