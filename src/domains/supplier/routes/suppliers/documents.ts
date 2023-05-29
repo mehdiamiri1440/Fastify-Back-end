@@ -55,14 +55,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Number(),
       }),
-      body: Type.Omit(DocumentSchema, [
-        'id',
-        'supplier',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Pick(DocumentSchema, ['fileId']),
     },
     async handler(req) {
       // validating references
