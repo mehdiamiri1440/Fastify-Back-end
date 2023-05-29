@@ -105,7 +105,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ],
       body: Type.Omit(WarehouseSchema, [
         'id',
-        'streetName',
         'creator',
         'createdAt',
         'updatedAt',
@@ -118,22 +117,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         id: req.body.supervisor,
       });
 
-      // get detail by street code to use street name
-      const { streets } = await getStreets(
-        new URLSearchParams({
-          filter: `filter[code]=${req.body.streetCode}`,
-          include: 'false',
-          page: '0',
-          size: '1',
-        }),
-      );
-      if (streets.length !== 1) throw new STREET_NAME_NOT_FOUND();
-      const street = streets[0];
-
       return await Warehouses.save({
         ...req.body,
         supervisor,
-        streetName: street.formated_name, // use street name
       });
     },
   });
@@ -149,7 +135,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ],
       body: Type.Omit(WarehouseSchema, [
         'id',
-        'streetName',
         'creator',
         'createdAt',
         'updatedAt',
@@ -166,22 +151,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         id: req.body.supervisor,
       });
 
-      // get detail by street code to use street name
-      const { streets } = await getStreets(
-        new URLSearchParams({
-          filter: `filter[code]=${req.body.streetCode}`,
-          include: 'false',
-          page: '0',
-          size: '1',
-        }),
-      );
-      if (streets.length !== 1) throw new STREET_NAME_NOT_FOUND();
-      const street = streets[0];
-
-      await Warehouses.update(
-        { id },
-        { ...req.body, supervisor, streetName: street.formated_name },
-      );
+      await Warehouses.update({ id }, { ...req.body, supervisor });
     },
   });
   app.route({
