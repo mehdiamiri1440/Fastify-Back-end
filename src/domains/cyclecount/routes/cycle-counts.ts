@@ -76,8 +76,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const cycleCount = await repo(CycleCount).findOneOrFail({
         where: { id: req.params.id },
         relations: {
-          bin: true,
-          product: true,
+          bin: { property: true, size: true },
+          product: { category: true },
           differences: { binProduct: true },
         },
       });
