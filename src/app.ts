@@ -108,6 +108,7 @@ const app: FastifyPluginAsync<Options> = async (
       });
 
       await fastify.register(import('./domains/inbound/routes'));
+      await fastify.register(import('./domains/outbound/routes'));
 
       await fastify.register(import('./domains/files/routes'), {
         prefix: '/files',
