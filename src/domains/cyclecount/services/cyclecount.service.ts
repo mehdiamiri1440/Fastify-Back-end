@@ -21,16 +21,6 @@ const CYCLE_COUNT_IS_NOT_OPEN = createError(
   'this cycle count is not open',
   400,
 );
-const NOT_CHECKED = createError(
-  'NOT_CHECKED',
-  'difference not checked by checker in last 5 days',
-  400,
-);
-const NOT_COUNTED = createError(
-  'NOT_COUNTED',
-  'difference not counted by counter',
-  400,
-);
 const MISS_PRODUCT = createError(
   'MISS_PRODUCT',
   'miss product id in cycle count type Product',
