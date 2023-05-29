@@ -102,15 +102,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['cycle-count@cycle-count::create'],
         },
       ],
-      body: Type.Omit(CycleCountSchema, [
-        'id',
-        'cycleCountState',
-        'checker',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Pick(CycleCountSchema, ['cycleCountType', 'bin', 'product']),
     },
     async handler(req) {
       return await AppDataSource.transaction(async (manager) => {
