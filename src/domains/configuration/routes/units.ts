@@ -38,13 +38,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['configuration@unit::create'],
         },
       ],
-      body: Type.Omit(UnitSchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Pick(UnitSchema, ['name']),
     },
     async handler(req) {
       return await Units.save({ ...req.body, creator: { id: req.user.id } });
@@ -59,13 +53,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['configuration@unit::update'],
         },
       ],
-      body: Type.Omit(UnitSchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Pick(UnitSchema, ['name']),
       params: Type.Object({
         id: Type.Number(),
       }),

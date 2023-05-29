@@ -38,13 +38,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['configuration@shape::create'],
         },
       ],
-      body: Type.Omit(ShapeSchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Pick(ShapeSchema, ['name']),
     },
     async handler(req) {
       return await Shapes.save({ ...req.body, creator: { id: req.user.id } });
@@ -59,13 +53,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['configuration@shape::update'],
         },
       ],
-      body: Type.Omit(ShapeSchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Pick(ShapeSchema, ['name']),
       params: Type.Object({
         id: Type.Number(),
       }),

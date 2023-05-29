@@ -38,13 +38,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['configuration@color::create'],
         },
       ],
-      body: Type.Omit(ColorSchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Pick(ColorSchema, ['name', 'code']),
     },
     async handler(req) {
       return await Colors.save({ ...req.body, creator: { id: req.user.id } });
@@ -59,13 +53,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['configuration@color::update'],
         },
       ],
-      body: Type.Omit(ColorSchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Pick(ColorSchema, ['name', 'code']),
       params: Type.Object({
         id: Type.Number(),
       }),

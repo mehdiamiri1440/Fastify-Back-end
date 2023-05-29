@@ -38,13 +38,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['configuration@tag::create'],
         },
       ],
-      body: Type.Omit(TagSchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Pick(TagSchema, ['name']),
     },
     async handler(req) {
       return await Tags.save({
@@ -62,13 +56,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['configuration@tag::update'],
         },
       ],
-      body: Type.Omit(TagSchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Pick(TagSchema, ['name']),
       params: Type.Object({
         id: Type.Number(),
       }),
