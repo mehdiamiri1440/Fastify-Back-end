@@ -12,15 +12,14 @@ const ajv = new Ajv({ coerceTypes: true });
 const Suppliers = repo(Supplier);
 const Languages = repo(Language);
 
-const UploadedSupplierSchema = Type.Omit(SupplierSchema, [
-  'id',
-  'bic',
-  'bankName',
-  'logoFileId',
-  'creator',
-  'createdAt',
-  'updatedAt',
-  'deletedAt',
+const UploadedSupplierSchema = Type.Pick(SupplierSchema, [
+  'name',
+  'cif',
+  'language',
+  'iban',
+  'email',
+  'phoneNumber',
+  'accountNumber',
 ]);
 const UploadedSupplierValidator = ajv.compile<typeof UploadedSupplierSchema>(
   UploadedSupplierSchema,

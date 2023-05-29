@@ -13,13 +13,18 @@ const ajv = new Ajv({ coerceTypes: true });
 const Customers = repo(Customer);
 const Nationalities = repo(Nationality);
 
-const UploadedCustomerSchema = Type.Omit(CustomerSchema, [
-  'id',
-  'birthday',
-  'creator',
-  'createdAt',
-  'updatedAt',
-  'deletedAt',
+const UploadedCustomerSchema = Type.Pick(CustomerSchema, [
+  'name',
+  'businessName',
+  'subscriberType',
+  'documentType',
+  'businessDocumentType',
+  'fiscalId',
+  'businessFiscalId',
+  'contactFamily1',
+  'contactFamily2',
+  'nationalityId',
+  'isActive',
 ]);
 
 const UploadedCustomerValidator = ajv.compile<typeof UploadedCustomerSchema>(
