@@ -1,6 +1,10 @@
 import { Customer } from '$src/domains/customer/models/Customer';
 import { Nationality } from '$src/domains/customer/models/Nationality';
-import { CustomerSchema } from '$src/domains/customer/schemas/customer.schema';
+import {
+  CustomerSchema,
+  documentType,
+  subscriberType,
+} from '$src/domains/customer/schemas/customer.schema';
 import { isBusiness } from '$src/domains/customer/statics/subscriberTypes';
 import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
@@ -48,12 +52,19 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Number(),
       }),
-      body: Type.Omit(CustomerSchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
+      body: Type.Pick(CustomerSchema, [
+        'name',
+        'businessName',
+        'subscriberType',
+        'documentType',
+        'businessDocumentType',
+        'fiscalId',
+        'businessFiscalId',
+        'contactFamily1',
+        'contactFamily2',
+        'nationalityId',
+        'birthday',
+        'isActive',
       ]),
     },
     async handler(req) {
