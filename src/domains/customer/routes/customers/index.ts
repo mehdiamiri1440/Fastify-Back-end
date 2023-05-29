@@ -2,8 +2,15 @@ import { Customer } from '$src/domains/customer/models/Customer';
 import { Nationality } from '$src/domains/customer/models/Nationality';
 import { CustomerSchema } from '$src/domains/customer/schemas/customer.schema';
 import { ResponseShape } from '$src/infra/Response';
-import { TableQueryBuilder } from '$src/infra/tables/Table';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
+import {
+  Filter,
+  OrderBy,
+  PaginatedQueryString,
+  Searchable,
+} from '$src/infra/tables/PaginatedType';
+import { toTypeOrmFilter } from '$src/infra/tables/filter';
+import { toUpperCase } from '$src/infra/tables/order';
+import { PaginatedResponse } from '$src/infra/tables/response';
 import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
@@ -15,28 +22,77 @@ const Nationalities = repo(Nationality);
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
 
-  app.route({
-    method: 'GET',
-    url: '/',
+  app.get('/', {
     schema: {
       security: [
         {
           OAuth2: ['customer@customer::list'],
         },
       ],
-      querystring: ListQueryOptions({
-        filterable: ['isActive'],
-        orderable: ['id', 'name', 'fiscalId', 'email', 'createdAt', 'isActive'],
-        searchable: ['id', 'name', 'fiscalId', 'email'],
+
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy([
+          'id',
+          'name',
+          'fiscalId',
+          'email',
+          'createdAt',
+          'isActive',
+        ]),
+        filter: Filter({
+          id: Searchable(),
+          isActive: Type.Boolean(),
+          name: Searchable(),
+          emailOrPhone: Searchable(),
+          fiscalIdOrAddress: Searchable(),
+        }),
       }),
     },
     async handler(req) {
-      return new TableQueryBuilder(Customers, req)
-        .relation(() => ({
-          addresses: true,
-          nationality: true,
-        }))
-        .exec();
+      const { page, pageSize, filter, order, orderBy } = req.query;
+
+      const { id, emailOrPhone, fiscalIdOrAddress, ...normalFilters } =
+        filter ?? {};
+
+      const qb = Customers.createQueryBuilder('customer')
+        .leftJoinAndSelect('customer.contacts', 'contact')
+        .leftJoinAndSelect('customer.nationality', 'nationality')
+
+        .where(toTypeOrmFilter(normalFilters));
+
+      if (emailOrPhone) {
+        qb.andWhere(
+          `(contact.email || ' ' || contact.phone_number)  like :emailOrPhone`,
+          { emailOrPhone: emailOrPhone.$like },
+        );
+      }
+
+      if (fiscalIdOrAddress) {
+        qb.andWhere(
+          `(customer.fiscal_id || ' ' || (customer.address ->> 'formatted'))  like :fiscalIdOrAddress`,
+          {
+            fiscalIdOrAddress: fiscalIdOrAddress.$like,
+          },
+        );
+      }
+
+      if (id) {
+        qb.andWhere(`customer.id::varchar(255) like :id`, {
+          id: id.$like,
+        });
+      }
+
+      const [rows, total] = await qb
+        .skip((page - 1) * pageSize)
+        .take(pageSize)
+        .orderBy(`customer.${orderBy}`, toUpperCase(order))
+        .getManyAndCount();
+
+      return new PaginatedResponse(rows, {
+        page: page,
+        pageSize: pageSize,
+        total,
+      });
     },
   });
 
