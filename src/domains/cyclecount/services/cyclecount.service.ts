@@ -32,14 +32,10 @@ const MISS_BIN = createError(
   400,
 );
 
-const bodySchema = Type.Omit(CycleCountSchema, [
-  'id',
-  'cycleCountState',
-  'checker',
-  'creator',
-  'createdAt',
-  'updatedAt',
-  'deletedAt',
+const bodySchema = Type.Pick(CycleCountSchema, [
+  'cycleCountType',
+  'bin',
+  'product',
 ]);
 
 export class CycleCountService {
