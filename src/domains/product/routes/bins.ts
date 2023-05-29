@@ -90,7 +90,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       return BinProducts.find({
         where: { bin: { id } },
         relations: {
-          product: true,
+          product: { unit: true, images: true },
         },
       });
     },
