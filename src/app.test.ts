@@ -1,9 +1,11 @@
 import { afterEach, it } from '@jest/globals';
 import Fastify from 'fastify';
 import App from './app';
+import { ajvOptions } from './AjvOptions';
 
 const fastify = Fastify({
   pluginTimeout: 20000,
+  ajv: ajvOptions,
 });
 
 afterEach(() => fastify.close());

@@ -38,9 +38,12 @@ const contactData = {
   phoneNumber: '+989303212233',
 };
 const addressData = {
-  province: 'Fars',
-  city: 'Shiraz',
-  street: 'Hedayat',
+  provinceName: 'Fars',
+  provinceCode: 'Fars',
+  cityName: 'Shiraz',
+  cityCode: 'Shiraz',
+  streetName: 'Hedayat',
+  streetCode: 'Hedayat',
   postalCode: '123456',
   number: 1,
   building: 'Prans',
@@ -111,29 +114,6 @@ it('should create a customer', async () => {
   customerId = response.json().data.id;
 });
 
-it('should return all customers', async () => {
-  assert(app);
-  assert(user);
-
-  const response = await user.inject({
-    method: 'GET',
-    url: '/customers',
-  });
-  expect(response.json().data).toMatchObject([
-    {
-      id: customerId,
-      ...customerData,
-      nationality: {
-        id: nId,
-        title: expect.any(String),
-      },
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String),
-      deletedAt: null,
-    },
-  ]);
-});
-
 it('should update customer specification', async () => {
   assert(app);
   assert(user);
@@ -155,6 +135,8 @@ it('should get customer specification', async () => {
     method: 'GET',
     url: '/customers/' + customerId + '/specification',
   });
+
+  expect(response).statusCodeToBe(200);
 
   expect(response.json().data).toMatchObject({
     id: customerId,
@@ -328,12 +310,7 @@ it('should get customer address', async () => {
   });
 
   expect(response.json()).toMatchObject({
-    data: {
-      ...addressData,
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String),
-      deletedAt: null,
-    },
+    data: addressData,
     meta: {},
   });
 });
@@ -351,7 +328,6 @@ it('should update customer address after first time', async () => {
   expect(response).statusCodeToBe(200);
 
   expect(response.json().data).toMatchObject({
-    id: expect.any(Number),
     stairway: 'edited',
   });
 });
@@ -419,6 +395,62 @@ it('should not update customer bank', async () => {
   });
 
   expect(response).statusCodeToBe(400);
+});
+
+it('should return all customers', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/customers',
+  });
+
+  expect(response).statusCodeToBe(200);
+
+  expect(response.json().data).toMatchObject([
+    {
+      id: customerId,
+      ...customerData,
+      name: 'edited',
+      nationality: {
+        id: nId,
+        title: expect.any(String),
+      },
+      address: {
+        ...addressData,
+        stairway: 'edited',
+      },
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+      deletedAt: null,
+    },
+  ]);
+});
+
+it('should return all customers - with address filter', async () => {
+  assert(app);
+  assert(user);
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/customers?filter.fiscalIdOrAddress.$like=%Shiraz%',
+  });
+
+  expect(response).statusCodeToBe(200);
+  expect(response.json().data).toMatchObject([
+    {
+      id: customerId,
+    },
+  ]);
+
+  const response2 = await user.inject({
+    method: 'GET',
+    url: '/customers?filter.fiscalIdOrAddress.$like=%Hey%',
+  });
+
+  expect(response2).statusCodeToBe(200);
+  expect(response2.json().data).toMatchObject([]);
 });
 
 it('should delete customer', async () => {

@@ -1,24 +1,25 @@
 import { User } from '$src/domains/user/models/User';
+import { Static, Type } from '@sinclair/typebox';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
   CreateDateColumn,
-  UpdateDateColumn,
   DeleteDateColumn,
-  Relation,
+  Entity,
   Index,
+  ManyToOne,
   OneToMany,
+  PrimaryGeneratedColumn,
+  Relation,
+  UpdateDateColumn,
 } from 'typeorm';
-import { Nationality } from './Nationality';
+import { AddressSchema } from '../schemas/address.schema';
 import {
   CustomerSchema,
-  subscriberType,
   documentType,
+  subscriberType,
 } from '../schemas/customer.schema';
-import { Static, Type } from '@sinclair/typebox';
-import { CustomerAddress } from './Address';
+import { CustomerContact } from './Contact';
+import { Nationality } from './Nationality';
 
 const CustomerSchemaWithoutRelations = Type.Omit(CustomerSchema, [
   'creator',
@@ -64,11 +65,17 @@ export class Customer implements Static<typeof CustomerSchemaWithoutRelations> {
   @ManyToOne(() => Nationality, { nullable: false })
   nationality!: Relation<Nationality>;
 
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+  })
+  address!: Static<typeof AddressSchema> | null;
+
   @OneToMany(
-    () => CustomerAddress,
-    (customerAddress) => customerAddress.customer,
+    () => CustomerContact,
+    (customerContacts) => customerContacts.customer,
   )
-  addresses!: CustomerAddress[];
+  contacts!: CustomerContact[];
 
   @Column({ type: 'text', nullable: true })
   birthday!: string | null;

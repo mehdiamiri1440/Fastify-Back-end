@@ -5,7 +5,6 @@ import { Customer } from '$src/domains/customer/models/Customer';
 import { User } from '$src/domains/user/models/User';
 import { Role } from '$src/domains/user/models/Role';
 import { CustomerContact } from '$src/domains/customer/models/Contact';
-import { CustomerAddress } from '$src/domains/customer/models/Address';
 
 export default class CustomerSeeder extends Seeder {
   async run(dataSource: DataSource) {
@@ -40,6 +39,23 @@ export default class CustomerSeeder extends Seeder {
       birthday: 'birthday',
       isActive: true,
       creator,
+      address: {
+        door: '7',
+        floor: '3',
+        number: 1,
+        building: 'Prans',
+        cityCode: 'Shiraz',
+        cityName: 'Shiraz',
+        latitude: 1.222334123,
+        stairway: 'edited',
+        formatted: 'Fars Shiraz Hedayat 123456 1 3-7',
+        longitude: 2.222334124,
+        postalCode: '123456',
+        streetCode: 'Hedayat',
+        streetName: 'Hedayat',
+        provinceCode: 'Fars',
+        provinceName: 'Fars',
+      },
     });
     await dataSource.getRepository(CustomerContact).save({
       customer,
@@ -48,14 +64,6 @@ export default class CustomerSeeder extends Seeder {
       position: 'position',
       phoneNumber: 'phoneNumber',
       email: 'email',
-      creator,
-    });
-    await dataSource.getRepository(CustomerAddress).save({
-      customer,
-      province: 'province',
-      city: 'city',
-      street: 'street',
-      postalCode: 'postalCode',
       creator,
     });
   }

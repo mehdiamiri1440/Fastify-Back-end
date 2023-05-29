@@ -26,7 +26,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const entity = await Customers.findOneOrFail({
         where: { id: req.params.id },
         relations: {
-          addresses: true,
           nationality: true,
           creator: true,
         },

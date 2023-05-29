@@ -1,10 +1,9 @@
-import { CustomerAddress } from '$src/domains/customer/models/Address';
-import { Customer } from '$src/domains/customer/models/Customer';
-import { AddressSchema } from '$src/domains/customer/schemas/address.schema';
 import { repo } from '$src/infra/utils/repo';
-import createError from '@fastify/error';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
+import { Customer } from '$src/domains/customer/models/Customer';
+import { AddressSchema } from '$src/domains/customer/schemas/address.schema';
+import createError from '@fastify/error';
 
 const CUSTOMER_HAS_NO_ADDRESS = createError(
   'CUSTOMER_HAS_NO_ADDRESS',
@@ -13,10 +12,11 @@ const CUSTOMER_HAS_NO_ADDRESS = createError(
 );
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
-  const Addresses = repo(CustomerAddress);
   const Customers = repo(Customer);
 
-  app.get('/:id/address', {
+  app.route({
+    method: 'GET',
+    url: '/:id/address',
     schema: {
       security: [
         {
@@ -33,16 +33,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         id: req.params.id,
       });
 
-      const address = await Addresses.findOne({
-        where: { customer: { id: customer.id } },
-        loadRelationIds: true,
-      });
-
-      if (!address) {
+      if (!customer.address) {
         throw new CUSTOMER_HAS_NO_ADDRESS();
       }
 
-      return address;
+      return customer.address;
     },
   });
   app.route({
@@ -57,42 +52,29 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Number(),
       }),
-      body: Type.Omit(AddressSchema, [
-        'id',
-        'customer',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Omit(AddressSchema, ['formatted']),
     },
     async handler(req) {
-      const { id } = req.params;
+      const { body, params } = req;
 
       const customer = await Customers.findOneByOrFail({
-        id,
+        id: params.id,
       });
 
-      const maybeAddress = await Addresses.findOne({
-        where: { customer: { id: customer.id } },
-        loadRelationIds: true,
+      const address = {
+        ...body,
+        formatted: `${body.provinceName ?? ''} ${body.cityName ?? ''} ${
+          body.streetName ?? ''
+        } ${body.postalCode ?? ''} ${body.number ?? ''} ${body.floor ?? ''}-${
+          body.door ?? ''
+        }`,
+      };
+
+      await Customers.update(customer.id, {
+        address,
       });
 
-      let addressId: number;
-      if (!maybeAddress) {
-        const address = await Addresses.save({
-          ...req.body,
-          customer,
-          creator: { id: req.user.id },
-        });
-
-        addressId = address.id;
-      } else {
-        await Addresses.update({ id: maybeAddress.id }, { ...req.body });
-        addressId = maybeAddress.id;
-      }
-
-      return Addresses.findOneByOrFail({ id: addressId });
+      return address;
     },
   });
 };

@@ -27,6 +27,7 @@ test:
   variables:
     DB_URL: postgres://user:password@postgres:5432/inventory
     DB_DROP_SCHEMA: 'true'
+    DB_ENABLE_SYNCHRONIZE: 'true'
     S3_URI: http://minio:minio123@minio:9000/
     JWT_SECRET: secret
     IBAN_VALIDATOR_URL: http://hub2.delinternet.com:5004

@@ -15,3 +15,6 @@ export function from(req: FastifyRequest) {
     [orderBy ?? 'id']: order ?? 'desc',
   };
 }
+
+export const toUpperCase = (order: 'asc' | 'desc'): 'ASC' | 'DESC' =>
+  order.toUpperCase() as 'ASC' | 'DESC';
