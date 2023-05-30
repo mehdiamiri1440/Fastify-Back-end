@@ -146,6 +146,27 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
+  app.put('/:id/is-active', {
+    schema: {
+      security: [
+        {
+          OAuth2: ['customer@specification::update'],
+        },
+      ],
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      body: Type.Pick(CustomerSchema, ['isActive']),
+    },
+    async handler(req) {
+      const { id } = await Customers.findOneByOrFail({
+        id: req.params.id,
+      });
+
+      await Customers.update({ id }, req.body);
+    },
+  });
+
   app.route({
     method: 'DELETE',
     url: '/:id',
