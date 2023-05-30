@@ -270,6 +270,49 @@ describe('Update InboundProduct', () => {
     expect(entity?.deletedAt).toBeNull();
     expect(entity?.actualQuantity).toBe(123);
   });
+
+  it('should set-requested-quantity when inbound state is LOAD', async () => {
+    assert(app);
+    assert(user);
+    const InboundProducts = repo(InboundProduct);
+
+    const inbound = await repo(Inbound).save({
+      code: 'code',
+      type: InboundType.NEW,
+      status: InboundStatus.LOAD,
+      creator: {
+        id: 1,
+      },
+      warehouse,
+    });
+
+    const inboundProduct = await InboundProducts.save<
+      DeepPartial<InboundProduct>
+    >({
+      supplier,
+      product,
+      inbound,
+      price: 100,
+      requestedQuantity: 10,
+    });
+
+    const response = await user.inject({
+      method: 'POST',
+      url: `/${inboundProduct.id}/set-requested-quantity`,
+      payload: {
+        requestedQuantity: 20,
+      },
+    });
+
+    expect(response).statusCodeToBe(200);
+
+    const entity = await InboundProducts.findOne({
+      where: { id: inboundProduct.id },
+      withDeleted: true,
+    });
+    expect(entity?.deletedAt).toBeNull();
+    expect(entity?.requestedQuantity).toBe(20);
+  });
 });
 
 describe('Delete InboundProduct', () => {
