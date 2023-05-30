@@ -4,7 +4,9 @@ import { PaginatedResponse } from '$src/infra/tables/response';
 import { FastifyRequest } from 'fastify';
 import { FindOneOptions, ObjectLiteral, Repository } from 'typeorm';
 
-export type WhereBuilder = (req: FastifyRequest) => FindOneOptions['where'];
+export type WhereBuilder<T> = (
+  req: FastifyRequest,
+) => FindOneOptions<T>['where'];
 export type RelationBuilder<T> = (
   req: FastifyRequest,
 ) => FindOneOptions<T>['relations'];
@@ -17,7 +19,7 @@ export class TableQueryBuilder<T extends ObjectLiteral> {
   #repo: Repository<T>;
   #req: FastifyRequest;
 
-  #whereBuilder: WhereBuilder = (req) => where.from(req);
+  #whereBuilder: WhereBuilder<T> = (req) => where.from(req);
   #relationBuilder: RelationBuilder<T> = () => undefined;
   #orderBuilder: OrderBuilder = (req) => order.from(req);
   #selectBuilder: SelectBuilder<T> = () => undefined;
@@ -28,7 +30,7 @@ export class TableQueryBuilder<T extends ObjectLiteral> {
     this.#req = req;
   }
 
-  where(builder: WhereBuilder) {
+  where(builder: WhereBuilder<T>) {
     this.#whereBuilder = builder;
     return this;
   }
