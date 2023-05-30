@@ -14,14 +14,11 @@ const AppDataSource = new DataSource({
   synchronize: DB_ENABLE_SYNCHRONIZE === 'true',
   logging: DB_ENABLE_LOGGING === 'true',
   dropSchema: DB_DROP_SCHEMA === 'true',
-
   entities: models,
   subscribers: [],
   migrations: ['migrations/*.ts'],
   namingStrategy: new SnakeNamingStrategy(),
   connectTimeoutMS: 10000,
 });
-
-AppDataSource.synchronize();
 
 export default AppDataSource;
