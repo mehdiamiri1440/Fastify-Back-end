@@ -30,28 +30,37 @@ export class Warehouse
   name!: string;
 
   @Column({ nullable: false })
-  provinceCode!: string;
+  addressProvinceCode!: string;
 
   @Column({ nullable: false })
-  cityCode!: string;
+  addressProvinceName!: string;
 
   @Column({ nullable: false })
-  streetCode!: string;
+  addressCityCode!: string;
 
   @Column({ nullable: false })
-  streetName!: string;
+  addressCityName!: string;
+
+  @Column({ nullable: false })
+  addressStreetCode!: string;
+
+  @Column({ nullable: false })
+  addressStreetName!: string;
+
+  @Column({ nullable: false })
+  addressPostalCode!: string;
+
+  @Column({ type: 'text', nullable: true })
+  addressNumber!: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  addressNumberCode!: string | null;
 
   @OneToMany(
     () => WarehouseStaff,
     (warehouseStaffs) => warehouseStaffs.warehouse,
   )
   warehouseStaffs!: Relation<WarehouseStaff>;
-
-  @Column({ nullable: false })
-  postalCode!: string;
-
-  @Column({ type: 'text', nullable: true })
-  number!: string | null;
 
   @Column({ type: 'text', nullable: true })
   description!: string | null;

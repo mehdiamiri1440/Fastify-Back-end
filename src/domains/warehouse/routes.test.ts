@@ -29,12 +29,15 @@ const propertyData = {
 };
 const warehouseData = {
   name: 'DI Warehouse',
-  provinceCode: 'P43',
-  cityCode: 'C43.183',
-  streetCode: 'S43.183.00057',
-  streetName: 'Quatre',
-  postalCode: '43894',
-  number: null,
+  addressProvinceCode: 'P43',
+  addressProvinceName: 'TARRAGONA',
+  addressCityCode: 'C07.062',
+  addressCityName: 'SON SERVERA',
+  addressStreetCode: 'S43.001.00104',
+  addressStreetName: 'Alicante  en  ur mas en pares',
+  addressPostalCode: '7820',
+  addressNumber: '9',
+  addressNumberCode: 'N07.046.00097.00009.2965903CD5126N',
   description: 'this is just for test',
 };
 const binData = {

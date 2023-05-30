@@ -51,11 +51,15 @@ beforeEach(async () => {
   ]);
   const warehouse = await repo(Warehouse).save({
     name: 'test warehouse',
-    provinceCode: 'blah',
-    cityCode: 'blah',
-    streetCode: 'blah',
-    streetName: 'blah',
-    postalCode: 'blah',
+    addressProvinceCode: 'P43',
+    addressProvinceName: 'TARRAGONA',
+    addressCityCode: 'C07.062',
+    addressCityName: 'SON SERVERA',
+    addressStreetCode: 'S43.001.00104',
+    addressStreetName: 'Alicante  en  ur mas en pares',
+    addressPostalCode: '7820',
+    addressNumber: '9',
+    addressNumberCode: 'N07.046.00097.00009.2965903CD5126N',
   });
   product = await repo(Product).save({ name: 'test product' });
   const userId: number = (app.jwt.verify(user.token) as { id: number }).id;
