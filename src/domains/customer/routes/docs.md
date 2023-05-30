@@ -1,3 +1,25 @@
+# POST /api/v1/customers
+## Request body
+`businessName` and `businessDocumentType` and `businessFiscalId` are required when subscriberType is empresa
+
+```ts
+interface Body {
+  name: string;
+  subscriberType: "empresa" | "residential" | "autono" | "extranger";
+  documentType: 'dni' | 'passaporte' | 'nie' | 'cif';
+
+  businessName: string | null; // required when subscriberType is empresa
+  businessDocumentType: documentType | null; // required when subscriberType is empresa
+  businessFiscalId: string | null; // required when subscriberType is empresa
+  fiscalId: string;
+  contactFamily1: string;
+  contactFamily2: string | null;
+  nationalityId: number;
+  birthday: string | null;
+  isActive: boolean;
+}
+```
+
 # GET /api/v1/customers/:id/address
 
 Response interface
