@@ -20,12 +20,13 @@ const plugin: FastifyPluginAsyncTypebox = async function (fastify) {
       if (error.message.includes('Could not find any entity')) {
         const fastifyError = new ENTITY_NOT_FOUND();
         fastifyError.cause = error;
-        // replace new line and white space
-        // also replace quotes
-        fastifyError.message = error.message
-          .replace(/(\r\n|\n|\r|\s+)/gm, ' ')
-          .replaceAll('  ', ' ')
-          .replace(/"/g, "'");
+        const startOfEntity: number = error.message.indexOf('"') + 1;
+        const endOfEntity: number = error.message.indexOf('"', startOfEntity);
+        const entity: string = error.message.substring(
+          startOfEntity,
+          endOfEntity,
+        );
+        fastifyError.message = `${entity} not found`;
         return defaultErrorHandler(fastifyError, request, reply);
       } else if (
         // duplicate key error
