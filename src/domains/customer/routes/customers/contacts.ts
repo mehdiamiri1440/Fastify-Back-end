@@ -101,7 +101,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
   app.route({
     method: 'PUT',
-    url: '/:id/contacts/:cId',
+    url: '/:customerId/contacts/:contactId',
     schema: {
       security: [
         {
@@ -109,8 +109,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
-        cId: Type.Number(),
+        customerId: Type.Number(),
+        contactId: Type.Number(),
       }),
       body: Type.Omit(ContactSchema, [
         'id',
@@ -122,10 +122,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ]),
     },
     async handler(req) {
-      // validating references
-      const customer = await Customers.findOneByOrFail({
-        id: req.params.id,
-      });
+      const { customerId, contactId } = req.params;
+
+      const customer = await Customers.findOneByOrFail({ id: customerId });
 
       // check if subscriber type need business data, business data exist else business data must not exist
       const needBusinessData = isBusiness(customer.subscriberType);
@@ -135,9 +134,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }
 
       const { id } = await Contacts.findOneByOrFail({
-        id: req.params.cId,
+        id: contactId,
         customer: { id: customer.id },
       });
+
       await Contacts.update(
         { id },
         {
@@ -145,12 +145,14 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           customer,
         },
       );
+
+      return Contacts.findOneByOrFail({ id: contactId });
     },
   });
 
   app.route({
     method: 'DELETE',
-    url: '/:id/contacts/:cId',
+    url: '/:customerId/contacts/:contactId',
     schema: {
       security: [
         {
@@ -158,17 +160,19 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
-        cId: Type.Number(),
+        customerId: Type.Number(),
+        contactId: Type.Number(),
       }),
     },
     async handler(req) {
+      const { contactId, customerId } = req.params;
+
       const customer = await Customers.findOneByOrFail({
-        id: req.params.id,
+        id: customerId,
       });
 
       const { id } = await Contacts.findOneByOrFail({
-        id: req.params.cId,
+        id: contactId,
         customer: { id: customer.id },
       });
       await Contacts.delete({ id });
