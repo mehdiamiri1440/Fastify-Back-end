@@ -7,11 +7,11 @@ export const AddressSchema = Type.Object({
   cityCode: Type.String(),
   cityName: Type.String(),
 
-  streetCode: Type.String(),
+  streetCode: Type.Union([Type.Null(), Type.String()]),
   streetName: Type.String(),
 
   postalCode: Type.String(),
-  number: Type.Union([Type.Null(), Type.Number()]),
+  number: Type.Union([Type.Null(), Type.String()]),
   building: Type.Union([Type.Null(), Type.String()]),
   stairway: Type.Union([Type.Null(), Type.String()]),
   floor: Type.Union([Type.Null(), Type.String()]),

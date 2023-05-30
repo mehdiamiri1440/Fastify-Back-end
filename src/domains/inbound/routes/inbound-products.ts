@@ -176,10 +176,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // POST /:id/set-actual-quantity
-  app.route({
-    method: 'POST',
-    url: '/:id/set-actual-quantity',
+  app.post('/:id/set-actual-quantity', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -195,13 +192,40 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     async handler(req) {
       const { id } = req.params;
+      const { actualQuantity } = req.body;
+
       const inboundProduct = await fineOne(id);
 
       if (inboundProduct.inbound.status !== InboundStatus.LOAD) {
         throw new INBOUND_INVALID_STATUS();
       }
 
-      await InboundProducts.update(inboundProduct.id, req.body);
+      await InboundProducts.update(inboundProduct.id, { actualQuantity });
+      return InboundProducts.findOneByOrFail({ id: inboundProduct.id });
+    },
+  });
+
+  app.post('/:id/set-requested-quantity', {
+    schema: {
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      body: Type.Object({
+        requestedQuantity: Type.Number(),
+      }),
+      security: [
+        {
+          OAuth2: ['user@inbound::update'],
+        },
+      ],
+    },
+    async handler(req) {
+      const { id } = req.params;
+      const { requestedQuantity } = req.body;
+
+      const inboundProduct = await fineOne(id);
+
+      await InboundProducts.update(inboundProduct.id, { requestedQuantity });
       return InboundProducts.findOneByOrFail({ id: inboundProduct.id });
     },
   });

@@ -3,6 +3,8 @@ import assert from 'assert';
 import { FastifyPluginAsync } from 'fastify/types/plugin';
 import { SwaggerTheme } from 'swagger-themes';
 import permissions from './permissions';
+import { join } from 'path';
+import { readFileSync } from 'fs';
 
 export interface Options {
   /**
@@ -81,6 +83,13 @@ const app: FastifyPluginAsync<Options> = async (
             {
               filename: 'theme.css',
               content: new SwaggerTheme('v3').getBuffer('dark'),
+            },
+            {
+              filename: 'custom.css',
+              content: readFileSync(
+                join(__dirname, 'infra/swagger.css'),
+                'utf8',
+              ),
             },
           ],
         },

@@ -7,6 +7,8 @@ import { FastifyInstance } from 'fastify';
 import { Nationality } from './models/Nationality';
 import routes from './routes';
 import '$src/infra/test/statusCodeExpect';
+import { Customer } from '$src/domains/customer/models/Customer';
+import { DeepPartial } from 'typeorm';
 
 const Nationalities = repo(Nationality);
 let app: FastifyInstance | undefined;
@@ -29,7 +31,7 @@ const customerData = {
   contactFamily2: 'my contact family two',
   birthday: '2022-11-30T11:21:44.000-08:00',
   isActive: true,
-};
+} as DeepPartial<Customer>;
 const contactData = {
   name: 'Hanzou',
   surName: 'Jerald',
@@ -45,7 +47,7 @@ const addressData = {
   streetName: 'Hedayat',
   streetCode: 'Hedayat',
   postalCode: '123456',
-  number: 1,
+  number: '1',
   building: 'Prans',
   stairway: 'test',
   floor: '3',
@@ -463,4 +465,30 @@ it('should delete customer', async () => {
   });
 
   expect(response).statusCodeToBe(200);
+});
+
+it('should deactive customer', async () => {
+  assert(app);
+  assert(user);
+  const { id } = await repo(Customer).save({
+    ...customerData,
+    nationality: await Nationalities.save({
+      title: 'xzcv',
+      creator: { id: 1 },
+    }),
+    isActive: true,
+    creator: { id: 1 },
+  });
+
+  const response = await user.inject({
+    method: 'PUT',
+    url: '/customers/' + id + '/is-active',
+    payload: {
+      isActive: false,
+    },
+  });
+
+  expect(response).statusCodeToBe(200);
+  const newCustomer = await repo(Customer).findOneByOrFail({ id });
+  expect(newCustomer.isActive).toBe(false);
 });
