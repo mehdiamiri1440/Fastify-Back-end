@@ -42,7 +42,7 @@ export default class CustomerSeeder extends Seeder {
       address: {
         door: '7',
         floor: '3',
-        number: 1,
+        number: '1',
         building: 'Prans',
         cityCode: 'Shiraz',
         cityName: 'Shiraz',

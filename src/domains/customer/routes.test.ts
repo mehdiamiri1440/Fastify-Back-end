@@ -45,7 +45,7 @@ const addressData = {
   streetName: 'Hedayat',
   streetCode: 'Hedayat',
   postalCode: '123456',
-  number: 1,
+  number: '1',
   building: 'Prans',
   stairway: 'test',
   floor: '3',
