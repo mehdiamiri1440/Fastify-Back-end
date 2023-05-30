@@ -49,9 +49,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       return (
         new TableQueryBuilder(Contacts, req)
           // this where is for filter contacts that for customer
-          .where(() => {
-            return { customer: { id: customer.id } };
-          })
+          .where({ customer: { id: customer.id } })
           .exec()
       );
     },

@@ -73,7 +73,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const userWarehouse = await loadUserWarehouse(req.user.id);
 
       return new TableQueryBuilder(InboundProducts, req)
-        .select(() => ({
+        .select({
           id: true,
           createdAt: true,
           requestedQuantity: true,
@@ -91,8 +91,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             },
           },
           inbound: {},
-        }))
-        .relation(() => ({
+        })
+        .relation({
           inbound: {
             warehouse: true,
           },
@@ -100,8 +100,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             unit: true,
           },
           supplier: true,
-        }))
-        .where(() =>
+        })
+        .where(
           where.merge([
             where.from(req),
             {

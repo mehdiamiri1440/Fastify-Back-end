@@ -31,9 +31,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     async handler(req) {
       return new TableQueryBuilder(Suppliers, req)
-        .relation(() => ({
+        .relation({
           creator: true,
-        }))
+        })
         .loadRelationIds({
           disableMixedMap: false,
         })

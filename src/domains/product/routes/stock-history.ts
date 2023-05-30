@@ -43,7 +43,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const { orderBy } = req.query as ListQueryParams;
 
       return new TableQueryBuilder(ProductStockHistories, req)
-        .where(() =>
+        .where(
           where.merge([
             where.from(req),
             {
@@ -51,11 +51,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             },
           ]),
         )
-        .relation(() => ({
+        .relation({
           creator: true,
           bin: true,
-        }))
-        .select(() => ({
+        })
+        .select({
           creator: {
             id: true,
             fullName: true,
@@ -64,8 +64,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             id: true,
             name: true,
           },
-        }))
-        .order(() => (orderBy ? order.from(req) : { id: 'DESC' }))
+        })
+        .order(orderBy ? order.from(req) : { id: 'DESC' })
         .exec();
     },
   });
@@ -92,7 +92,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const { orderBy } = req.query as ListQueryParams;
 
       return new TableQueryBuilder(ProductStockHistories, req)
-        .where(() =>
+        .where(
           where.merge([
             where.from(req),
             {
@@ -100,11 +100,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             },
           ]),
         )
-        .relation(() => ({
+        .relation({
           creator: true,
           product: true,
-        }))
-        .select(() => ({
+        })
+        .select({
           creator: {
             id: true,
             fullName: true,
@@ -113,7 +113,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             id: true,
             name: true,
           },
-        }))
+        })
         .exec();
     },
   });

@@ -37,9 +37,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     async handler(req) {
       return new TableQueryBuilder(Roles, req)
-        .relation(() => {
-          return { creator: true };
-        })
+        .relation({ creator: true })
         .exec();
     },
   });
@@ -192,9 +190,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       const roleId: number = req.params.id;
       return new TableQueryBuilder(RolePermissions, req)
-        .where(() => {
-          return { role: { id: roleId } };
-        })
+        .where({ role: { id: roleId } })
         .exec();
     },
   });

@@ -37,9 +37,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const customer = await Customers.findOneByOrFail({ id: req.params.id });
 
       return new TableQueryBuilder(Documents, req)
-        .where(() => {
-          return { customer: { id: customer.id } };
-        })
+        .where({ customer: { id: customer.id } })
         .exec();
     },
   });

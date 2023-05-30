@@ -30,29 +30,29 @@ export class TableQueryBuilder<T extends ObjectLiteral> {
     this.#req = req;
   }
 
-  where(builder: WhereBuilder<T>) {
-    this.#whereBuilder = builder;
+  where(i: FindOneOptions<T>['where']) {
+    this.#whereBuilder = () => i;
     return this;
   }
 
-  relation(builder: RelationBuilder<T>) {
-    this.#relationBuilder = builder;
+  relation(i: FindOneOptions<T>['relations']) {
+    this.#relationBuilder = () => i;
     this.#loadRelationIds = false;
     return this;
   }
 
-  order(builder: OrderBuilder) {
-    this.#orderBuilder = builder;
+  order(i: FindOneOptions<T>['order']) {
+    this.#orderBuilder = () => i;
     return this;
   }
 
-  loadRelationIds(value: FindOneOptions['loadRelationIds']) {
-    this.#loadRelationIds = value;
+  loadRelationIds(i: FindOneOptions['loadRelationIds']) {
+    this.#loadRelationIds = i;
     return this;
   }
 
-  select(builder: SelectBuilder<T>) {
-    this.#selectBuilder = builder;
+  select(i: FindOneOptions<T>['select']) {
+    this.#selectBuilder = () => i;
     return this;
   }
 
