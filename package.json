@@ -45,7 +45,7 @@
     "bson": "^5.2.0",
     "case-anything": "^2.1.10",
     "content-disposition": "^0.5.4",
-    "fastify": "^4.14.1",
+    "fastify": "^4.17.0",
     "fastify-plugin": "^4.5.0",
     "imgproxy": "^1.1.1",
     "mime-types": "^2.1.35",
