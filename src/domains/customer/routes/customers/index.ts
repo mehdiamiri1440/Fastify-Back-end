@@ -62,14 +62,14 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
       if (emailOrPhone) {
         qb.andWhere(
-          `(contact.email || ' ' || contact.phone_number)  like :emailOrPhone`,
+          `CONCAT(contact.email, ' ', contact.phone_number) like :emailOrPhone`,
           { emailOrPhone: emailOrPhone.$like },
         );
       }
 
       if (fiscalIdOrAddress) {
         qb.andWhere(
-          `(customer.fiscal_id || ' ' || (customer.address ->> 'formatted'))  like :fiscalIdOrAddress`,
+          `CONCAT(customer.fiscal_id, ' ', (customer.address ->> 'formatted')) like :fiscalIdOrAddress`,
           {
             fiscalIdOrAddress: fiscalIdOrAddress.$like,
           },
