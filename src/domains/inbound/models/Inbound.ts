@@ -64,8 +64,8 @@ export class Inbound {
   })
   driverSignature!: string | null;
 
-  @Column({ nullable: true })
-  description!: string;
+  @Column({ type: 'varchar', nullable: true })
+  description!: string | null;
 
   @ManyToOne(() => User)
   creator!: User;

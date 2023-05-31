@@ -14,6 +14,7 @@ import { InboundProduct } from '../models/InboundProduct';
 import { InboundService } from '../services/Inbound.service';
 import { loadUserWarehouse } from '../services/utils';
 import { IsNull } from 'typeorm';
+import { Nullable } from '$src/infra/utils/Nullable';
 
 const sum = (array: number[]) => array.reduce((a, b) => a + b, 0);
 
@@ -259,11 +260,13 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Number(),
       }),
-      body: Type.Object({
-        creatorSignature: Type.Optional(Type.String()),
-        driverSignature: Type.Optional(Type.String()),
-        description: Type.Optional(Type.String()),
-      }),
+      body: Type.Partial(
+        Type.Object({
+          creatorSignature: Nullable(Type.String()),
+          driverSignature: Nullable(Type.String()),
+          description: Nullable(Type.String()),
+        }),
+      ),
       security: [
         {
           OAuth2: ['user@inbound::update'],
