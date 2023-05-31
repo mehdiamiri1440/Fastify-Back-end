@@ -20,7 +20,7 @@ const customerData = {
   subscriberType: 'empresa',
   documentType: 'dni',
   businessDocumentType: 'passaporte',
-  fiscalId: 'my fiscal id',
+  fiscalId: 'my fiscal id 123456',
   businessFiscalId: 'my buisness id',
   contactFamily1: 'my contact family one',
   contactFamily2: 'my contact family two',
@@ -398,6 +398,19 @@ it('customer flow', async () => {
 
     expect(response2).statusCodeToBe(200);
     expect(response2.json().data).toMatchObject([]);
+
+    // search by fiscalId
+    const response3 = await user.inject({
+      method: 'GET',
+      url: '/customers?filter.fiscalIdOrAddress.$like=%123%',
+    });
+
+    expect(response3).statusCodeToBe(200);
+    expect(response3.json().data).toMatchObject([
+      {
+        fiscalId: 'my fiscal id 123456',
+      },
+    ]);
   }
   {
     // should delete customer
