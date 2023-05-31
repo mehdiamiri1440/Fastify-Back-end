@@ -58,11 +58,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const userWarehouse = await loadUserWarehouse(req.user.id);
 
       return new TableQueryBuilder(outboundsRepo, req)
-        .relation(() => ({
+        .relation({
           creator: true,
           warehouse: true,
-        }))
-        .where(() =>
+        })
+        .where(
           where.merge([
             where.from(req),
             {

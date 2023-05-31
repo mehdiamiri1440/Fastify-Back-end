@@ -74,9 +74,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     async handler(req) {
       return new TableQueryBuilder(Products, req)
-        .relation(() => ({
+        .relation({
           category: true,
-        }))
+        })
         .exec();
     },
   });

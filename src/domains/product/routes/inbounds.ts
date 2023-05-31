@@ -37,12 +37,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const { id } = req.params;
 
       return new TableQueryBuilder(InboundProducts, req)
-        .relation(() => ({
+        .relation({
           inbound: true,
           product: true,
           supplier: true,
-        }))
-        .select(() => ({
+        })
+        .select({
           id: true,
           createdAt: true,
           actualQuantity: true,
@@ -51,18 +51,18 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             name: true,
           },
           price: true,
-        }))
-        .where(() => ({
+        })
+        .where({
           inbound: {
             status: InboundStatus.SORTED,
           },
           product: {
             id,
           },
-        }))
-        .order(() => ({
+        })
+        .order({
           id: 'DESC',
-        }))
+        })
         .exec();
     },
   });

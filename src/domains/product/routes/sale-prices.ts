@@ -42,9 +42,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const { id } = req.params;
 
       return new TableQueryBuilder(ProductSalePrices, req)
-        .where(() => ({
+        .where({
           product: { id },
-        }))
+        })
         .exec();
     },
   });

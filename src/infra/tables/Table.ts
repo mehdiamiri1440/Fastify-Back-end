@@ -4,7 +4,9 @@ import { PaginatedResponse } from '$src/infra/tables/response';
 import { FastifyRequest } from 'fastify';
 import { FindOneOptions, ObjectLiteral, Repository } from 'typeorm';
 
-export type WhereBuilder = (req: FastifyRequest) => FindOneOptions['where'];
+export type WhereBuilder<T> = (
+  req: FastifyRequest,
+) => FindOneOptions<T>['where'];
 export type RelationBuilder<T> = (
   req: FastifyRequest,
 ) => FindOneOptions<T>['relations'];
@@ -17,7 +19,7 @@ export class TableQueryBuilder<T extends ObjectLiteral> {
   #repo: Repository<T>;
   #req: FastifyRequest;
 
-  #whereBuilder: WhereBuilder = (req) => where.from(req);
+  #whereBuilder: WhereBuilder<T> = (req) => where.from(req);
   #relationBuilder: RelationBuilder<T> = () => undefined;
   #orderBuilder: OrderBuilder = (req) => order.from(req);
   #selectBuilder: SelectBuilder<T> = () => undefined;
@@ -28,29 +30,29 @@ export class TableQueryBuilder<T extends ObjectLiteral> {
     this.#req = req;
   }
 
-  where(builder: WhereBuilder) {
-    this.#whereBuilder = builder;
+  where(i: FindOneOptions<T>['where']) {
+    this.#whereBuilder = () => i;
     return this;
   }
 
-  relation(builder: RelationBuilder<T>) {
-    this.#relationBuilder = builder;
+  relation(i: FindOneOptions<T>['relations']) {
+    this.#relationBuilder = () => i;
     this.#loadRelationIds = false;
     return this;
   }
 
-  order(builder: OrderBuilder) {
-    this.#orderBuilder = builder;
+  order(i: FindOneOptions<T>['order']) {
+    this.#orderBuilder = () => i;
     return this;
   }
 
-  loadRelationIds(value: FindOneOptions['loadRelationIds']) {
-    this.#loadRelationIds = value;
+  loadRelationIds(i: FindOneOptions['loadRelationIds']) {
+    this.#loadRelationIds = i;
     return this;
   }
 
-  select(builder: SelectBuilder<T>) {
-    this.#selectBuilder = builder;
+  select(i: FindOneOptions<T>['select']) {
+    this.#selectBuilder = () => i;
     return this;
   }
 
