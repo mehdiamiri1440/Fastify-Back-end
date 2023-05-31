@@ -9,7 +9,7 @@ import {
   TestUser,
 } from '$src/infra/test/utils';
 import { repo } from '$src/infra/utils/repo';
-import { afterAll, beforeAll, expect, it } from '@jest/globals';
+import { afterEach, beforeEach, expect, it } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance } from 'fastify';
 import { describe } from 'node:test';
@@ -21,12 +21,6 @@ import { Product } from '$src/domains/product/models/Product';
 const Languages = repo(Language);
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
-
-let languageId: number;
-let supplierId: number;
-let contactId: number;
-let documentId: number;
-let productId: number;
 
 const languageData = { title: 'SPN' };
 const supplierData = {
@@ -47,14 +41,27 @@ const contactData = {
   phoneNumber: '+989112223344',
 };
 
-beforeAll(async () => {
+beforeEach(async () => {
   app = await createTestFastifyApp();
   await AppDataSource.synchronize();
   await app.register(routes);
   await app.ready();
   user = await TestUser.create(app);
+});
+
+afterEach(async () => {
+  await app?.close();
+});
+
+it('cycle count flow', async () => {
+  assert(app);
+  assert(user);
+  let languageId: number;
+  let supplierId: number;
+  let contactId: number;
+  let documentId: number;
   await disableForeignKeyCheck();
-  productId = (
+  const productId = (
     await AppDataSource.getRepository(Product).save({
       name: 'name',
       code: 'code',
@@ -65,17 +72,9 @@ beforeAll(async () => {
     })
   ).id;
   await enableForeignKeyCheck();
-});
 
-afterAll(async () => {
-  await app?.close();
-});
-
-describe('flow', () => {
-  it('should return all languages', async () => {
-    assert(app);
-    assert(user);
-
+  {
+    // language
     languageId = (await Languages.save({ ...languageData })).id;
 
     const response = await user.inject({
@@ -94,21 +93,17 @@ describe('flow', () => {
       ],
       meta: {},
     });
-  });
-
-  it('should create a supplier', async () => {
-    assert(app);
-    assert(user);
-
+  }
+  {
+    // create supplier
     const response = await user.inject({
       method: 'POST',
       url: '/suppliers',
       payload: supplierData,
     });
-    supplierId = response.json().data.id;
     expect(response.json()).toMatchObject({
       data: {
-        id: supplierId,
+        id: expect.any(Number),
         ...supplierData,
         language: languageData,
         createdAt: expect.any(String),
@@ -117,12 +112,10 @@ describe('flow', () => {
       },
       meta: {},
     });
-  });
-
-  it('should return all products of supplier', async () => {
-    assert(app);
-    assert(user);
-
+    supplierId = response.json().data.id;
+  }
+  {
+    // should return all products of supplier
     await AppDataSource.getRepository(ProductSupplier).save({
       supplier: { id: supplierId },
       product: { id: productId },
@@ -143,12 +136,9 @@ describe('flow', () => {
         }),
       ]),
     );
-  });
-
-  it('should return all suppliers', async () => {
-    assert(app);
-    assert(user);
-
+  }
+  {
+    // should return all suppliers
     const response = await user.inject({
       method: 'GET',
       url: '/suppliers',
@@ -163,12 +153,9 @@ describe('flow', () => {
         language: languageId,
       },
     ]);
-  });
-
-  it('should single supplier', async () => {
-    assert(app);
-    assert(user);
-
+  }
+  {
+    // should single supplier
     const response = await user.inject({
       method: 'GET',
       url: '/suppliers/1',
@@ -183,12 +170,9 @@ describe('flow', () => {
         id: languageId,
       },
     });
-  });
-
-  it('should update supplier', async () => {
-    assert(app);
-    assert(user);
-
+  }
+  {
+    // should update supplier
     const response = await user.inject({
       method: 'PUT',
       url: '/suppliers/' + supplierId,
@@ -196,12 +180,9 @@ describe('flow', () => {
     });
 
     expect(response).statusCodeToBe(200);
-  });
-
-  it('should create a contact for supplier', async () => {
-    assert(app);
-    assert(user);
-
+  }
+  {
+    // should create a contact for supplier
     const response = await user.inject({
       method: 'POST',
       url: '/suppliers/' + supplierId + '/contacts',
@@ -209,6 +190,7 @@ describe('flow', () => {
     });
     expect(response.json()).toMatchObject({
       data: {
+        id: expect.any(Number),
         ...contactData,
         supplier: { id: supplierId },
         createdAt: expect.any(String),
@@ -218,12 +200,9 @@ describe('flow', () => {
       meta: {},
     });
     contactId = response.json().data.id;
-  });
-
-  it('should return all contacts of supplier', async () => {
-    assert(app);
-    assert(user);
-
+  }
+  {
+    // should return all contacts of supplier
     const response = await user.inject({
       method: 'GET',
       url: '/suppliers/' + supplierId + '/contacts',
@@ -240,12 +219,9 @@ describe('flow', () => {
         }),
       ]),
     );
-  });
-
-  it('should update contact of supplier', async () => {
-    assert(app);
-    assert(user);
-
+  }
+  {
+    // should update contact of supplier
     const response = await user.inject({
       method: 'PUT',
       url: '/suppliers/' + supplierId + '/contacts/' + contactId,
@@ -253,24 +229,18 @@ describe('flow', () => {
     });
 
     expect(response).statusCodeToBe(200);
-  });
-
-  it('should delete contact of supplier', async () => {
-    assert(app);
-    assert(user);
-
+  }
+  {
+    // should delete contact of supplier
     const response = await user.inject({
       method: 'DELETE',
       url: '/suppliers/' + supplierId + '/contacts/' + contactId,
     });
 
     expect(response).statusCodeToBe(200);
-  });
-
-  it('should create a document for supplier', async () => {
-    assert(app);
-    assert(user);
-
+  }
+  {
+    // should create a document for supplier
     const response = await user.inject({
       method: 'POST',
       url: '/suppliers/' + supplierId + '/documents',
@@ -278,6 +248,7 @@ describe('flow', () => {
     });
     expect(response.json()).toMatchObject({
       data: {
+        id: expect.any(Number),
         fileId: 'testFileId',
         supplier: { id: supplierId },
         createdAt: expect.any(String),
@@ -287,12 +258,9 @@ describe('flow', () => {
       meta: {},
     });
     documentId = response.json().data.id;
-  });
-
-  it('should return all documents of supplier', async () => {
-    assert(app);
-    assert(user);
-
+  }
+  {
+    // should return all documents of supplier
     const response = await user.inject({
       method: 'GET',
       url: '/suppliers/' + supplierId + '/documents',
@@ -312,29 +280,23 @@ describe('flow', () => {
         }),
       ]),
     );
-  });
-
-  it('should delete document of supplier', async () => {
-    assert(app);
-    assert(user);
-
+  }
+  {
+    // should delete document of supplier
     const response = await user.inject({
       method: 'DELETE',
       url: '/suppliers/' + supplierId + '/documents/' + documentId,
     });
 
     expect(response).statusCodeToBe(200);
-  });
-
-  it('should delete supplier', async () => {
-    assert(app);
-    assert(user);
-
+  }
+  {
+    // should delete supplier
     const response = await user.inject({
       method: 'DELETE',
       url: '/suppliers/' + supplierId,
     });
 
     expect(response).statusCodeToBe(200);
-  });
+  }
 });

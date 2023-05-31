@@ -3,7 +3,7 @@ import 'reflect-metadata';
 import AppDataSource from '$src/DataSource';
 import '$src/infra/test/statusCodeExpect';
 import { createTestFastifyApp, TestUser } from '$src/infra/test/utils';
-import { afterAll, beforeAll, expect, it } from '@jest/globals';
+import { afterEach, beforeEach, expect, it } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance } from 'fastify';
 import routes from './routes';
@@ -11,7 +11,7 @@ import routes from './routes';
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
 
-beforeAll(async () => {
+beforeEach(async () => {
   app = await createTestFastifyApp();
   await AppDataSource.synchronize();
   await app.register(routes);
@@ -19,7 +19,7 @@ beforeAll(async () => {
   user = await TestUser.create(app);
 });
 
-afterAll(async () => {
+afterEach(async () => {
   await app?.close();
 });
 
