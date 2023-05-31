@@ -65,13 +65,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['warehouse@warehouse::update'],
         },
       ],
-      body: Type.Omit(WarehouseStaffSchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Pick(WarehouseStaffSchema, ['warehouse', 'user']),
     },
     async handler(req) {
       // validating references

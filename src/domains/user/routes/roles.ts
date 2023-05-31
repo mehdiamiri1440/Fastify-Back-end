@@ -52,12 +52,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['user@role::create'],
         },
       ],
-      body: Type.Omit(Type.Composite([RoleSchema, RolePermissionsSchema]), [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
+      body: Type.Pick(Type.Composite([RoleSchema, RolePermissionsSchema]), [
+        'title',
+        'isActive',
+        'permissions',
       ]),
     },
     async handler(req) {
@@ -84,12 +82,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['user@role::update'],
         },
       ],
-      body: Type.Omit(Type.Composite([RoleSchema, RolePermissionsSchema]), [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
+      body: Type.Pick(Type.Composite([RoleSchema, RolePermissionsSchema]), [
+        'title',
+        'isActive',
+        'permissions',
       ]),
       params: Type.Object({
         id: Type.Number(),
@@ -141,9 +137,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Number(),
       }),
-      body: Type.Object({
-        isActive: Type.Boolean(),
-      }),
+      body: Type.Pick(RoleSchema, ['isActive']),
     },
     async handler(req) {
       const { id } = await Roles.findOneByOrFail({ id: req.params.id });

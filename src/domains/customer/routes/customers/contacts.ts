@@ -66,13 +66,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['customer@contact::create'],
         },
       ],
-      body: Type.Omit(ContactSchema, [
-        'id',
-        'customer',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
+      body: Type.Pick(ContactSchema, [
+        'position',
+        'name',
+        'surName',
+        'email',
+        'phoneNumber',
       ]),
       params: Type.Object({
         id: Type.Number(),
@@ -112,13 +111,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         customerId: Type.Number(),
         contactId: Type.Number(),
       }),
-      body: Type.Omit(ContactSchema, [
-        'id',
-        'customer',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
+      body: Type.Pick(ContactSchema, [
+        'position',
+        'name',
+        'surName',
+        'email',
+        'phoneNumber',
       ]),
     },
     async handler(req) {

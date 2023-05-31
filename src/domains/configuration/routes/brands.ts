@@ -38,13 +38,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['configuration@brand::create'],
         },
       ],
-      body: Type.Omit(BrandSchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Pick(BrandSchema, ['name', 'logoFileId']),
     },
     async handler(req) {
       return await Brands.save({ ...req.body, creator: { id: req.user.id } });
@@ -59,13 +53,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['configuration@brand::update'],
         },
       ],
-      body: Type.Omit(BrandSchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Pick(BrandSchema, ['name', 'logoFileId']),
       params: Type.Object({
         id: Type.Number(),
       }),

@@ -58,13 +58,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['warehouse@bin-size::create'],
         },
       ],
-      body: Type.Omit(BinSizeSchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Pick(BinSizeSchema, ['title', 'width', 'height', 'depth']),
     },
     async handler(req) {
       return await BinSizes.save({ ...req.body, creator: { id: req.user.id } });
@@ -80,13 +74,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['warehouse@bin-size::update'],
         },
       ],
-      body: Type.Omit(BinSizeSchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-      ]),
+      body: Type.Pick(BinSizeSchema, ['title', 'width', 'height', 'depth']),
       params: Type.Object({
         id: Type.Number(),
       }),

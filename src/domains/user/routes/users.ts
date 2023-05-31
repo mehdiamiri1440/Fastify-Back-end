@@ -47,12 +47,16 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['user@role::create'],
         },
       ],
-      body: Type.Omit(UserSchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
+      body: Type.Pick(UserSchema, [
+        'firstName',
+        'lastName',
+        'role',
+        'nif',
+        'email',
+        'phoneNumber',
+        'password',
+        'position',
+        'isActive',
       ]),
     },
     async handler(req) {
@@ -76,12 +80,16 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['user@user::update'],
         },
       ],
-      body: Type.Omit(UserSchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
+      body: Type.Pick(UserSchema, [
+        'firstName',
+        'lastName',
+        'role',
+        'nif',
+        'email',
+        'phoneNumber',
+        'password',
+        'position',
+        'isActive',
       ]),
       params: Type.Object({
         id: Type.Number(),
@@ -152,9 +160,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Number(),
       }),
-      body: Type.Object({
-        isActive: Type.Boolean(),
-      }),
+      body: Type.Pick(UserSchema, ['isActive']),
     },
     async handler(req) {
       const { id } = await Users.findOneByOrFail({ id: req.params.id });

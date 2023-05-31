@@ -70,12 +70,14 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['warehouse@bin::create'],
         },
       ],
-      body: Type.Omit(BinSchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
+      body: Type.Pick(BinSchema, [
+        'name',
+        'warehouse',
+        'size',
+        'property',
+        'physicalCode',
+        'internalCode',
+        'description',
       ]),
     },
     async handler(req) {
@@ -107,12 +109,14 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['warehouse@bin::update'],
         },
       ],
-      body: Type.Omit(BinSchema, [
-        'id',
-        'creator',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
+      body: Type.Pick(BinSchema, [
+        'name',
+        'warehouse',
+        'size',
+        'property',
+        'physicalCode',
+        'internalCode',
+        'description',
       ]),
       params: Type.Object({
         id: Type.Number(),
