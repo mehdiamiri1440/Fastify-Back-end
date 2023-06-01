@@ -65,10 +65,10 @@ export class Warehouse
   @Column({ type: 'text', nullable: true })
   description!: string | null;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: true })
   supervisor!: Relation<User>;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: false })
   creator!: Relation<User>;
 
   @CreateDateColumn({ nullable: false })

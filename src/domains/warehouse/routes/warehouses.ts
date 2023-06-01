@@ -120,6 +120,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       return await Warehouses.save({
         ...req.body,
         supervisor,
+        creator: { id: req.user.id },
       });
     },
   });

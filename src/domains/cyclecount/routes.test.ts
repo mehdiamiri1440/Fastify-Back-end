@@ -60,19 +60,48 @@ beforeEach(async () => {
     addressPostalCode: '7820',
     addressNumber: '9',
     addressNumberCode: 'N07.046.00097.00009.2965903CD5126N',
+    creator: { id: 1 },
   });
   product = await repo(Product).save({ name: 'test product' });
   const userId: number = (app.jwt.verify(user.token) as { id: number }).id;
-  await repo(WarehouseStaff).save({ warehouse, user: { id: userId } }); // this if for that in product cycle count we just want to cycle count that bins is in user's warehouse
+  await repo(WarehouseStaff).save({
+    warehouse,
+    user: { id: userId },
+    creator: { id: 1 },
+  }); // this if for that in product cycle count we just want to cycle count that bins is in user's warehouse
   await repo(Bin).save([
-    { name: 'useless one', internalCode: 'useless one' },
-    { name: 'useless two', internalCode: 'useless two' },
-    { name: 'useless three', internalCode: 'useless three' },
+    {
+      name: 'useless one',
+      internalCode: 'useless one',
+      warehouse: { id: 1 },
+      size: { id: 1 },
+      property: { id: 1 },
+      creator: { id: 1 },
+    },
+    {
+      name: 'useless two',
+      internalCode: 'useless two',
+      warehouse: { id: 1 },
+      size: { id: 1 },
+      property: { id: 1 },
+      creator: { id: 1 },
+    },
+    {
+      name: 'useless three',
+      internalCode: 'useless three',
+      warehouse: { id: 1 },
+      size: { id: 1 },
+      property: { id: 1 },
+      creator: { id: 1 },
+    },
   ]);
   bin = await repo(Bin).save({
     name: 'test bin',
     internalCode: 'test',
     warehouse,
+    size: { id: 1 },
+    property: { id: 1 },
+    creator: { id: 1 },
   });
   await enableForeignKeyCheck();
   binProduct = await repo(BinProduct).save({ product, bin, quantity: 10 });

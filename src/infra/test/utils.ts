@@ -29,11 +29,18 @@ export async function createTestUser() {
 export class TestUser {
   token: string;
   #app: FastifyInstance;
+  user: User;
+
+  get id() {
+    return this.user.id;
+  }
 
   static async create(app: FastifyInstance) {
+    const user = await createTestUser();
+
     const token = app.jwt.sign(
       {
-        id: (await createTestUser()).id,
+        id: user.id,
         scope: Object.keys(permissions).join(' '),
       },
       {
@@ -41,12 +48,13 @@ export class TestUser {
       },
     );
 
-    return new TestUser(app, token);
+    return new TestUser(app, token, user);
   }
 
-  constructor(app: FastifyInstance, token: string) {
+  constructor(app: FastifyInstance, token: string, user: User) {
     this.token = token;
     this.#app = app;
+    this.user = user;
   }
 
   inject(options: InjectOptions) {

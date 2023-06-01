@@ -11,9 +11,11 @@ import {
   ManyToOne,
   Check,
   Relation,
+  Unique,
 } from 'typeorm';
 
 @Entity()
+@Unique(['bin', 'product'])
 export class BinProduct {
   @PrimaryGeneratedColumn()
   id!: number;

@@ -201,10 +201,9 @@ it('warehouse flow', async () => {
       url: '/warehouses',
       payload: { ...warehouseData, supervisor: userId },
     });
-    warehouseId = response.json().data.id;
     expect(response.json()).toMatchObject({
       data: {
-        id: warehouseId,
+        id: expect.any(Number),
         ...warehouseData,
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
@@ -212,6 +211,7 @@ it('warehouse flow', async () => {
       },
       meta: {},
     });
+    warehouseId = response.json().data.id;
   }
   {
     // should get list of warehouses

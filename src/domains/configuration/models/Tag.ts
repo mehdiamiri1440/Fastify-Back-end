@@ -22,7 +22,7 @@ export class Tag implements Static<typeof TagSchemaWithoutRelations> {
   @Column({ nullable: false, unique: true })
   name!: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: false })
   creator!: Relation<User>;
 
   @CreateDateColumn({ nullable: false })

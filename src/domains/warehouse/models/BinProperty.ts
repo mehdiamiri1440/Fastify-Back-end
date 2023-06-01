@@ -26,7 +26,7 @@ export class BinProperty
   @Column({ nullable: false })
   title!: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: false })
   creator!: Relation<User>;
 
   @CreateDateColumn({ nullable: false })

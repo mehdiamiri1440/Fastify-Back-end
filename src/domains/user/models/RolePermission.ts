@@ -24,7 +24,7 @@ export class RolePermission {
   @Column({ nullable: false })
   permission!: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: false })
   creator!: Relation<User>;
 
   @CreateDateColumn({ nullable: false })
