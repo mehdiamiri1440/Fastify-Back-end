@@ -1,38 +1,30 @@
-import createError from '@fastify/error';
-import { SubscriberType, isBusiness } from './statics/subscriberTypes';
+import { isBusiness } from './statics/subscriberTypes';
+import { Static, Type } from '@sinclair/typebox';
+import { CustomerSchema } from '$src/domains/customer/schemas/customer.schema';
+import {
+  NEED_BUSINESS_DATA,
+  NOT_NEED_BUSINESS_DATA,
+} from '$src/domains/customer/errors';
 
-const NOT_NEED_BUSINESS_DATA = createError(
-  'NOT_NEED_BUSINESS_DATA',
-  'this subscriber type not need business data',
-  409,
-);
-const NEED_BUSINESS_DATA = createError(
-  'NEED_BUSINESS_DATA',
-  'this subscriber type need business data',
-  409,
-);
+const businessData = [
+  'businessName',
+  'businessFiscalId',
+  'businessDocumentType',
+] as const;
 
-export function validateCustomerData({
-  businessName,
-  businessFiscalId,
-  businessDocumentType,
-  subscriberType,
-}: {
-  businessName: string | null;
-  businessFiscalId: string | null;
-  businessDocumentType: string | null;
-  subscriberType: SubscriberType;
-}) {
-  const allBusinessData =
-    businessName && businessFiscalId && businessDocumentType;
-  const anyBusinessData =
-    businessName || businessFiscalId || businessDocumentType;
+const neededDataOfCustomer = Type.Pick(CustomerSchema, [
+  ...businessData,
+  'subscriberType',
+]);
 
-  const needBusinessData = isBusiness(subscriberType);
-
-  if (needBusinessData) {
-    if (!allBusinessData) throw new NEED_BUSINESS_DATA();
-  } else {
-    if (anyBusinessData) throw new NOT_NEED_BUSINESS_DATA();
+export function validateCustomerData(
+  customer: Static<typeof neededDataOfCustomer>,
+) {
+  for (const field of businessData) {
+    if (isBusiness(customer.subscriberType)) {
+      if (customer[field] === null) throw new NEED_BUSINESS_DATA();
+    } else {
+      if (customer[field] !== null) throw new NOT_NEED_BUSINESS_DATA();
+    }
   }
 }
