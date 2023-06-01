@@ -6,6 +6,7 @@ import {
   Filter,
   OrderBy,
   PaginatedQueryString,
+  Range,
   Searchable,
 } from '$src/infra/tables/PaginatedType';
 import { toTypeOrmFilter } from '$src/infra/tables/filter';
@@ -45,6 +46,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           name: Searchable(),
           emailOrPhone: Searchable(),
           fiscalIdOrAddress: Searchable(),
+          createdAt: Range(Type.String({ format: 'date-time' })),
         }),
       }),
     },
@@ -57,8 +59,13 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const qb = Customers.createQueryBuilder('customer')
         .leftJoinAndSelect('customer.contacts', 'contact')
         .leftJoinAndSelect('customer.nationality', 'nationality')
-
         .where(toTypeOrmFilter(normalFilters));
+
+      if (id) {
+        qb.andWhere(`customer.id::varchar(255) like :id`, {
+          id: id.$like,
+        });
+      }
 
       if (emailOrPhone) {
         qb.andWhere(
@@ -74,12 +81,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             fiscalIdOrAddress: fiscalIdOrAddress.$like,
           },
         );
-      }
-
-      if (id) {
-        qb.andWhere(`customer.id::varchar(255) like :id`, {
-          id: id.$like,
-        });
       }
 
       const [rows, total] = await qb

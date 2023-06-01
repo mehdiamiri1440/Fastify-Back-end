@@ -1,5 +1,11 @@
 import { FastifyRequest } from 'fastify';
-import { FindOptionsWhere, Like } from 'typeorm';
+import {
+  Between,
+  FindOptionsWhere,
+  LessThanOrEqual,
+  Like,
+  MoreThanOrEqual,
+} from 'typeorm';
 
 function _toTypeOrmFilter(obj: any) {
   for (const key in obj) {
@@ -8,6 +14,12 @@ function _toTypeOrmFilter(obj: any) {
       delete obj[key];
     } else if (value.$like) {
       obj[key] = Like(value.$like);
+    } else if (value.$gte && value.$lte) {
+      obj[key] = Between(value.$gte, value.$lte);
+    } else if (value.$gte) {
+      obj[key] = MoreThanOrEqual(value.$gte);
+    } else if (value.$lte) {
+      obj[key] = LessThanOrEqual(value.$lte);
     } else if (typeof value === 'object') {
       _toTypeOrmFilter(value);
     }
