@@ -495,6 +495,37 @@ describe('Sorting', () => {
     });
   });
 
+  it('should delete a sort', async () => {
+    assert(app);
+    assert(user);
+    const { inboundProduct, bin1 } = await init();
+
+    const sortResponse = await user.inject({
+      method: 'POST',
+      url: `/${inboundProduct.id}/sorts`,
+      payload: {
+        quantity: 10,
+        binId: bin1.id,
+      },
+    });
+
+    expect(sortResponse).statusCodeToBe(200);
+    const sort = sortResponse.json().data;
+
+    const deleteSort = await user.inject({
+      method: 'DELETE',
+      url: `/${inboundProduct.id}/sorts/${sort.id}`,
+    });
+
+    expect(deleteSort).statusCodeToBe(200);
+
+    expect(
+      await repo(InboundProduct).findOneByOrFail({ id: inboundProduct.id }),
+    ).toMatchObject({
+      sorted: false,
+    });
+  });
+
   it('should throw error on duplicate sort on same bin', async () => {
     assert(app);
     assert(user);

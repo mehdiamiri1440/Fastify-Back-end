@@ -394,6 +394,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           },
           relations: {
             inbound: true,
+            product: true,
             sorts: {
               bin: true,
             },
