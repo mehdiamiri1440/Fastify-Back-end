@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   Relation,
+  Unique,
 } from 'typeorm';
 import { ContactSchema } from '../schemas/contact.schema';
 import { Static, Type } from '@sinclair/typebox';
@@ -19,6 +20,8 @@ const ContactSchemaWithoutRelations = Type.Omit(ContactSchema, [
 ]);
 
 @Entity()
+@Unique(['customer', 'email'])
+@Unique(['customer', 'phoneNumber'])
 export class CustomerContact
   implements Static<typeof ContactSchemaWithoutRelations>
 {

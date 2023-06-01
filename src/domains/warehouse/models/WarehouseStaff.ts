@@ -6,6 +6,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   Relation,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import { Warehouse } from './Warehouse';
@@ -19,19 +20,20 @@ const WarehouseStaffSchemaWithoutRelations = Type.Omit(WarehouseStaffSchema, [
 ]);
 
 @Entity()
+@Unique(['user', 'warehouse'])
 export class WarehouseStaff
   implements Static<typeof WarehouseStaffSchemaWithoutRelations>
 {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: false })
   user!: Relation<User>;
 
-  @ManyToOne(() => Warehouse)
+  @ManyToOne(() => Warehouse, { nullable: false })
   warehouse!: Relation<Warehouse>;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: false })
   creator!: Relation<User>;
 
   @CreateDateColumn()

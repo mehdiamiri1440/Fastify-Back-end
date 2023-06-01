@@ -62,7 +62,7 @@ export class User implements Static<typeof UserSchemaWithoutRelations> {
   @OneToMany(() => WarehouseStaff, (warehouseStaff) => warehouseStaff.user)
   staffWarehouses!: WarehouseStaff[];
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: true })
   creator!: Relation<User>;
 
   @CreateDateColumn()

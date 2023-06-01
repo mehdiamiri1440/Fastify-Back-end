@@ -11,9 +11,11 @@ import {
   DeleteDateColumn,
   ManyToOne,
   Relation,
+  Unique,
 } from 'typeorm';
 
 @Entity()
+@Unique(['supplier', 'product'])
 export class ProductSupplier {
   @PrimaryGeneratedColumn()
   id!: number;

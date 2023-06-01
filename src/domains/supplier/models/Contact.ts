@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   Relation,
+  Unique,
 } from 'typeorm';
 import { ContactSchema } from '$src/domains/supplier/schemas/contact.schema';
 import { Supplier } from '$src/domains/supplier/models/Supplier';
@@ -19,6 +20,8 @@ const ContactSchemaWithoutRelations = Type.Omit(ContactSchema, [
 ]);
 
 @Entity()
+@Unique(['supplier', 'email'])
+@Unique(['supplier', 'phoneNumber'])
 export class SupplierContact
   implements Static<typeof ContactSchemaWithoutRelations>
 {

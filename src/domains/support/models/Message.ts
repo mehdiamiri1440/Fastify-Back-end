@@ -23,7 +23,7 @@ export class Message implements Static<typeof MessageSchema> {
   @Column({ nullable: false })
   message!: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: false })
   creator!: Relation<User>;
 
   @CreateDateColumn({ nullable: false })

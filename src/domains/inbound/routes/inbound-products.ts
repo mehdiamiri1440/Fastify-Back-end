@@ -1,29 +1,24 @@
+import AppDataSource from '$src/DataSource';
+import { ProductService } from '$src/domains/product/ProductService';
+import { SourceType } from '$src/domains/product/models/ProductStockHistory';
+import { Bin } from '$src/domains/warehouse/models/Bin';
 import { ResponseShape } from '$src/infra/Response';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import * as where from '$src/infra/tables/filter';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';
+import { repo } from '$src/infra/utils/repo';
 import createError from '@fastify/error';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { InboundStatus } from '../models/Inbound';
 import { InboundProduct } from '../models/InboundProduct';
-import { loadUserWarehouse } from '../services/utils';
-import { Bin } from '$src/domains/warehouse/models/Bin';
-import { Product } from '$src/domains/product/models/Product';
 import { InboundProductSort } from '../models/InboundProductSort';
-import AppDataSource from '$src/DataSource';
-import { repo } from '$src/infra/utils/repo';
-import { ProductService } from '$src/domains/product/ProductService';
-import { SourceType } from '$src/domains/product/models/ProductStockHistory';
+import { loadUserWarehouse } from '../services/utils';
 
-const INBOUND_INVALID_STATUS = createError(
-  'INBOUND_INVALID_STATUS',
-  'Only pre_delivery inbounds can be eddited',
-  400,
-);
+const INBOUND_INVALID_STATUS = createError('INBOUND_INVALID_STATUS', '%s', 400);
 
 const INVALID_QUANTITY_AMOUNT = createError(
-  'INBOUND_INVALID_STATUS',
+  'INVALID_QUANTITY_AMOUNT',
   'message',
   400,
 );
@@ -168,7 +163,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const inboundProduct = await fineOne(id);
 
       if (inboundProduct.inbound.status !== InboundStatus.PRE_DELIVERY) {
-        throw new INBOUND_INVALID_STATUS();
+        throw new INBOUND_INVALID_STATUS(
+          'Only pre_delivery inbounds are allowed to update product prices',
+        );
       }
 
       await InboundProducts.update(inboundProduct.id, req.body);
@@ -197,7 +194,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const inboundProduct = await fineOne(id);
 
       if (inboundProduct.inbound.status !== InboundStatus.LOAD) {
-        throw new INBOUND_INVALID_STATUS();
+        throw new INBOUND_INVALID_STATUS(
+          'Only load inbounds are allowed to update actual quantity',
+        );
       }
 
       await InboundProducts.update(inboundProduct.id, { actualQuantity });
@@ -257,7 +256,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       });
 
       if (inboundProduct.inbound.status !== InboundStatus.PRE_DELIVERY) {
-        throw new INBOUND_INVALID_STATUS();
+        throw new INBOUND_INVALID_STATUS(
+          'Only pre_delivery inbounds are allowed to delete',
+        );
       }
 
       await AppDataSource.transaction(async (manager) => {
@@ -315,7 +316,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         const currentUnsorted = inboundProduct.actualQuantity - currentSorted;
 
         if (inboundProduct.inbound.status !== InboundStatus.SORTING) {
-          throw new INBOUND_INVALID_STATUS();
+          throw new INBOUND_INVALID_STATUS(
+            'Only inbounds with sorting state are allowed to sort',
+          );
         }
 
         if (inboundProduct.sorts.find((sort) => sort.bin.id === binId)) {
@@ -382,9 +385,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
         const InboundProducts = manager.getRepository(InboundProduct);
         const InboundProductSorts = manager.getRepository(InboundProductSort);
-        const Products = manager.getRepository(Product);
-        const inboundProductSortsRepo =
-          manager.getRepository(InboundProductSort);
 
         const { id, sortId } = req.params;
 
@@ -413,7 +413,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         });
 
         if (inboundProduct.inbound.status !== InboundStatus.SORTING) {
-          throw new INBOUND_INVALID_STATUS();
+          throw new INBOUND_INVALID_STATUS(
+            'Only inbounds with sorting state are allowed to unsort',
+          );
         }
 
         await InboundProductSorts.delete({

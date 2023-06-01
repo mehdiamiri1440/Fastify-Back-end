@@ -38,7 +38,7 @@ beforeAll(async () => {
 
   product = await repo(Product).save({
     name: 'test',
-    unit: await repo(Unit).save({ name: 'unit' }),
+    unit: await repo(Unit).save({ name: 'unit', creator: { id: 1 } }),
     quantity: 10,
   });
 
@@ -76,12 +76,16 @@ beforeAll(async () => {
       name: 'bin1',
       warehouse,
       internalCode: 'hey1',
+      property: { id: 1 },
+      size: { id: 1 },
       creator: { id: 1 },
     }),
     await repo(Bin).save({
       name: 'bin2',
       warehouse,
       internalCode: 'bin2',
+      property: { id: 1 },
+      size: { id: 1 },
       creator: { id: 1 },
     }),
   ];

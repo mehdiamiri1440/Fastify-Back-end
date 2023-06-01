@@ -36,7 +36,7 @@ export class Category implements Static<typeof CategorySchemaWithoutRelations> {
   @OneToMany(() => Category, (category) => category.parent)
   children?: Category[];
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: false })
   creator!: Relation<User>;
 
   @CreateDateColumn({ nullable: false })
