@@ -1,17 +1,18 @@
-import { User } from '$src/domains/user/models/User';
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  CreateDateColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
-  Relation,
-} from 'typeorm';
-import { ContactSchema } from '$src/domains/supplier/schemas/contact.schema';
 import { Supplier } from '$src/domains/supplier/models/Supplier';
+import { ContactSchema } from '$src/domains/supplier/schemas/contact.schema';
+import { User } from '$src/domains/user/models/User';
 import { Static, Type } from '@sinclair/typebox';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  Index,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Relation,
+  UpdateDateColumn,
+} from 'typeorm';
 
 const ContactSchemaWithoutRelations = Type.Omit(ContactSchema, [
   'creator',
@@ -19,6 +20,8 @@ const ContactSchemaWithoutRelations = Type.Omit(ContactSchema, [
 ]);
 
 @Entity()
+@Index(['supplier', 'email'], { where: `deleted_at IS NULL` })
+@Index(['supplier', 'phoneNumber'], { where: `deleted_at IS NULL` })
 export class SupplierContact
   implements Static<typeof ContactSchemaWithoutRelations>
 {

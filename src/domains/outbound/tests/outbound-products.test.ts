@@ -41,7 +41,7 @@ beforeAll(async () => {
 
   product = await repo(Product).save({
     name: 'test',
-    unit: await repo(Unit).save({ name: 'unit' }),
+    unit: await repo(Unit).save({ name: 'unit', creator: { id: 1 } }),
   });
 
   warehouse = await repo(Warehouse).save({
@@ -164,6 +164,8 @@ describe('Supply', () => {
       name: 'bin1',
       warehouse,
       internalCode: 'hey1',
+      size: { id: 1 },
+      property: { id: 1 },
       creator: { id: 1 },
     });
     await repo(BinProduct).save({
@@ -176,6 +178,8 @@ describe('Supply', () => {
       name: 'bin2',
       warehouse,
       internalCode: 'hey2',
+      size: { id: 1 },
+      property: { id: 1 },
       creator: { id: 1 },
     });
     await repo(BinProduct).save({
@@ -188,6 +192,8 @@ describe('Supply', () => {
       name: 'bin3',
       warehouse,
       internalCode: 'hey3',
+      size: { id: 1 },
+      property: { id: 1 },
       creator: { id: 1 },
     });
     await repo(BinProduct).save({

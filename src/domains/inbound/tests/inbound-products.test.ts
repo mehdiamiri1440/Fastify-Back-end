@@ -10,42 +10,72 @@ import {
   TestUser,
 } from '$src/infra/test/utils';
 import { repo } from '$src/infra/utils/repo';
-import { afterAll, beforeAll, expect, it } from '@jest/globals';
+import {
+  beforeAll,
+  expect,
+  it,
+  afterAll,
+  beforeEach,
+  describe,
+  jest,
+} from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance } from 'fastify';
-import { describe } from 'node:test';
 import { DeepPartial } from 'typeorm';
 import { Product } from '../../product/models/Product';
 import { Supplier } from '../../supplier/models/Supplier';
 import { Warehouse } from '../../warehouse/models/Warehouse';
-import { WarehouseStaff } from '../../warehouse/models/WarehouseStaff';
 import { Inbound, InboundStatus, InboundType } from '../models/Inbound';
 import { InboundProduct } from '../models/InboundProduct';
 import routes from '../routes/inbound-products';
+import { WarehouseStaff } from '$src/domains/warehouse/models/WarehouseStaff';
+import { randomUUID } from 'crypto';
+
+jest.setTimeout(99999999);
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
-let product: Product | undefined;
-let supplier: Supplier | undefined;
-let warehouse: Warehouse | undefined;
 
-beforeAll(async () => {
-  app = await createTestFastifyApp();
-  await AppDataSource.synchronize();
-  await app.register(routes);
-  await app.ready();
-  user = await TestUser.create(app);
-
+const createSampleBin = async (
+  warehouse: Warehouse,
+  overrides?: DeepPartial<Bin>,
+) => {
   await disableForeignKeyCheck();
 
-  product = await repo(Product).save({
-    name: 'test',
-    unit: await repo(Unit).save({
-      name: 'test',
-    }),
+  const bin = await repo(Bin).save({
+    name: 'bin1',
+    warehouse,
+    internalCode: 'internalCode1',
+    physicalCode: randomUUID(),
+    property: { id: 1 },
+    size: { id: 1 },
+    creator: { id: 1 },
+    ...overrides,
   });
 
-  supplier = await repo(Supplier).save({
+  await enableForeignKeyCheck();
+  return bin;
+};
+
+const createSampleProduct = async (overrides?: DeepPartial<Product>) =>
+  await repo(Product).save({
+    name: 'test',
+    barcode: '123',
+    invoiceSystemCode: 1,
+    description: 'description',
+    weight: 1,
+    unit: await repo(Unit).save({
+      id: 1,
+      name: 'test',
+      creator: { id: 1 },
+    }),
+    creator: { id: 1 },
+    ...overrides,
+  });
+
+const createSampleSupplier = async (overrides?: DeepPartial<Supplier>) => {
+  await disableForeignKeyCheck();
+  const s = await repo(Supplier).save({
     name: 'test',
     cif: 'cif',
     iban: 'iban',
@@ -58,9 +88,30 @@ beforeAll(async () => {
     creator: {
       id: 1,
     },
+    ...overrides,
+  });
+  await enableForeignKeyCheck();
+  return s;
+};
+
+const createSampleInbound = async (
+  warehouse: Warehouse,
+  overrides?: DeepPartial<Inbound>,
+) =>
+  repo(Inbound).save({
+    code: 'code',
+    type: InboundType.NEW,
+    status: InboundStatus.PRE_DELIVERY,
+    creator: {
+      id: 1,
+    },
+    warehouse,
+    ...overrides,
   });
 
-  warehouse = await repo(Warehouse).save({
+const createSampleWarehouse = async (overrides?: DeepPartial<Warehouse>) => {
+  assert(user);
+  const warehouse = await repo(Warehouse).save({
     name: 'warehouse test',
     description: 'description',
     addressProvinceCode: 'P43',
@@ -75,13 +126,14 @@ beforeAll(async () => {
     creator: {
       id: 1,
     },
+    ...overrides,
   });
 
   await repo(WarehouseStaff).save({
     name: 'warehouse test',
     description: 'description',
     user: {
-      id: 1,
+      id: user.id,
     },
     warehouse,
     creator: {
@@ -89,7 +141,19 @@ beforeAll(async () => {
     },
   });
 
-  await enableForeignKeyCheck();
+  return warehouse;
+};
+
+beforeAll(async () => {
+  app = await createTestFastifyApp();
+  await app.register(routes);
+  await app.ready();
+});
+
+beforeEach(async () => {
+  assert(app);
+  await AppDataSource.synchronize(true);
+  user = await TestUser.create(app);
 });
 
 afterAll(async () => {
@@ -97,20 +161,15 @@ afterAll(async () => {
 });
 
 describe('InboundProduct list', () => {
-  let inbound: Inbound | undefined;
+  it('should get list of inbound-products', async () => {
+    assert(app);
+    assert(user);
 
-  beforeAll(async () => {
     const InboundProducts = repo(InboundProduct);
-
-    inbound = await repo(Inbound).save({
-      code: 'code',
-      type: InboundType.NEW,
-      status: InboundStatus.PRE_DELIVERY,
-      creator: {
-        id: 1,
-      },
-      warehouse,
-    });
+    const supplier = await createSampleSupplier();
+    const product = await createSampleProduct();
+    const warehouse = await createSampleWarehouse();
+    const inbound = await createSampleInbound(warehouse);
 
     await Promise.all([
       InboundProducts.save({
@@ -130,13 +189,6 @@ describe('InboundProduct list', () => {
         actualQuantity: 21,
       }),
     ]);
-  });
-
-  it('should get list of inbound-products', async () => {
-    assert(app);
-    assert(user);
-    assert(supplier);
-    assert(product);
 
     const response = await user.inject({
       method: 'GET',
@@ -177,24 +229,18 @@ describe('InboundProduct list', () => {
 });
 
 describe('Update InboundProduct', () => {
-  let inbound: Inbound | undefined;
-
-  beforeAll(async () => {
-    inbound = await repo(Inbound).save({
-      code: 'code',
-      type: InboundType.NEW,
-      status: InboundStatus.PRE_DELIVERY,
-      creator: {
-        id: 1,
-      },
-      warehouse,
-    });
-  });
-
   it('should set-price when inbound state is PRE_DELIVERY', async () => {
     assert(app);
     assert(user);
     const InboundProducts = repo(InboundProduct);
+
+    const supplier = await createSampleSupplier();
+    const product = await createSampleProduct();
+    const warehouse = await createSampleWarehouse();
+    const inbound = await createSampleInbound(warehouse, {
+      type: InboundType.NEW,
+      status: InboundStatus.PRE_DELIVERY,
+    });
 
     const inboundProduct = await InboundProducts.save<
       DeepPartial<InboundProduct>
@@ -237,14 +283,12 @@ describe('Update InboundProduct', () => {
     assert(user);
     const InboundProducts = repo(InboundProduct);
 
-    const inbound = await repo(Inbound).save({
-      code: 'code',
+    const supplier = await createSampleSupplier();
+    const product = await createSampleProduct();
+    const warehouse = await createSampleWarehouse();
+    const inbound = await createSampleInbound(warehouse, {
       type: InboundType.NEW,
       status: InboundStatus.LOAD,
-      creator: {
-        id: 1,
-      },
-      warehouse,
     });
 
     const inboundProduct = await InboundProducts.save<
@@ -280,14 +324,12 @@ describe('Update InboundProduct', () => {
     assert(user);
     const InboundProducts = repo(InboundProduct);
 
-    const inbound = await repo(Inbound).save({
-      code: 'code',
+    const supplier = await createSampleSupplier();
+    const product = await createSampleProduct();
+    const warehouse = await createSampleWarehouse();
+    const inbound = await createSampleInbound(warehouse, {
       type: InboundType.NEW,
-      status: InboundStatus.LOAD,
-      creator: {
-        id: 1,
-      },
-      warehouse,
+      status: InboundStatus.PRE_DELIVERY,
     });
 
     const inboundProduct = await InboundProducts.save<
@@ -320,23 +362,18 @@ describe('Update InboundProduct', () => {
 });
 
 describe('Delete InboundProduct', () => {
-  let inbound: Inbound | undefined;
-
-  beforeAll(async () => {
-    inbound = await repo(Inbound).save({
-      code: 'code',
-      type: InboundType.NEW,
-      status: InboundStatus.PRE_DELIVERY,
-      creator: {
-        id: 1,
-      },
-      warehouse,
-    });
-  });
-
   it('should delete inbound-product', async () => {
     assert(app);
     assert(user);
+
+    const supplier = await createSampleSupplier();
+    const product = await createSampleProduct();
+    const warehouse = await createSampleWarehouse();
+    const inbound = await createSampleInbound(warehouse, {
+      type: InboundType.NEW,
+      status: InboundStatus.PRE_DELIVERY,
+    });
+
     const InboundProducts = repo(InboundProduct);
 
     const inboundProduct = await InboundProducts.save<
@@ -375,41 +412,26 @@ describe('Delete InboundProduct', () => {
 });
 
 describe('Sorting', () => {
-  let inbound: Inbound | undefined;
-  let inboundProduct: InboundProduct;
-  let bin1: Bin;
-  let bin2: Bin;
-
-  beforeAll(async () => {
-    bin1 = await repo(Bin).save({
-      name: 'bin1',
-      warehouse,
-      internalCode: 'hey1',
-      creator: { id: 1 },
-    });
-
-    bin2 = await repo(Bin).save({
-      name: 'bin2',
-      warehouse,
-      internalCode: 'hey2',
-      creator: { id: 1 },
-    });
-  });
-
   const init = async () => {
     const InboundProducts = repo(InboundProduct);
 
-    inbound = await repo(Inbound).save({
-      code: 'code',
+    const supplier = await createSampleSupplier();
+    const product = await createSampleProduct();
+    const warehouse = await createSampleWarehouse();
+    const inbound = await createSampleInbound(warehouse, {
       type: InboundType.NEW,
       status: InboundStatus.SORTING,
-      creator: {
-        id: 1,
-      },
-      warehouse,
+    });
+    const bin1 = await createSampleBin(warehouse, {
+      name: 'bin1',
+      internalCode: 'hey1',
+    });
+    const bin2 = await createSampleBin(warehouse, {
+      name: 'bin2',
+      internalCode: 'hey2',
     });
 
-    inboundProduct = await InboundProducts.save({
+    const inboundProduct = await InboundProducts.save({
       supplier,
       product,
       inbound,
@@ -429,13 +451,14 @@ describe('Sorting', () => {
       product,
       quantity: 0,
     });
+
+    return { inboundProduct, bin1, bin2 };
   };
 
   it('should sort', async () => {
-    await init();
     assert(app);
     assert(user);
-    assert(inbound);
+    const { inboundProduct, bin1, bin2 } = await init();
 
     const response = await user.inject({
       method: 'POST',
@@ -472,34 +495,62 @@ describe('Sorting', () => {
     });
   });
 
-  describe('Sort Errors', () => {
-    it('should throw error on duplicate sort on same bin', async () => {
-      await init();
+  it('should delete a sort', async () => {
+    assert(app);
+    assert(user);
+    const { inboundProduct, bin1 } = await init();
 
-      assert(app);
-      assert(user);
-
-      const firstSort = await user.inject({
-        method: 'POST',
-        url: `/${inboundProduct.id}/sorts`,
-        payload: {
-          quantity: 10,
-          binId: bin1.id,
-        },
-      });
-
-      expect(firstSort.statusCode).toBe(200);
-
-      const secondSort = await user.inject({
-        method: 'POST',
-        url: `/${inboundProduct.id}/sorts`,
-        payload: {
-          quantity: 10,
-          binId: bin1.id,
-        },
-      });
-
-      expect(secondSort.statusCode).toBe(400);
+    const sortResponse = await user.inject({
+      method: 'POST',
+      url: `/${inboundProduct.id}/sorts`,
+      payload: {
+        quantity: 10,
+        binId: bin1.id,
+      },
     });
+
+    expect(sortResponse).statusCodeToBe(200);
+    const sort = sortResponse.json().data;
+
+    const deleteSort = await user.inject({
+      method: 'DELETE',
+      url: `/${inboundProduct.id}/sorts/${sort.id}`,
+    });
+
+    expect(deleteSort).statusCodeToBe(200);
+
+    expect(
+      await repo(InboundProduct).findOneByOrFail({ id: inboundProduct.id }),
+    ).toMatchObject({
+      sorted: false,
+    });
+  });
+
+  it('should throw error on duplicate sort on same bin', async () => {
+    assert(app);
+    assert(user);
+    const { inboundProduct, bin1 } = await init();
+
+    const firstSort = await user.inject({
+      method: 'POST',
+      url: `/${inboundProduct.id}/sorts`,
+      payload: {
+        quantity: 10,
+        binId: bin1.id,
+      },
+    });
+
+    expect(firstSort.statusCode).toBe(200);
+
+    const secondSort = await user.inject({
+      method: 'POST',
+      url: `/${inboundProduct.id}/sorts`,
+      payload: {
+        quantity: 10,
+        binId: bin1.id,
+      },
+    });
+
+    expect(secondSort.statusCode).toBe(400);
   });
 });

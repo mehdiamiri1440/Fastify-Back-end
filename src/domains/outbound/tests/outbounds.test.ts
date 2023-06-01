@@ -34,7 +34,7 @@ beforeAll(async () => {
 
   product = await repo(Product).save({
     name: 'test',
-    unit: await repo(Unit).save({ name: 'unit' }),
+    unit: await repo(Unit).save({ name: 'unit', creator: { id: 1 } }),
     quantity: 10,
   });
 

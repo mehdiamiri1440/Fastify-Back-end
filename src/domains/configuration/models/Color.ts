@@ -25,7 +25,7 @@ export class Color implements Static<typeof ColorSchemaWithoutRelations> {
   @Column({ nullable: false, unique: true })
   code!: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: false })
   creator!: Relation<User>;
 
   @CreateDateColumn({ nullable: false })

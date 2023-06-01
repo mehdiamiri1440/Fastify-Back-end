@@ -76,11 +76,13 @@ it('should get list of categories', async () => {
 
   const c1 = await repo(Category).save({
     name: 'test1',
+    creator: { id: 1 },
   });
 
   const c2 = await repo(Category).save({
     name: 'test2',
     parent: c1,
+    creator: { id: 1 },
   });
 
   const response = await user.inject({
@@ -118,15 +120,18 @@ it('should update a category', async () => {
 
   const c1 = await repo(Category).save({
     name: 'test1',
+    creator: { id: 1 },
   });
 
   const c2 = await repo(Category).save({
     name: 'test2',
     parent: c1,
+    creator: { id: 1 },
   });
 
   const c3 = await repo(Category).save({
     name: 'test3',
+    creator: { id: 1 },
   });
 
   const responseA = await user.inject({

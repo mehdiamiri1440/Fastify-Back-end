@@ -6,7 +6,7 @@ async function main() {
   const fastify = Fastify({
     logger: true,
     querystringParser: (str) => qs.parse(str, { allowDots: true }),
-    pluginTimeout: 20000,
+    pluginTimeout: 60000,
     ajv: ajvOptions,
   });
 

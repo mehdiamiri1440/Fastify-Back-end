@@ -31,13 +31,13 @@ export class Bin implements Static<typeof BinSchemaWithoutRelations> {
   @Column({ nullable: false })
   name!: string;
 
-  @ManyToOne(() => Warehouse)
+  @ManyToOne(() => Warehouse, { nullable: false })
   warehouse!: Relation<Warehouse>;
 
-  @ManyToOne(() => BinSize)
+  @ManyToOne(() => BinSize, { nullable: false })
   size!: Relation<BinSize>;
 
-  @ManyToOne(() => BinProperty)
+  @ManyToOne(() => BinProperty, { nullable: false })
   property!: Relation<BinProperty>;
 
   @Column({ type: 'text', nullable: true })
@@ -53,7 +53,7 @@ export class Bin implements Static<typeof BinSchemaWithoutRelations> {
   @Column({ type: 'text', nullable: true })
   description!: string | null;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: false })
   creator!: Relation<User>;
 
   @CreateDateColumn({ nullable: false })

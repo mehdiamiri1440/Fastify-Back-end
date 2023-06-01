@@ -31,7 +31,7 @@ export class BinSize implements Static<typeof BinSizeSchemaWithoutRelations> {
   @Column({ nullable: false })
   depth!: number;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: false })
   creator!: Relation<User>;
 
   @CreateDateColumn({ nullable: false })

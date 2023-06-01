@@ -79,6 +79,7 @@ const createSampleProduct = async (overrides?: DeepPartial<Product>) =>
     unit: await repo(Unit).save({
       id: 1,
       name: 'meter',
+      creator: { id: 1 },
     }),
     creator: { id: 1 },
     ...overrides,
@@ -303,12 +304,16 @@ it('POST /products/:id/move-bin-quantity', async () => {
     name: 'bin1',
     warehouse,
     internalCode: 'hey1',
+    size: { id: 1 },
+    property: { id: 1 },
     creator: { id: 1 },
   });
 
   const targetBin = await repo(Bin).save({
     name: 'bin2',
     warehouse,
+    size: { id: 1 },
+    property: { id: 1 },
     internalCode: 'hey2',
     creator: { id: 1 },
   });
@@ -359,6 +364,8 @@ describe('history', () => {
       name: 'bin1',
       warehouse,
       internalCode: 'hey1',
+      size: { id: 1 },
+      property: { id: 1 },
       creator: { id: 1 },
     });
 
@@ -439,6 +446,8 @@ describe('history', () => {
       name: 'bin1',
       warehouse,
       internalCode: 'hey1',
+      size: { id: 1 },
+      property: { id: 1 },
       creator: { id: 1 },
     });
 
@@ -537,6 +546,8 @@ describe('bins', () => {
         name: 'bin1',
         warehouse,
         internalCode: 'hey1',
+        size: { id: 1 },
+        property: { id: 1 },
         creator: { id: 1 },
       }),
       product,
@@ -550,6 +561,8 @@ describe('bins', () => {
         name: 'bin2',
         warehouse,
         internalCode: 'hey2',
+        size: { id: 1 },
+        property: { id: 1 },
         creator: { id: 1 },
       }),
       product,
@@ -609,6 +622,8 @@ describe('bins', () => {
       name: 'bin',
       warehouse,
       internalCode: 'hey2',
+      size: { id: 1 },
+      property: { id: 1 },
       creator: { id: 1 },
     });
 
@@ -912,12 +927,15 @@ describe('Content', async () => {
     const { identifiers: tags } = await repo(Tag).insert([
       {
         name: 'tag1',
+        creator: { id: 1 },
       },
       {
         name: 'tag2',
+        creator: { id: 1 },
       },
       {
         name: 'tag3',
+        creator: { id: 1 },
       },
     ]);
 

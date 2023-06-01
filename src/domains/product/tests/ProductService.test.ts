@@ -67,6 +67,8 @@ describe('addProductToBin', () => {
       name: 'bin1',
       warehouse,
       internalCode: 'hey1',
+      size: { id: 1 },
+      property: { id: 1 },
       creator: { id: 1 },
     });
 
@@ -134,6 +136,8 @@ describe('addProductToBin', () => {
       name: 'bin1',
       warehouse,
       internalCode: 'hey1',
+      size: { id: 1 },
+      property: { id: 1 },
       creator: { id: 1 },
     });
 
@@ -212,6 +216,8 @@ describe('subtractProductFromBin', () => {
       name: 'bin1',
       warehouse,
       internalCode: 'hey1',
+      size: { id: 1 },
+      property: { id: 1 },
       creator: { id: 1 },
     });
 
@@ -270,6 +276,8 @@ describe('Move', () => {
       name: 'bin1',
       warehouse,
       internalCode: 'hey1',
+      size: { id: 1 },
+      property: { id: 1 },
       creator: { id: 1 },
     });
 
@@ -277,6 +285,8 @@ describe('Move', () => {
       name: 'bin2',
       warehouse,
       internalCode: 'hey2',
+      size: { id: 1 },
+      property: { id: 1 },
       creator: { id: 1 },
     });
 
@@ -284,6 +294,8 @@ describe('Move', () => {
       bin: sourceBin,
       product,
       quantity: 10,
+      size: { id: 1 },
+      property: { id: 1 },
       creator: { id: 1 },
     });
 

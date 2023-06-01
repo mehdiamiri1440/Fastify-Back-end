@@ -22,7 +22,7 @@ export class Role implements Static<typeof RoleSchemaWithoutRelations> {
   @Column({ nullable: false, unique: true })
   title!: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: true })
   creator!: Relation<User>;
 
   @Column({ nullable: false })

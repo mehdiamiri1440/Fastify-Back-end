@@ -1,19 +1,21 @@
 import { Supplier } from '$src/domains/supplier/models/Supplier';
-import { Product } from './Product';
 import { User } from '$src/domains/user/models/User';
+import { Product } from './Product';
 
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
   DeleteDateColumn,
+  Entity,
+  Index,
   ManyToOne,
+  PrimaryGeneratedColumn,
   Relation,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
+@Index(['supplier', 'product'], { where: `deleted_at IS NULL` })
 export class ProductSupplier {
   @PrimaryGeneratedColumn()
   id!: number;

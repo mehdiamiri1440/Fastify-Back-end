@@ -25,7 +25,7 @@ export class Brand implements Static<typeof BrandSchemaWithoutRelations> {
   @Column({ nullable: false, unique: true })
   name!: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: false })
   creator!: Relation<User>;
 
   @CreateDateColumn({ nullable: false })

@@ -1,19 +1,21 @@
-import { Product } from './Product';
 import { Bin } from '$src/domains/warehouse/models/Bin';
+import { Product } from './Product';
 
 import {
-  Entity,
-  PrimaryGeneratedColumn,
+  Check,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
   DeleteDateColumn,
+  Entity,
+  Index,
   ManyToOne,
-  Check,
+  PrimaryGeneratedColumn,
   Relation,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
+@Index(['bin', 'product'], { where: `deleted_at IS NULL` })
 export class BinProduct {
   @PrimaryGeneratedColumn()
   id!: number;
