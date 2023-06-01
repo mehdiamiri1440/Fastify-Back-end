@@ -1,4 +1,5 @@
 export default {
+  permission: 'this permission is just for test', // test
   // user
   'menu@users': 'with this permission you can see the user in menu',
   'user@user::tab':
