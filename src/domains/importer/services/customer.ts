@@ -15,12 +15,12 @@ const Nationalities = repo(Nationality);
 
 const UploadedCustomerSchema = Type.Pick(CustomerSchema, [
   'name',
-  'businessName',
+  'contactName',
   'subscriberType',
   'documentType',
-  'businessDocumentType',
+  'contactDocumentType',
   'fiscalId',
-  'businessFiscalId',
+  'contactFiscalId',
   'contactFamily1',
   'contactFamily2',
   'nationalityId',

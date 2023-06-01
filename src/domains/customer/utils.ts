@@ -7,9 +7,9 @@ import {
 } from '$src/domains/customer/errors';
 
 const businessData = [
-  'businessName',
-  'businessFiscalId',
-  'businessDocumentType',
+  'contactName',
+  'contactFiscalId',
+  'contactDocumentType',
 ] as const;
 
 const neededDataOfCustomer = Type.Pick(CustomerSchema, [
