@@ -1,17 +1,17 @@
 import { User } from '$src/domains/user/models/User';
+import { WarehouseStaffSchema } from '$src/domains/warehouse/schemas/warehouse-staff';
+import { Static, Type } from '@sinclair/typebox';
 import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   ManyToOne,
   PrimaryGeneratedColumn,
   Relation,
-  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import { Warehouse } from './Warehouse';
-import { Static, Type } from '@sinclair/typebox';
-import { WarehouseStaffSchema } from '$src/domains/warehouse/schemas/warehouse-staff';
 
 const WarehouseStaffSchemaWithoutRelations = Type.Omit(WarehouseStaffSchema, [
   'user',
@@ -20,7 +20,7 @@ const WarehouseStaffSchemaWithoutRelations = Type.Omit(WarehouseStaffSchema, [
 ]);
 
 @Entity()
-@Unique(['user', 'warehouse'])
+@Index(['user', 'warehouse'], { where: `deleted_at IS NULL` })
 export class WarehouseStaff
   implements Static<typeof WarehouseStaffSchemaWithoutRelations>
 {

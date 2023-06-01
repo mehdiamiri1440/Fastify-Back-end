@@ -1,19 +1,19 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
   CreateDateColumn,
-  UpdateDateColumn,
   DeleteDateColumn,
-  Unique,
+  Entity,
+  Index,
+  ManyToOne,
+  PrimaryGeneratedColumn,
   Relation,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Role } from './Role';
 import { User } from './User';
 
 @Entity()
-@Unique(['role', 'permission'])
+@Index(['role', 'permission'], { where: `deleted_at IS NULL` })
 export class RolePermission {
   @PrimaryGeneratedColumn()
   id!: number;
