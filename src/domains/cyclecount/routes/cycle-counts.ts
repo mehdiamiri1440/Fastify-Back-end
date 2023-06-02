@@ -6,10 +6,24 @@ import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { Type } from '@sinclair/typebox';
 import AppDataSource from '$src/DataSource';
 import { CycleCount } from '$src/domains/cyclecount/models/CycleCount';
-import { CycleCountSchema } from '$src/domains/cyclecount/schemas/cyclecount.schema';
+import {
+  CycleCountSchema,
+  cycleCountState,
+  cycleCountType,
+} from '$src/domains/cyclecount/schemas/cyclecount.schema';
 import { CycleCountService } from '$src/domains/cyclecount/services/cyclecount.service';
 import { CycleCountDifference } from '$src/domains/cyclecount/models/Difference';
 import { CycleCountDifferenceSchema } from '$src/domains/cyclecount/schemas/difference.schema';
+import {
+  Filter,
+  OrderBy,
+  PaginatedQueryString,
+  Range,
+  Searchable,
+} from '$src/infra/tables/PaginatedType';
+import { toTypeOrmFilter } from '$src/infra/tables/filter';
+import { toUpperCase } from '$src/infra/tables/order';
+import { PaginatedResponse } from '$src/infra/tables/response';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
@@ -23,31 +37,42 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['cycle-count@cycle-count::list'],
         },
       ],
-      querystring: ListQueryOptions({
-        filterable: ['id', 'cycleCountState', 'cycleCountType'],
-        orderable: ['id', 'cycleCountState', 'cycleCountType'],
-        searchable: ['id'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id', 'cycleCountState', 'cycleCountType']),
+        filter: Filter({
+          cycleCountState,
+          cycleCountType,
+          checker: Type.Object({ fullName: Searchable() }),
+          createdAt: Range(Type.String({ format: 'date-time' })),
+        }),
       }),
     },
     async handler(req) {
-      const subQuery = AppDataSource.createQueryBuilder()
+      const { page, pageSize, filter, order, orderBy } = req.query;
+
+      const subQuery = AppDataSource.getRepository(CycleCountDifference)
+        .createQueryBuilder('cycle_count_difference')
         .select('COUNT(cycle_count_difference.difference)')
-        .from(CycleCountDifference, 'cycle_count_difference')
         .where(
           'cycle_count_difference.difference != 0 AND cycle_count_difference.cycle_count_id = cycle_count.id',
         )
         .groupBy('cycle_count_difference.cycle_count_id')
         .getQuery();
 
+      const query = AppDataSource.getRepository(CycleCount)
+        .createQueryBuilder('cycle_count')
+        .addSelect(`(${subQuery}) AS not_match`)
+        .leftJoinAndSelect('cycle_count.bin', 'bin')
+        .leftJoinAndSelect('cycle_count.product', 'product')
+        .leftJoinAndSelect('cycle_count.checker', 'checker')
+        .leftJoinAndSelect('cycle_count.creator', 'creator')
+        .where(toTypeOrmFilter(filter ?? {}))
+        .skip((page - 1) * pageSize)
+        .take(pageSize)
+        .orderBy(`cycle_count.${orderBy}`, toUpperCase(order));
+
       const rawAndEntities: { entities: any; raw: any } =
-        await AppDataSource.getRepository(CycleCount)
-          .createQueryBuilder('cycle_count')
-          .addSelect(`(${subQuery}) AS not_match`)
-          .leftJoinAndSelect('cycle_count.bin', 'bin')
-          .leftJoinAndSelect('cycle_count.product', 'product')
-          .leftJoinAndSelect('cycle_count.checker', 'checker')
-          .leftJoinAndSelect('cycle_count.creator', 'creator')
-          .getRawAndEntities();
+        await query.getRawAndEntities();
 
       for (const entity of rawAndEntities.entities) {
         const raw = rawAndEntities.raw.find(
@@ -56,7 +81,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         entity.notMatch = raw.not_match;
       }
 
-      return rawAndEntities.entities;
+      return new PaginatedResponse(rawAndEntities.entities, {
+        page: page,
+        pageSize: pageSize,
+        total: await query.getCount(),
+      });
     },
   });
   app.route({
