@@ -1,52 +1,41 @@
 import AppDataSource from '$src/DataSource';
 import { User } from '$src/domains/user/models/User';
 import { ResponseShape } from '$src/infra/Response';
+import StringEnum from '$src/infra/StringEnum';
+import {
+  Filter,
+  OrderBy,
+  PaginatedQueryString,
+  Searchable,
+} from '$src/infra/tables/PaginatedType';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import * as where from '$src/infra/tables/filter';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
+import { Nullable } from '$src/infra/utils/Nullable';
 import { repo } from '$src/infra/utils/repo';
-import createError from '@fastify/error';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
+import { INVALID_STATUS } from '../errors';
 import { Outbound, OutboundStatus } from '../models/Outbound';
-import { OutboundProduct } from '../models/OutboundProduct';
 import { OutboundService } from '../services/outbound.service';
 import { loadUserWarehouse } from '../utils';
 
-const outboundsRepo = repo(Outbound);
-const outboundProductRepo = repo(OutboundProduct);
-const usersRepo = repo(User);
-
-const OUTBOUND_INVALID_STATUS = createError(
-  'OUTBOUND_INVALID_STATUS',
-  'Only draft outbounds can be modified',
-  400,
-);
-
-const OUTBOUND_INCOMPLETE_SUPPLY = createError(
-  'OUTBOUND_INCOMPLETE_SUPPLY',
-  'not all outbound products are supplied',
-  400,
-);
-
-const MISSING_SIGNATURE = createError(
-  'MISSING_SIGNATURE',
-  'Missing signature',
-  400,
-);
-
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
+  const outboundsRepo = repo(Outbound);
+  const usersRepo = repo(User);
+
   app.register(ResponseShape);
 
-  // GET /
-  app.route({
-    method: 'GET',
-    url: '/',
+  app.get('/', {
     schema: {
-      querystring: ListQueryOptions({
-        filterable: ['status'],
-        orderable: ['code', 'status', 'creator.fullName', 'createdAt'],
-        searchable: ['code', 'creator.fullName'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['code', 'status', 'creator.fullName', 'createdAt']),
+        filter: Filter({
+          status: StringEnum(Object.values(OutboundStatus)),
+          code: Searchable(),
+          creator: Type.Object({
+            fullName: Searchable(),
+          }),
+        }),
       }),
       security: [
         {
@@ -75,10 +64,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // GET /:id
-  app.route({
-    method: 'GET',
-    url: '/:id',
+  app.get('/:id', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -135,10 +121,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // POST /
-  app.route({
-    method: 'POST',
-    url: '/',
+  app.post('/', {
     schema: {
       security: [
         {
@@ -179,10 +162,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // DELETE /:id
-  app.route({
-    method: 'DELETE',
-    url: '/:id',
+  app.delete('/:id', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -198,7 +178,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const outbound = await outboundsRepo.findOneByOrFail({ id });
 
       if (outbound.status !== OutboundStatus.DRAFT) {
-        throw new OUTBOUND_INVALID_STATUS();
+        throw new INVALID_STATUS(`only draft outbounds can be deleted`);
       }
 
       await outboundsRepo.softDelete(id);
@@ -206,10 +186,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // POST /:id/set-customer
-  app.route({
-    method: 'POST',
-    url: '/:id/set-customer',
+  app.post('/:id/set-customer', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -228,7 +205,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const outbound = await outboundsRepo.findOneByOrFail({ id });
 
       if (outbound.status !== OutboundStatus.DRAFT) {
-        throw new OUTBOUND_INVALID_STATUS();
+        throw new INVALID_STATUS(
+          `you can only set a customer for a draft outbound`,
+        );
       }
 
       await outboundsRepo.update(id, {
@@ -238,10 +217,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // POST /:id/confirm-order
-  app.route({
-    method: 'POST',
-    url: '/:id/confirm-order',
+  app.post('/:id/confirm-current-step', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -253,78 +229,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ],
     },
     async handler(req) {
+      const { user } = req;
       const { id } = req.params;
-      const outbound = await outboundsRepo.findOneByOrFail({ id });
+      const service = new OutboundService(AppDataSource, user.id);
 
-      if (outbound.status !== OutboundStatus.DRAFT) {
-        throw new OUTBOUND_INVALID_STATUS();
-      }
-
-      await outboundsRepo.update(id, {
-        status: OutboundStatus.NEW_ORDER,
-      });
-
-      return outboundsRepo.findOneByOrFail({ id });
-    },
-  });
-
-  // POST /:id/confirm-supply
-  app.route({
-    method: 'POST',
-    url: '/:id/confirm-supply',
-    schema: {
-      params: Type.Object({
-        id: Type.Number(),
-      }),
-      security: [
-        {
-          OAuth2: ['outbound@outbound::update'],
-        },
-      ],
-    },
-    async handler(req) {
-      const { id } = req.params;
-      const outbound = await outboundsRepo.findOneByOrFail({ id });
-
-      if (outbound.status !== OutboundStatus.NEW_ORDER) {
-        throw new OUTBOUND_INVALID_STATUS();
-      }
-
-      const unSuppliedProduct = await outboundProductRepo.find({
-        where: {
-          outbound: { id },
-          supplied: false,
-        },
-      });
-
-      if (unSuppliedProduct.length > 0) {
-        throw new OUTBOUND_INCOMPLETE_SUPPLY();
-      }
-
-      await outboundsRepo.update(id, {
-        status: OutboundStatus.TRANSFER,
-      });
-
-      return outboundsRepo.findOneByOrFail({ id });
-    },
-  });
-
-  // POST /:id/confirm-transfer
-  app.route({
-    method: 'POST',
-    url: '/:id/confirm-transfer',
-    schema: {
-      params: Type.Object({
-        id: Type.Number(),
-      }),
-      security: [
-        {
-          OAuth2: ['outbound@outbound::update'],
-        },
-      ],
-    },
-    async handler(req) {
-      const { id } = req.params;
       const outbound = await outboundsRepo.findOneOrFail({
         where: { id },
         relations: {
@@ -332,29 +240,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       });
 
-      if (outbound.status !== OutboundStatus.TRANSFER) {
-        throw new OUTBOUND_INVALID_STATUS();
-      }
-
-      const hasDriver = !!outbound.driver;
-
-      const nextStatus = hasDriver
-        ? OutboundStatus.PICKING
-        : OutboundStatus.DELIVERED;
-
-      if (hasDriver) {
-        await outboundsRepo.update(id, {
-          status: nextStatus,
-        });
-      }
-
-      if (!outbound.creatorSignature) {
-        throw new OUTBOUND_INCOMPLETE_SUPPLY();
-      }
-
-      await outboundsRepo.update(id, {
-        status: OutboundStatus.TRANSFER,
-      });
+      await service.confirmStep(outbound);
 
       return outboundsRepo.findOneByOrFail({ id });
     },
@@ -374,7 +260,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         id: Type.Number(),
       }),
       body: Type.Object({
-        driverId: Type.Union([Type.Integer(), Type.Null()]),
+        driverId: Nullable(Type.Integer()),
       }),
       security: [
         {
@@ -389,9 +275,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const outbound = await outboundsRepo.findOneByOrFail({ id });
       const allowedStates = [OutboundStatus.TRANSFER, OutboundStatus.PICKING];
       if (!allowedStates.includes(outbound.status)) {
-        throw new OUTBOUND_INVALID_STATUS(
-          'outbound state is not TRANSFER or PICKING',
-        );
+        throw new INVALID_STATUS('outbound state is not TRANSFER or PICKING');
       }
 
       const driver = driverId
@@ -400,89 +284,13 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
       await outboundsRepo.update(outbound.id, {
         driver,
-        status: driver ? OutboundStatus.PICKING : OutboundStatus.TRANSFER,
       });
 
       return outboundsRepo.findOneByOrFail({ id });
     },
   });
 
-  // POST /:id/confirm-picking
-  app.route({
-    method: 'POST',
-    url: '/:id/confirm-picking',
-    schema: {
-      params: Type.Object({
-        id: Type.Number(),
-      }),
-      security: [
-        {
-          OAuth2: ['outbound@outbound::update'],
-        },
-      ],
-    },
-    async handler(req) {
-      const { id } = req.params;
-
-      const outbound = await outboundsRepo.findOneByOrFail({ id });
-      if (outbound.status !== OutboundStatus.PICKING) {
-        throw new OUTBOUND_INVALID_STATUS('outbound state is not PICKING');
-      }
-
-      if (!outbound.creatorSignature) {
-        throw new MISSING_SIGNATURE('Creator signature is required');
-      }
-
-      if (!outbound.driverSignature) {
-        throw new MISSING_SIGNATURE('Driver signature is required');
-      }
-
-      await outboundsRepo.update(outbound.id, {
-        status: OutboundStatus.PICKED,
-      });
-
-      return outboundsRepo.findOneByOrFail({ id });
-    },
-  });
-
-  // POST /:id/confirm-picked
-  app.route({
-    method: 'POST',
-    url: '/:id/confirm-picked',
-    schema: {
-      params: Type.Object({
-        id: Type.Number(),
-      }),
-      security: [
-        {
-          OAuth2: ['outbound@outbound::update'],
-        },
-      ],
-    },
-    async handler(req) {
-      const { id } = req.params;
-
-      const outbound = await outboundsRepo.findOneByOrFail({ id });
-      if (outbound.status !== OutboundStatus.PICKED) {
-        throw new OUTBOUND_INVALID_STATUS('outbound state is not PICKED');
-      }
-
-      if (!outbound.customerSignature) {
-        throw new MISSING_SIGNATURE('Customer signature is required');
-      }
-
-      await outboundsRepo.update(outbound.id, {
-        status: OutboundStatus.DELIVERED,
-      });
-
-      return outboundsRepo.findOneByOrFail({ id });
-    },
-  });
-
-  // POST /:id/set-creator-signature
-  app.route({
-    method: 'POST',
-    url: '/:id/set-creator-signature',
+  app.post('/:id/set-creator-signature', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -508,10 +316,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // POST /:id/set-customer-signature
-  app.route({
-    method: 'POST',
-    url: '/:id/set-customer-signature',
+  app.post('/:id/set-customer-signature', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -536,10 +341,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // POST /:id/set-driver-signature
-  app.route({
-    method: 'POST',
-    url: '/:id/set-driver-signature',
+  app.post('/:id/set-driver-signature', {
     schema: {
       params: Type.Object({
         id: Type.Number(),

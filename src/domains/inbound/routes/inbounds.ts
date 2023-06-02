@@ -1,28 +1,30 @@
 import AppDataSource from '$src/DataSource';
 import { User } from '$src/domains/user/models/User';
 import { ResponseShape } from '$src/infra/Response';
+import StringEnum from '$src/infra/StringEnum';
+import {
+  Filter,
+  OrderBy,
+  PaginatedQueryString,
+  Searchable,
+} from '$src/infra/tables/PaginatedType';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import * as where from '$src/infra/tables/filter';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
+import { Nullable } from '$src/infra/utils/Nullable';
 import { repo } from '$src/infra/utils/repo';
 import createError from '@fastify/error';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
+import { IsNull } from 'typeorm';
 import { Inbound, InboundStatus, InboundType } from '../models/Inbound';
 import { InboundImage } from '../models/InboundImage';
 import { InboundProduct } from '../models/InboundProduct';
 import { InboundService } from '../services/Inbound.service';
 import { loadUserWarehouse } from '../services/utils';
-import { IsNull } from 'typeorm';
-import { Nullable } from '$src/infra/utils/Nullable';
 
 const sum = (array: number[]) => array.reduce((a, b) => a + b, 0);
 
-const INBOUND_INVALID_STATUS = createError(
-  'INBOUND_INVALID_STATUS',
-  'inbound status is invalid',
-  400,
-);
+const INVALID_STATUS = createError('INVALID_STATUS', '%s', 400);
 
 const INCOMPLETE_LOADING = createError(
   'INCOMPLETE_LOADING',
@@ -48,10 +50,15 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/',
     schema: {
-      querystring: ListQueryOptions({
-        filterable: ['status'],
-        orderable: ['code', 'status', 'creator.fullName', 'createdAt'],
-        searchable: ['code', 'creator.fullName'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['code', 'status', 'creator.fullName', 'createdAt']),
+        filter: Filter({
+          status: StringEnum(Object.values(InboundStatus)),
+          code: Searchable(),
+          creator: Type.Object({
+            fullName: Searchable(),
+          }),
+        }),
       }),
       security: [
         {
@@ -308,7 +315,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       });
 
       if (inbound.status !== InboundStatus.PRE_DELIVERY) {
-        throw new INBOUND_INVALID_STATUS();
+        throw new INVALID_STATUS(`only pre-delivery inbounds can be deleted`);
       }
 
       await AppDataSource.transaction(async (manager) => {
@@ -386,7 +393,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const inbound = await Inbounds.findOneByOrFail({ id });
 
       if (inbound.status !== InboundStatus.PRE_DELIVERY) {
-        throw new INBOUND_INVALID_STATUS();
+        throw new INVALID_STATUS(`only pre-delivery inbounds can be confirmed`);
       }
 
       await Inbounds.update(inbound.id, {
@@ -412,7 +419,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const inbound = await Inbounds.findOneByOrFail({ id });
 
       if (inbound.status !== InboundStatus.LOAD) {
-        throw new INBOUND_INVALID_STATUS();
+        throw new INVALID_STATUS(`only load inbounds can be confirmed`);
       }
 
       const inboundProductWithoutActualQuantity = await InboundProducts.findOne(
@@ -453,7 +460,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const inbound = await Inbounds.findOneByOrFail({ id });
 
       if (inbound.status !== InboundStatus.SORTING) {
-        throw new INBOUND_INVALID_STATUS();
+        throw new INVALID_STATUS(`only sorting inbounds can be confirmed`);
       }
 
       // ensure all product sorts are done

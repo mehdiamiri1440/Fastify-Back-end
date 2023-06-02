@@ -16,6 +16,9 @@ export interface ListQueryParams<T = any> {
   filter: T;
 }
 
+/**
+ * @deprecated Use PaginatedType.ts
+ */
 export function ListQueryOptions(options: Options) {
   return {
     page: {

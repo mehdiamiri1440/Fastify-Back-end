@@ -1,7 +1,7 @@
 import { expect, it } from '@jest/globals';
 import { describe } from 'node:test';
 import { Between, LessThanOrEqual, Like, MoreThanOrEqual } from 'typeorm';
-import { toTypeOrmFilter } from './filter';
+import { merge, toTypeOrmFilter } from './filter';
 
 describe('toTypeOrmFilter function', () => {
   it('covert simple filters', () => {
@@ -118,6 +118,28 @@ describe('toTypeOrmFilter function', () => {
       foo: Between(5, 10),
       bar: {
         zar: Between(5, 10),
+      },
+    });
+  });
+});
+
+describe('merge', () => {
+  it('should merge many typeorm filter to one', () => {
+    expect(
+      merge([
+        {
+          foo: 'bar',
+        },
+        {
+          hey: {
+            bar: 'you',
+          },
+        },
+      ]),
+    ).toEqual({
+      foo: 'bar',
+      hey: {
+        bar: 'you',
       },
     });
   });
