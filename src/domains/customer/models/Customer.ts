@@ -35,7 +35,7 @@ export class Customer implements Static<typeof CustomerSchemaWithoutRelations> {
   name!: string;
 
   @Column({ type: 'text', nullable: true })
-  businessName!: string | null;
+  contactName!: string | null;
 
   @Column({ nullable: false, type: 'enum', enum: subscriberType.enum })
   subscriberType!: Static<typeof subscriberType>;
@@ -44,7 +44,7 @@ export class Customer implements Static<typeof CustomerSchemaWithoutRelations> {
   documentType!: Static<typeof documentType>;
 
   @Column({ nullable: true, type: 'enum', enum: documentType.enum })
-  businessDocumentType!: Static<typeof documentType> | null;
+  contactDocumentType!: Static<typeof documentType> | null;
 
   @Column({ nullable: false })
   @Index({
@@ -54,7 +54,7 @@ export class Customer implements Static<typeof CustomerSchemaWithoutRelations> {
   fiscalId!: string;
 
   @Column({ type: 'text', nullable: true })
-  businessFiscalId!: string | null;
+  contactFiscalId!: string | null;
 
   @Column({ nullable: false })
   contactFamily1!: string;

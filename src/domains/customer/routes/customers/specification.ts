@@ -54,12 +54,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
       body: Type.Pick(CustomerSchema, [
         'name',
-        'businessName',
+        'contactName',
         'subscriberType',
         'documentType',
-        'businessDocumentType',
+        'contactDocumentType',
         'fiscalId',
-        'businessFiscalId',
+        'contactFiscalId',
         'contactFamily1',
         'contactFamily2',
         'nationalityId',
@@ -70,9 +70,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       const {
         nationalityId,
-        businessName,
-        businessFiscalId,
-        businessDocumentType,
+        contactName,
+        contactFiscalId,
+        contactDocumentType,
         subscriberType,
         ...restBody
       } = req.body;
@@ -82,9 +82,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       });
 
       validateCustomerData({
-        businessName,
-        businessFiscalId,
-        businessDocumentType,
+        contactName,
+        contactFiscalId,
+        contactDocumentType,
         subscriberType,
       });
 
@@ -95,9 +95,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         { id },
         {
           ...restBody,
-          businessName,
-          businessFiscalId,
-          businessDocumentType,
+          contactName,
+          contactFiscalId,
+          contactDocumentType,
           subscriberType,
           nationality,
         },

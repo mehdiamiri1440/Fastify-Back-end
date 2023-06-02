@@ -16,12 +16,12 @@ let user: TestUser | undefined;
 
 const customerData = {
   name: 'my name',
-  businessName: 'my business name',
+  contactName: 'my business name',
   subscriberType: 'empresa',
   documentType: 'dni',
-  businessDocumentType: 'passaporte',
+  contactDocumentType: 'passaporte',
   fiscalId: 'my fiscal id 123456',
-  businessFiscalId: 'my buisness id',
+  contactFiscalId: 'my buisness id',
   contactFamily1: 'my contact family one',
   contactFamily2: 'my contact family two',
   birthday: '2022-11-30T11:21:44.000-08:00',
