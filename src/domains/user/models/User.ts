@@ -34,7 +34,7 @@ export class User implements Static<typeof UserSchemaWithoutRelations> {
   })
   fullName!: string;
 
-  @ManyToOne(() => Role, { onDelete: 'SET NULL' })
+  @ManyToOne(() => Role, { nullable: false })
   role!: Relation<Role>;
 
   @Column({ nullable: false })

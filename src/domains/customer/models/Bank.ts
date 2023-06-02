@@ -23,7 +23,7 @@ export class CustomerBank implements Static<typeof BankSchemaWithoutRelations> {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => Customer, { nullable: false, onDelete: 'CASCADE' })
+  @ManyToOne(() => Customer, { nullable: false })
   customer!: Relation<Customer>;
 
   @Column({ nullable: false })

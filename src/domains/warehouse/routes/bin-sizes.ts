@@ -98,8 +98,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      const { id } = await BinSizes.findOneByOrFail({ id: req.params.id });
-      await BinSizes.delete({ id });
+      const size = await BinSizes.findOneByOrFail({ id: req.params.id });
+      await BinSizes.softRemove(size);
     },
   });
 };

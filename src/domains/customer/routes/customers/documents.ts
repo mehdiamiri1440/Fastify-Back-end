@@ -84,13 +84,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       // validating references
       const customer = await Customers.findOneByOrFail({ id: req.params.id });
 
-      const { id } = await Documents.findOneByOrFail({
+      const document = await Documents.findOneByOrFail({
         id: req.params.dId,
-      });
-      await Documents.delete({
-        id,
         customer: { id: customer.id },
       });
+      await Documents.softRemove(document);
     },
   });
 };

@@ -119,8 +119,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      const { id } = await Roles.findOneByOrFail({ id: req.params.id });
-      await Roles.delete({ id });
+      const role = await Roles.findOneByOrFail({ id: req.params.id });
+      await Roles.softRemove(role);
     },
   });
   app.route({
@@ -256,7 +256,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       const { id } = await Roles.findOneByOrFail({ id: req.params.id });
       const permission: string = req.params.code;
-      await RolePermissions.delete({
+      await RolePermissions.softDelete({
         permission: permission,
         role: { id },
       });

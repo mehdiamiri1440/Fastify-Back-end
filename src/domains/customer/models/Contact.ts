@@ -34,7 +34,7 @@ export class CustomerContact
   @Column({ type: 'text', nullable: true })
   surName!: string | null;
 
-  @ManyToOne(() => Customer, { nullable: false, onDelete: 'CASCADE' })
+  @ManyToOne(() => Customer, { nullable: false })
   customer!: Relation<Customer>;
 
   @Column({ type: 'text', nullable: true })
