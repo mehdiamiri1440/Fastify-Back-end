@@ -18,10 +18,12 @@ import { INVALID_STATUS } from '../errors';
 import { Outbound, OutboundStatus } from '../models/Outbound';
 import { OutboundService } from '../services/outbound.service';
 import { loadUserWarehouse } from '../utils';
+import { Customer } from '$src/domains/customer/models/Customer';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   const outboundsRepo = repo(Outbound);
   const usersRepo = repo(User);
+  const customersRepo = repo(Customer);
 
   app.register(ResponseShape);
 
@@ -192,7 +194,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         id: Type.Number(),
       }),
       body: Type.Object({
-        customerId: Type.Optional(Type.Number()),
+        customerId: Nullable(Type.Number()),
       }),
       security: [
         {
@@ -202,6 +204,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     async handler(req) {
       const { id } = req.params;
+      const { customerId } = req.body;
+
       const outbound = await outboundsRepo.findOneByOrFail({ id });
 
       if (outbound.status !== OutboundStatus.DRAFT) {
@@ -210,10 +214,16 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         );
       }
 
-      await outboundsRepo.update(id, {
-        customerId: req.body.customerId,
-      });
-      return outboundsRepo.findOneByOrFail({ id });
+      const customer = customerId
+        ? await customersRepo.findOneBy({
+            id: customerId,
+          })
+        : null;
+
+      outbound.customer = customer;
+
+      await outboundsRepo.save(outbound);
+      return outbound;
     },
   });
 

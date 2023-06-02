@@ -12,6 +12,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { OutboundProduct } from './OutboundProduct';
+import { Customer } from '$src/domains/customer/models/Customer';
 
 export enum OutboundStatus {
   DRAFT = 'draft',
@@ -40,8 +41,8 @@ export class Outbound {
   @Column({ type: 'integer', nullable: true })
   docId!: number | null;
 
-  @Column({ nullable: true })
-  customerId!: number;
+  @ManyToOne(() => Customer, { nullable: true })
+  customer?: Customer | null;
 
   @ManyToOne(() => User, { nullable: true })
   driver?: User | null;

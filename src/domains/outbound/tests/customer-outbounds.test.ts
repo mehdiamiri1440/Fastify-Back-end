@@ -11,25 +11,17 @@ import {
 import { repo } from '$src/infra/utils/repo';
 import { afterAll, beforeAll, beforeEach, expect, it } from '@jest/globals';
 import assert from 'assert';
+import { randomUUID } from 'crypto';
 import { FastifyInstance } from 'fastify';
 import { describe } from 'node:test';
 import 'reflect-metadata';
-import { Product } from '../../product/models/Product';
 import { Warehouse } from '../../warehouse/models/Warehouse';
 import { WarehouseStaff } from '../../warehouse/models/WarehouseStaff';
 import { Outbound, OutboundStatus } from '../models/Outbound';
-import { OutboundProduct } from '../models/OutboundProduct';
-import routes from '../routes/outbounds';
+import routes from '../routes/customer-outbounds';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
-
-const createSampleProduct = async () =>
-  repo(Product).save({
-    name: 'test',
-    unit: await repo(Unit).save({ name: 'unit', creator: { id: 1 } }),
-    quantity: 10,
-  });
 
 const createSampleWarehouse = async () => {
   assert(user);
@@ -74,7 +66,7 @@ const createSampleCustomer = async () => {
     subscriberType: 'empresa',
     documentType: 'dni',
     contactDocumentType: 'passaporte',
-    fiscalId: 'my fiscal id 123456',
+    fiscalId: randomUUID(),
     contactFamily1: '1',
     nationality: { id: 1 },
     isActive: true,
@@ -102,22 +94,35 @@ afterAll(async () => {
   await app?.close();
 });
 
-describe('Get Outbound', () => {
+describe('Get Outbound of single customer', () => {
   it('should get list of outbounds', async () => {
     const warehouse = await createSampleWarehouse();
+    const customerA = await createSampleCustomer();
+    const customerB = await createSampleCustomer();
+
     assert(app);
     assert(user);
 
-    await repo(Outbound).save({
-      status: OutboundStatus.DRAFT,
-      code: 'test',
-      warehouse,
-      creator: { id: 1 },
-    });
+    await repo(Outbound).insert([
+      {
+        status: OutboundStatus.DRAFT,
+        code: 'test',
+        warehouse,
+        creator: { id: 1 },
+        customer: customerA,
+      },
+      {
+        status: OutboundStatus.DRAFT,
+        code: 'test2',
+        warehouse,
+        creator: { id: 1 },
+        customer: customerB,
+      },
+    ]);
 
     const response = await user.inject({
       method: 'GET',
-      url: '/',
+      url: `/customers/${customerA.id}/outbounds`,
     });
 
     expect(response).statusCodeToBe(200);
@@ -126,103 +131,11 @@ describe('Get Outbound', () => {
       data: [
         {
           status: 'draft',
-          creator: { fullName: 'tester tester' },
           code: expect.any(String),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
         },
       ],
-    });
-  });
-
-  it('should get outbound by id', async () => {
-    const warehouse = await createSampleWarehouse();
-    const product = await createSampleProduct();
-
-    assert(app);
-    assert(user);
-
-    const outbound = await repo(Outbound).save({
-      status: OutboundStatus.DRAFT,
-      code: 'test',
-      warehouse,
-      creator: { id: 1 },
-    });
-
-    await repo(OutboundProduct).save({
-      outbound,
-      product,
-      quantity: 5,
-    });
-
-    const response = await user.inject({
-      method: 'GET',
-      url: '/1',
-    });
-
-    expect(response).statusCodeToBe(200);
-    const body = response.json();
-    expect(body).toMatchObject({
-      data: {
-        id: 1,
-        status: 'draft',
-        code: expect.any(String),
-        products: [
-          {
-            id: 1,
-            quantity: 5,
-            product: {
-              id: 1,
-              name: 'test',
-              // quantity: 10, // TODO(erfan)
-              unit: {
-                id: 1,
-                name: 'unit',
-              },
-            },
-            createdAt: expect.any(String),
-          },
-        ],
-        creator: { id: 1, fullName: 'tester tester' },
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-      },
-    });
-  });
-});
-
-describe('Set CustomerId', () => {
-  it('should set customer id when inbound state is draft', async () => {
-    assert(app);
-    assert(user);
-    const warehouse = await createSampleWarehouse();
-    const customer = await createSampleCustomer();
-
-    const outbound = await repo(Outbound).save({
-      status: OutboundStatus.DRAFT,
-      code: 'test',
-      warehouse,
-      creator: { id: 1 },
-    });
-
-    const response = await user.inject({
-      method: 'POST',
-      url: `/${outbound.id}/set-customer`,
-      payload: {
-        customerId: customer.id,
-      },
-    });
-
-    expect(response).statusCodeToBe(200);
-    const body = response.json();
-    expect(body).toMatchObject({
-      data: {
-        id: 1,
-        status: 'draft',
-        customer: {
-          id: customer.id,
-        },
-      },
     });
   });
 });

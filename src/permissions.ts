@@ -115,6 +115,8 @@ export default {
     'with this permission you can get list of shapes',
   'configuration@shape::create': 'with this permission you can add new shape',
   'configuration@shape::update': 'with this permission you can edit shape',
+
+  // customer
   'customer@customer::list':
     'with this permission you can get list of customers',
   'customer@customer::create': 'with this permission you can add new customer',
@@ -137,6 +139,10 @@ export default {
     'with this permission you can see customer bank details',
   'customer@bank::update':
     'with this permission you can update customer bank details',
+  'customer@outbound::view':
+    'with this permission you can see customer outbounds list',
+
+  // config
   'configuration@tag::list': 'with this permission you can get list of tags',
   'configuration@tag::create': 'with this permission you can add new tag',
   'configuration@tag::update': 'with this permission you can edit tag',
