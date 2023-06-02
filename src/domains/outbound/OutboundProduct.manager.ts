@@ -10,14 +10,9 @@ import { OutboundProductSupply } from './models/OutboundProductSupply';
 import createError from '@fastify/error';
 import { ProductService } from '../product/ProductService';
 import { SourceType } from '../product/models/ProductStockHistory';
+import { INVALID_STATUS } from './errors';
 
 const sum = (arr: number[]): number => arr.reduce((a, b) => a + b, 0);
-
-const OUTBOUND_INVALID_STATUS = createError(
-  'OUTBOUND_INVALID_STATUS',
-  'Only new_order outbounds can be accepted',
-  400,
-);
 
 const ALREADY_SUPPLIED = createError(
   'ALREADY_SUPPLIED',
@@ -140,7 +135,7 @@ export class OutboundProductManager {
 
   #assertNewOrder() {
     if (this.entity.outbound.status !== OutboundStatus.NEW_ORDER) {
-      throw new OUTBOUND_INVALID_STATUS();
+      throw new INVALID_STATUS(`only new_order outbounds can be supplied`);
     }
   }
 

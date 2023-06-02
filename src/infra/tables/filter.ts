@@ -63,8 +63,5 @@ export function from(req: FastifyRequest) {
     return;
   }
 
-  const clonedFilter = structuredClone(filter);
-  toTypeOrmFilter(clonedFilter);
-
-  return clonedFilter;
+  return toTypeOrmFilter(filter);
 }

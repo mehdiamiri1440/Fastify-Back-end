@@ -44,7 +44,7 @@ export class Outbound {
   customerId!: number;
 
   @ManyToOne(() => User, { nullable: true })
-  driver!: User | null;
+  driver?: User | null;
 
   @Column({
     type: 'varchar',

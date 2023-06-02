@@ -1,9 +1,10 @@
 import { DocumentService } from '$src/domains/document/service';
 import { Product } from '$src/domains/product/models/Product';
-import { Supplier } from '$src/domains/supplier/models/Supplier';
 import { Warehouse } from '$src/domains/warehouse/models/Warehouse';
+import createError from '@fastify/error';
 import { DataSource, DeepPartial, EntityManager, Repository } from 'typeorm';
-import { Outbound } from '../models/Outbound';
+import { INVALID_STATUS } from '../errors';
+import { Outbound, OutboundStatus } from '../models/Outbound';
 import { OutboundProduct } from '../models/OutboundProduct';
 
 function getCode(id: number) {
@@ -11,6 +12,14 @@ function getCode(id: number) {
   const counter = (id % 10000).toString().padStart(4, '0');
   return `DN${date}${counter}`;
 }
+
+const INCOMPLETE_SUPPLY = createError(
+  'INCOMPLETE_SUPPLY',
+  'not all outbound products are supplied',
+  400,
+);
+
+const MISSING_SIGNATURE = createError('MISSING_SIGNATURE', '%s', 400);
 
 export class OutboundService {
   private outboundsRepo: Repository<Outbound>;
@@ -68,6 +77,119 @@ export class OutboundService {
       product,
       quantity,
       creator: { id: this.#userId },
+    });
+  }
+
+  async confirmStep(outbound: Outbound) {
+    const confirmFn = this.#confirmStateMap[outbound.status];
+    await confirmFn(outbound);
+  }
+
+  #confirmStateMap: Record<
+    OutboundStatus,
+    (outbound: Outbound) => Promise<void>
+  > = {
+    [OutboundStatus.DRAFT]: this.#confirmOrder.bind(this),
+    [OutboundStatus.NEW_ORDER]: this.#confirmSupply.bind(this),
+    [OutboundStatus.TRANSFER]: this.#confirmTransfer.bind(this),
+    [OutboundStatus.PICKING]: this.#confirmPicking.bind(this),
+    [OutboundStatus.PICKED]: this.#confirmPicked.bind(this),
+    // state: delivered has no confirmation
+    [OutboundStatus.DELIVERED]: async () => undefined,
+  };
+
+  async #confirmOrder(outbound: Outbound) {
+    if (outbound.status !== OutboundStatus.DRAFT) {
+      throw new INVALID_STATUS(`only draft outbounds can be confirmed`);
+    }
+
+    await this.outboundsRepo.update(outbound.id, {
+      status: OutboundStatus.NEW_ORDER,
+    });
+  }
+
+  async #confirmSupply(outbound: Outbound) {
+    if (outbound.status !== OutboundStatus.NEW_ORDER) {
+      throw new INVALID_STATUS(`only new order outbounds can be confirmed`);
+    }
+
+    const unSuppliedProduct = await this.outboundProductsRepo.find({
+      where: {
+        outbound: { id: outbound.id },
+        supplied: false,
+      },
+    });
+
+    if (unSuppliedProduct.length > 0) {
+      throw new INCOMPLETE_SUPPLY();
+    }
+
+    await this.outboundsRepo.update(outbound.id, {
+      status: OutboundStatus.TRANSFER,
+    });
+  }
+
+  async #confirmTransfer(outbound: Outbound) {
+    if (outbound.status !== OutboundStatus.TRANSFER) {
+      throw new INVALID_STATUS(`only transfer outbounds can be confirmed`);
+    }
+
+    const hasDriver = !!outbound.driver;
+
+    const nextStatus = hasDriver
+      ? OutboundStatus.PICKING
+      : OutboundStatus.DELIVERED;
+
+    if (hasDriver) {
+      await this.outboundsRepo.update(outbound.id, {
+        status: nextStatus,
+      });
+      // outbound has driver. we should grab signatures in next step (picking) status
+      return;
+    }
+
+    if (!outbound.creatorSignature) {
+      throw new MISSING_SIGNATURE('Creator signature is required');
+    }
+
+    if (!outbound.customerSignature) {
+      throw new MISSING_SIGNATURE('Customer signature is required');
+    }
+
+    await this.outboundsRepo.update(outbound.id, {
+      status: OutboundStatus.TRANSFER,
+    });
+  }
+
+  async #confirmPicking(outbound: Outbound) {
+    if (outbound.status !== OutboundStatus.PICKING) {
+      throw new INVALID_STATUS('outbound state is not PICKING');
+    }
+
+    if (!outbound.creatorSignature) {
+      throw new MISSING_SIGNATURE('Creator signature is required');
+    }
+
+    if (!outbound.driverSignature) {
+      throw new MISSING_SIGNATURE('Driver signature is required');
+    }
+
+    await this.outboundsRepo.update(outbound.id, {
+      status: OutboundStatus.PICKED,
+    });
+  }
+
+  async #confirmPicked(outbound: Outbound) {
+    if (outbound.status !== OutboundStatus.PICKED) {
+      throw new INVALID_STATUS(`only 'picked' outbounds can be confirmed`);
+    }
+
+    if (!outbound.customerSignature) {
+      throw new MISSING_SIGNATURE('Customer signature is required');
+    }
+
+    await this.outboundsRepo.update(outbound.id, {
+      status: OutboundStatus.DELIVERED,
     });
   }
 }

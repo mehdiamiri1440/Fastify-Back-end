@@ -208,7 +208,7 @@ describe('Confirm Order', () => {
 
     const response = await user.inject({
       method: 'POST',
-      url: '/1/confirm-order',
+      url: '/1/confirm-current-step',
     });
 
     expect(response).statusCodeToBe(200);

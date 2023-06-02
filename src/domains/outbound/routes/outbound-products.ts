@@ -2,18 +2,12 @@ import AppDataSource from '$src/DataSource';
 import { Bin } from '$src/domains/warehouse/models/Bin';
 import { ResponseShape } from '$src/infra/Response';
 import { repo } from '$src/infra/utils/repo';
-import createError from '@fastify/error';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { OutboundProductManager } from '../OutboundProduct.manager';
 import { OutboundStatus } from '../models/Outbound';
 import { OutboundProduct } from '../models/OutboundProduct';
-
-const OUTBOUND_INVALID_STATUS = createError(
-  'OUTBOUND_INVALID_STATUS',
-  'Only draft outbounds can be modified',
-  400,
-);
+import { INVALID_STATUS } from '../errors';
 
 const outboundProductsRepo = repo(OutboundProduct);
 
@@ -53,7 +47,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const { outbound } = await fineOne(id);
 
       if (outbound.status !== OutboundStatus.DRAFT) {
-        throw new OUTBOUND_INVALID_STATUS();
+        throw new INVALID_STATUS(`only draft outbound can be updated`);
       }
 
       await outboundProductsRepo.update(id, req.body);
@@ -81,7 +75,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const product = await fineOne(id);
 
       if (product.outbound.status !== OutboundStatus.DRAFT) {
-        throw new OUTBOUND_INVALID_STATUS();
+        throw new INVALID_STATUS(`only draft outbound can be deleted`);
       }
 
       await outboundProductsRepo.softRemove({ id });

@@ -144,13 +144,15 @@ it('Outbound Flow - With Driver', async () => {
   expect(createResult.status).toBe('draft');
   const id = createResult.id;
 
-  // confirm that the outbound was created
-  const confirmOrderResult = await inject({
-    method: 'POST',
-    url: `/outbounds/${id}/confirm-order`,
-  });
+  const confirmStep = () =>
+    inject({
+      method: 'POST',
+      url: `/outbounds/${id}/confirm-current-step`,
+    });
 
-  // SET: NEW ORDER
+  const confirmOrderResult = await confirmStep();
+
+  // STATUS: NEW ORDER
   expect(confirmOrderResult.status).toBe('new_order');
 
   // doing the supply
@@ -186,15 +188,11 @@ it('Outbound Flow - With Driver', async () => {
   }
 
   // confirm that the outbound was created
-  const confirmSupply = await inject({
-    method: 'POST',
-    url: `/outbounds/${id}/confirm-supply`,
-  });
-
+  const confirmSupply = await confirmStep();
   // STATE: TRANSFER
   expect(confirmSupply.status).toBe('transfer');
 
-  const setDriver = await inject({
+  await inject({
     method: 'POST',
     url: `/outbounds/${id}/set-driver`,
     payload: {
@@ -202,8 +200,10 @@ it('Outbound Flow - With Driver', async () => {
     },
   });
 
+  const confirmTransfer = await confirmStep();
+
   // STATE: PICKING
-  expect(setDriver.status).toBe('picking');
+  expect(confirmTransfer.status).toBe('picking');
 
   await inject({
     method: 'POST',
@@ -221,10 +221,7 @@ it('Outbound Flow - With Driver', async () => {
     },
   });
 
-  const confirmPicking = await inject({
-    method: 'POST',
-    url: `/outbounds/${id}/confirm-picking`,
-  });
+  const confirmPicking = await confirmStep();
 
   // STATE: PICKED
   expect(confirmPicking.status).toBe('picked');
@@ -237,10 +234,7 @@ it('Outbound Flow - With Driver', async () => {
     },
   });
 
-  const confirmPicked = await inject({
-    method: 'POST',
-    url: `/outbounds/${id}/confirm-picked`,
-  });
+  const confirmPicked = await confirmStep();
 
   // STATE: DELIVERED
   expect(confirmPicked.status).toBe('delivered');

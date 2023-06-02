@@ -1,4 +1,12 @@
 import { FastifyRequest } from 'fastify';
+import { transform } from 'dottie';
+
+export function toTypeOrmOrder(
+  orderBy: string,
+  order: 'asc' | 'desc' | 'ASC' | 'DESC',
+) {
+  return transform({ [orderBy]: order.toLowerCase() });
+}
 
 export function from(req: FastifyRequest) {
   const { query } = req;
@@ -7,13 +15,11 @@ export function from(req: FastifyRequest) {
   }
 
   const { order, orderBy } = query as any;
-  if (!order) {
+  if (!order || !orderBy) {
     return;
   }
 
-  return {
-    [orderBy ?? 'id']: order ?? 'desc',
-  };
+  return toTypeOrmOrder(orderBy, order);
 }
 
 export const toUpperCase = (order: 'asc' | 'desc'): 'ASC' | 'DESC' =>
