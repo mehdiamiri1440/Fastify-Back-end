@@ -7,27 +7,17 @@ import { TableQueryBuilder } from '$src/infra/tables/Table';
 import * as where from '$src/infra/tables/filter';
 import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { repo } from '$src/infra/utils/repo';
-import createError from '@fastify/error';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { InboundStatus } from '../models/Inbound';
 import { InboundProduct } from '../models/InboundProduct';
 import { InboundProductSort } from '../models/InboundProductSort';
 import { loadUserWarehouse } from '../services/utils';
-
-const INBOUND_INVALID_STATUS = createError('INBOUND_INVALID_STATUS', '%s', 400);
-
-const INVALID_QUANTITY_AMOUNT = createError(
-  'INVALID_QUANTITY_AMOUNT',
-  'message',
-  400,
-);
-
-const BIN_ALREADY_SORTED = createError(
-  'BIN_ALREADY_SORTED',
-  'Bin already sorted',
-  400,
-);
+import {
+  BIN_ALREADY_SORTED,
+  INVALID_QUANTITY_AMOUNT,
+  INVALID_STATUS,
+} from '../errors';
 
 const InboundProducts = repo(InboundProduct);
 
@@ -143,7 +133,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const inboundProduct = await fineOne(id);
 
       if (inboundProduct.inbound.status !== InboundStatus.PRE_DELIVERY) {
-        throw new INBOUND_INVALID_STATUS(
+        throw new INVALID_STATUS(
           'Only pre_delivery inbounds are allowed to update product prices',
         );
       }
@@ -174,7 +164,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const inboundProduct = await fineOne(id);
 
       if (inboundProduct.inbound.status !== InboundStatus.LOAD) {
-        throw new INBOUND_INVALID_STATUS(
+        throw new INVALID_STATUS(
           'Only load inbounds are allowed to update actual quantity',
         );
       }
@@ -233,7 +223,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       });
 
       if (inboundProduct.inbound.status !== InboundStatus.PRE_DELIVERY) {
-        throw new INBOUND_INVALID_STATUS(
+        throw new INVALID_STATUS(
           'Only pre_delivery inbounds are allowed to delete',
         );
       }
@@ -290,7 +280,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         const currentUnsorted = inboundProduct.actualQuantity - currentSorted;
 
         if (inboundProduct.inbound.status !== InboundStatus.SORTING) {
-          throw new INBOUND_INVALID_STATUS(
+          throw new INVALID_STATUS(
             'Only inbounds with sorting state are allowed to sort',
           );
         }
@@ -385,7 +375,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         });
 
         if (inboundProduct.inbound.status !== InboundStatus.SORTING) {
-          throw new INBOUND_INVALID_STATUS(
+          throw new INVALID_STATUS(
             'Only inbounds with sorting state are allowed to unsort',
           );
         }
