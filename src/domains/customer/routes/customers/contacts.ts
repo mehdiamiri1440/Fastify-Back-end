@@ -167,11 +167,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         id: customerId,
       });
 
-      const { id } = await Contacts.findOneByOrFail({
+      const contact = await Contacts.findOneByOrFail({
         id: contactId,
         customer: { id: customer.id },
       });
-      await Contacts.delete({ id });
+      await Contacts.softRemove(contact);
     },
   });
 };

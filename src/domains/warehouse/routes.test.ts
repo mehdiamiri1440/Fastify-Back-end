@@ -7,6 +7,7 @@ import { afterEach, beforeEach, expect, it } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance } from 'fastify';
 import routes from './routes';
+import { Role } from '$src/domains/user/models/Role';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -69,7 +70,12 @@ it('warehouse flow', async () => {
   let propertyId: number;
   let warehouseId: number;
   let binId: number;
-  const userId: number = (await repo(User).save({ ...userData })).id;
+  const userId: number = (
+    await repo(User).save({
+      ...userData,
+      role: await repo(Role).save({ title: 'testxg', isActive: true }),
+    })
+  ).id;
   let staffId: number;
 
   {

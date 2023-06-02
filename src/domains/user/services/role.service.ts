@@ -44,7 +44,7 @@ export class RoleService {
     }
 
     // delete old permissions
-    await this.rolePermissionRepo.delete({
+    await this.rolePermissionRepo.softDelete({
       role: { id: roleId },
     });
 
