@@ -1,16 +1,15 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { repo } from '$src/infra/utils/repo';
-import { Repository, DataSource, EntityManager } from 'typeorm';
-import { Product } from '../product/models/Product';
-import { Bin } from '../warehouse/models/Bin';
-import { Outbound, OutboundStatus } from './models/Outbound';
-import { OutboundProduct } from './models/OutboundProduct';
-import assert from 'assert';
-import { OutboundProductSupply } from './models/OutboundProductSupply';
 import createError from '@fastify/error';
+import assert from 'assert';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { ProductService } from '../product/ProductService';
 import { SourceType } from '../product/models/ProductStockHistory';
+import { Bin } from '../warehouse/models/Bin';
 import { INVALID_STATUS } from './errors';
+import { OutboundStatus } from './models/Outbound';
+import { OutboundProduct } from './models/OutboundProduct';
+import { OutboundProductSupply } from './models/OutboundProductSupply';
 
 const sum = (arr: number[]): number => arr.reduce((a, b) => a + b, 0);
 
@@ -28,10 +27,8 @@ export interface BinSupplyState {
 }
 
 export class OutboundProductManager {
-  private outboundsRepo: Repository<Outbound>;
   private outboundProductsRepo: Repository<OutboundProduct>;
   private outboundProductSuppliesRepo: Repository<OutboundProductSupply>;
-  private productsRepo: Repository<Product>;
   private productService: ProductService;
 
   creator!: { id: number };
@@ -65,12 +62,10 @@ export class OutboundProductManager {
     id: number,
     userId: number,
   ) {
-    this.outboundsRepo = dataSource.getRepository(Outbound);
     this.outboundProductsRepo = dataSource.getRepository(OutboundProduct);
     this.outboundProductSuppliesRepo = dataSource.getRepository(
       OutboundProductSupply,
     );
-    this.productsRepo = dataSource.getRepository(Product);
     this.productService = new ProductService(dataSource, userId);
     this.id = id;
     this.creator = { id: userId };

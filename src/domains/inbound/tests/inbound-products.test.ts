@@ -504,13 +504,19 @@ describe('Sorting', () => {
       method: 'POST',
       url: `/${inboundProduct.id}/sorts`,
       payload: {
-        quantity: 10,
+        quantity: 30,
         binId: bin1.id,
       },
     });
 
     expect(sortResponse).statusCodeToBe(200);
     const sort = sortResponse.json().data;
+
+    expect(
+      await repo(InboundProduct).findOneByOrFail({ id: inboundProduct.id }),
+    ).toMatchObject({
+      sorted: true,
+    });
 
     const deleteSort = await user.inject({
       method: 'DELETE',

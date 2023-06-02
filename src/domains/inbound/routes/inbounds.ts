@@ -119,6 +119,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             requestedQuantity: true,
             actualQuantity: true,
             createdAt: true,
+            sorted: true,
             product: {
               id: true,
               name: true,
@@ -338,6 +339,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Number(),
       }),
+      security: [
+        {
+          OAuth2: ['user@inbound::update'],
+        },
+      ],
     },
     async handler(req) {
       const { id } = req.params;
@@ -363,7 +369,13 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       body: Type.Object({
         fileId: Type.String(),
       }),
+      security: [
+        {
+          OAuth2: ['user@inbound::update'],
+        },
+      ],
     },
+
     async handler(req) {
       const { id } = req.params;
       const { fileId } = req.body;

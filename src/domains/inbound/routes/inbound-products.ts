@@ -33,24 +33,10 @@ const InboundProducts = repo(InboundProduct);
 
 const sum = (array: number[]) => array.reduce((a, b) => a + b, 0);
 
-function fineOne(id: number) {
-  return InboundProducts.findOneOrFail({
-    where: {
-      id,
-    },
-    relations: {
-      inbound: true,
-    },
-  });
-}
-
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
 
-  // GET /
-  app.route({
-    method: 'GET',
-    url: '/',
+  app.get('/', {
     schema: {
       querystring: ListQueryOptions({
         filterable: ['status'],
@@ -111,10 +97,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // GET /:id
-  app.route({
-    method: 'GET',
-    url: '/:id',
+  app.get('/:id', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -141,10 +124,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // POST /:id/set-price
-  app.route({
-    method: 'POST',
-    url: '/:id/set-price',
+  app.post('/:id/set-price', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -229,10 +209,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // DELETE /:id
-  app.route({
-    method: 'DELETE',
-    url: '/:id',
+  app.delete('/:id', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -269,10 +246,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // POST /:id/sorts
-  app.route({
-    method: 'POST',
-    url: '/:id/sorts',
+  app.post('/:id/sorts', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -364,10 +338,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
   });
 
-  // DELETE /:id/sorts/:sortId
-  app.route({
-    method: 'DELETE',
-    url: '/:id/sorts/:sortId',
+  app.delete('/:id/sorts/:sortId', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -423,6 +394,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           id: sortId,
         });
 
+        await InboundProducts.update(inboundProduct.id, {
+          sorted: false,
+        });
+
         await productsService.subtractProductFromBin({
           product: inboundProduct.product,
           bin: sort.bin,
@@ -434,5 +409,16 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
   });
 };
+
+function fineOne(id: number) {
+  return InboundProducts.findOneOrFail({
+    where: {
+      id,
+    },
+    relations: {
+      inbound: true,
+    },
+  });
+}
 
 export default plugin;
