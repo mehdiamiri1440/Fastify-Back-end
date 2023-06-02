@@ -9,7 +9,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     schema: {
       security: [
         {
-          OAuth2: ['permission'],
+          OAuth2: ['user@user::list'],
         },
       ],
     },

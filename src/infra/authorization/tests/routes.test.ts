@@ -19,7 +19,7 @@ beforeEach(async () => {
   tokenWithPermission = app.jwt.sign(
     {
       id: 1,
-      scope: 'permission',
+      scope: 'user@user::list',
     },
     {
       expiresIn: 1000,
