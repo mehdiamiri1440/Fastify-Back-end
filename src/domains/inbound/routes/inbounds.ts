@@ -12,7 +12,6 @@ import { TableQueryBuilder } from '$src/infra/tables/Table';
 import * as where from '$src/infra/tables/filter';
 import { Nullable } from '$src/infra/utils/Nullable';
 import { repo } from '$src/infra/utils/repo';
-import createError from '@fastify/error';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { IsNull } from 'typeorm';
@@ -21,22 +20,13 @@ import { InboundImage } from '../models/InboundImage';
 import { InboundProduct } from '../models/InboundProduct';
 import { InboundService } from '../services/Inbound.service';
 import { loadUserWarehouse } from '../services/utils';
+import {
+  INCOMPLETE_LOADING,
+  INCOMPLETE_SORTING,
+  INVALID_STATUS,
+} from '../errors';
 
 const sum = (array: number[]) => array.reduce((a, b) => a + b, 0);
-
-const INVALID_STATUS = createError('INVALID_STATUS', '%s', 400);
-
-const INCOMPLETE_LOADING = createError(
-  'INCOMPLETE_LOADING',
-  'not all products are loaded completely ',
-  400,
-);
-
-const INCOMPLETE_SORTING = createError(
-  'INCOMPLETE_SORTING',
-  'not all products are sorted completely ',
-  400,
-);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
