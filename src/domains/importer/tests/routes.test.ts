@@ -240,3 +240,51 @@ it('should parse and insert customers data successfully', async () => {
     name: 'iphone',
   });
 });
+
+it('should get csv template for customer', async () => {
+  assert(app);
+  assert(user);
+  assert(minio, 'Storage is not enable. missing env');
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/importer/customers/template.csv',
+  });
+
+  expect(response).statusCodeToBe(200);
+  expect(response.payload).toBe(
+    'name,contactName,subscriberType,documentType,contactDocumentType,fiscalId,contactFiscalId,contactFamily1,contactFamily2,nationalityId,isActive',
+  );
+});
+
+it('should get csv template for supplier', async () => {
+  assert(app);
+  assert(user);
+  assert(minio, 'Storage is not enable. missing env');
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/importer/suppliers/template.csv',
+  });
+
+  expect(response).statusCodeToBe(200);
+  expect(response.payload).toBe(
+    'name,cif,language,iban,email,phoneNumber,accountNumber',
+  );
+});
+
+it('should get csv template for product', async () => {
+  assert(app);
+  assert(user);
+  assert(minio, 'Storage is not enable. missing env');
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/importer/products/template.csv',
+  });
+
+  expect(response).statusCodeToBe(200);
+  expect(response.payload).toBe(
+    'name,barcode,invoiceSystemCode,description,weight,content',
+  );
+});
