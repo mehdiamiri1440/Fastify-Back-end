@@ -1,14 +1,20 @@
-import { ResponseShape } from '$src/infra/Response';
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { Brand } from '../models/Brand';
-import { repo } from '$src/infra/utils/repo';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
-import { TableQueryBuilder } from '$src/infra/tables/Table';
-const Brands = repo(Brand);
-import { Type } from '@sinclair/typebox';
 import { BrandSchema } from '$src/domains/configuration/schemas/brand.schema';
+import { ResponseShape } from '$src/infra/Response';
+import {
+  Filter,
+  OrderBy,
+  PaginatedQueryString,
+  Searchable,
+} from '$src/infra/tables/PaginatedType';
+import { TableQueryBuilder } from '$src/infra/tables/Table';
+import { repo } from '$src/infra/utils/repo';
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { Type } from '@sinclair/typebox';
+import { Brand } from '../models/Brand';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
+  const Brands = repo(Brand);
+
   app.register(ResponseShape);
   app.route({
     method: 'GET',
@@ -19,10 +25,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['configuration@brand::list'],
         },
       ],
-      querystring: ListQueryOptions({
-        filterable: ['name'],
-        orderable: ['name'],
-        searchable: ['name'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id', 'createdAt', 'name']),
+        filter: Filter({
+          name: Searchable(),
+        }),
       }),
     },
     async handler(req) {

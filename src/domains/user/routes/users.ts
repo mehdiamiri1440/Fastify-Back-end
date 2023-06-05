@@ -1,20 +1,24 @@
-import { ResponseShape } from '$src/infra/Response';
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { User } from '../../user/models/User';
-import { Role } from '../../user/models/Role';
-import { repo } from '$src/infra/utils/repo';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
-import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { UserSchema } from '$src/domains/user/schemas/user.schema';
+import { ResponseShape } from '$src/infra/Response';
+import {
+  Filter,
+  OrderBy,
+  PaginatedQueryString,
+  Searchable,
+} from '$src/infra/tables/PaginatedType';
+import { TableQueryBuilder } from '$src/infra/tables/Table';
+import { repo } from '$src/infra/utils/repo';
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import bcrypt from 'bcrypt';
-import { createError } from '@fastify/error';
-
-const Users = repo(User);
-const Roles = repo(Role);
+import { Role } from '../../user/models/Role';
+import { User } from '../../user/models/User';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
+  const Users = repo(User);
+  const Roles = repo(Role);
+
   app.route({
     method: 'GET',
     url: '/',
@@ -24,10 +28,22 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['user@user::list'],
         },
       ],
-      querystring: ListQueryOptions({
-        filterable: ['firstName', 'lastName', 'nif', 'email', 'phoneNumber'],
-        orderable: ['firstName', 'lastName', 'nif', 'email', 'phoneNumber'],
-        searchable: ['firstName', 'lastName', 'nif', 'email', 'phoneNumber'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy([
+          'id',
+          'firstName',
+          'lastName',
+          'nif',
+          'email',
+          'phoneNumber',
+        ]),
+        filter: Filter({
+          firstName: Searchable(),
+          lastName: Searchable(),
+          nif: Searchable(),
+          email: Searchable(),
+          phoneNumber: Searchable(),
+        }),
       }),
     },
     async handler(req) {

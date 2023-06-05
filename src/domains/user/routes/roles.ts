@@ -1,18 +1,22 @@
+import AppDataSource from '$src/DataSource';
 import {
   RolePermissionsSchema,
   RoleSchema,
 } from '$src/domains/user/schemas/role.schema';
-import { repo } from '$src/infra/utils/repo';
+import { RoleService } from '$src/domains/user/services/role.service';
 import { ResponseShape } from '$src/infra/Response';
+import {
+  Filter,
+  OrderBy,
+  PaginatedQueryString,
+  Searchable,
+} from '$src/infra/tables/PaginatedType';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
+import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { Role } from '../../user/models/Role';
 import { RolePermission } from '../models/RolePermission';
-import { DeepPartial } from 'typeorm';
-import AppDataSource from '$src/DataSource';
-import { RoleService } from '$src/domains/user/services/role.service';
 
 const Roles = repo(Role);
 const RolePermissions = repo(RolePermission);
@@ -29,10 +33,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['user@role::list'],
         },
       ],
-      querystring: ListQueryOptions({
-        filterable: ['title'],
-        orderable: ['title'],
-        searchable: ['title'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id', 'createdAt', 'title']),
+        filter: Filter({
+          title: Searchable(),
+        }),
       }),
     },
     async handler(req) {
@@ -175,10 +180,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Number(),
       }),
-      querystring: ListQueryOptions({
-        filterable: ['permission'],
-        orderable: ['permission'],
-        searchable: ['permission'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id', 'createdAt', 'permission']),
+        filter: Filter({
+          permission: Searchable(),
+        }),
       }),
     },
     async handler(req) {

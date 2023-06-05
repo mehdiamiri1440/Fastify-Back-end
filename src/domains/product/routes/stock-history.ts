@@ -1,36 +1,35 @@
 import { ResponseShape } from '$src/infra/Response';
+import {
+  Filter,
+  OrderBy,
+  PaginatedQueryString,
+  Searchable,
+} from '$src/infra/tables/PaginatedType';
+import { TableQueryBuilder } from '$src/infra/tables/Table';
+import * as where from '$src/infra/tables/filter';
+import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
-import { ProductImage } from '../models/ProductImage';
-import { repo } from '$src/infra/utils/repo';
-import { FastifySchema } from 'fastify';
-import { Product } from '../models/Product';
-import { TableQueryBuilder } from '$src/infra/tables/Table';
-import { ProductStockHistory } from '../models/ProductStockHistory';
-import * as where from '$src/infra/tables/filter';
-import {
-  ListQueryOptions,
-  ListQueryParams,
-} from '$src/infra/tables/schema_builder';
-import * as order from '$src/infra/tables/order';
+import { ProductStockHistory, SourceType } from '../models/ProductStockHistory';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
 
   const ProductStockHistories = repo(ProductStockHistory);
 
-  // GET /products/:id/histories
-  app.route({
-    method: 'GET',
-    url: '/products/:id/history',
+  app.get('/products/:id/history', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
       }),
-      querystring: ListQueryOptions({
-        filterable: ['sourceType'],
-        orderable: ['sourceType', 'bin.name'],
-        searchable: ['bin.name'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id', 'sourceType', 'bin.name']),
+        filter: Filter({
+          sourceType: Type.String({ enum: Object.values(SourceType) }),
+          bin: Type.Object({
+            name: Searchable(),
+          }),
+        }),
       }),
       security: [
         {
@@ -40,7 +39,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     async handler(req) {
       const { id } = req.params;
-      const { orderBy } = req.query as ListQueryParams;
 
       return new TableQueryBuilder(ProductStockHistories, req)
         .where(
@@ -65,7 +63,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             name: true,
           },
         })
-        .order(orderBy ? order.from(req) : { id: 'DESC' })
         .exec();
     },
   });
@@ -76,10 +73,14 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Number(),
       }),
-      querystring: ListQueryOptions({
-        filterable: ['sourceType'],
-        orderable: ['id', 'sourceType', 'bin.name'],
-        searchable: ['bin.name'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id', 'sourceType', 'bin.name']),
+        filter: Filter({
+          sourceType: Type.String({ enum: Object.values(SourceType) }),
+          bin: Type.Object({
+            name: Searchable(),
+          }),
+        }),
       }),
       security: [
         {
@@ -89,7 +90,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     async handler(req) {
       const { id } = req.params;
-      const { orderBy } = req.query as ListQueryParams;
 
       return new TableQueryBuilder(ProductStockHistories, req)
         .where(

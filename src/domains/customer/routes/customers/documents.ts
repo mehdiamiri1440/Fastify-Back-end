@@ -1,27 +1,25 @@
-import { repo } from '$src/infra/utils/repo';
+import { Customer } from '$src/domains/customer/models/Customer';
+import { CustomerDocument } from '$src/domains/customer/models/Document';
+import { DocumentSchema } from '$src/domains/customer/schemas/document.schema';
 import { ResponseShape } from '$src/infra/Response';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
+import { OrderBy, PaginatedQueryString } from '$src/infra/tables/PaginatedType';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
+import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
-import { DocumentSchema } from '$src/domains/customer/schemas/document.schema';
-import { CustomerDocument } from '$src/domains/customer/models/Document';
-import { Customer } from '$src/domains/customer/models/Customer';
-
-const Customers = repo(Customer);
-const Documents = repo(CustomerDocument);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
+  const Customers = repo(Customer);
+  const Documents = repo(CustomerDocument);
+
   app.register(ResponseShape);
 
   app.route({
     method: 'GET',
     url: '/:id/documents',
     schema: {
-      querystring: ListQueryOptions({
-        filterable: [],
-        orderable: [],
-        searchable: [],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id', 'createdAt']),
       }),
       security: [
         {

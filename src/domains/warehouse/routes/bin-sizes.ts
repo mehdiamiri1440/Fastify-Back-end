@@ -1,11 +1,16 @@
+import { BinSize } from '$src/domains/warehouse/models/BinSize';
 import { ResponseShape } from '$src/infra/Response';
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { repo } from '$src/infra/utils/repo';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
+import {
+  Filter,
+  OrderBy,
+  PaginatedQueryString,
+  Searchable,
+} from '$src/infra/tables/PaginatedType';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
+import { repo } from '$src/infra/utils/repo';
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { BinSizeSchema } from '../schemas/bin-size.schema';
-import { BinSize } from '$src/domains/warehouse/models/BinSize';
 const BinSizes = repo(BinSize);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
@@ -20,10 +25,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['warehouse@bin-size::list'],
         },
       ],
-      querystring: ListQueryOptions({
-        filterable: ['title'],
-        orderable: ['title'],
-        searchable: ['title'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id', 'createdAt', 'title']),
+        filter: Filter({
+          title: Searchable(),
+        }),
       }),
     },
     async handler(req) {

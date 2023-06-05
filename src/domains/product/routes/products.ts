@@ -1,14 +1,19 @@
 import AppDataSource from '$src/DataSource';
 import { Bin } from '$src/domains/warehouse/models/Bin';
 import { Response, ResponseShape } from '$src/infra/Response';
+import {
+  Filter,
+  OrderBy,
+  PaginatedQueryString,
+  Searchable,
+} from '$src/infra/tables/PaginatedType';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { repo } from '$src/infra/utils/repo';
 import { createError } from '@fastify/error';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import assert from 'assert';
-import { DeepPartial, In, Raw } from 'typeorm';
+import { DeepPartial, In } from 'typeorm';
 import { ProductService } from '../ProductService';
 import { Product } from '../models/Product';
 import { SourceType } from '../models/ProductStockHistory';
@@ -56,15 +61,16 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
   app.register(ResponseShape);
 
-  // GET /products
-  app.route({
-    method: 'GET',
-    url: '/products',
+  app.get('/products', {
     schema: {
-      querystring: ListQueryOptions({
-        filterable: [],
-        orderable: ['name', 'category.name', 'price'],
-        searchable: ['name', 'category.name', 'price'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id', 'name', 'category.name']),
+        filter: Filter({
+          name: Searchable(),
+          category: Filter({
+            name: Searchable(),
+          }),
+        }),
       }),
       security: [
         {

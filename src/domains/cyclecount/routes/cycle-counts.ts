@@ -1,19 +1,14 @@
-import { ResponseShape } from '$src/infra/Response';
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { repo } from '$src/infra/utils/repo';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
-import { TableQueryBuilder } from '$src/infra/tables/Table';
-import { Type } from '@sinclair/typebox';
 import AppDataSource from '$src/DataSource';
 import { CycleCount } from '$src/domains/cyclecount/models/CycleCount';
+import { CycleCountDifference } from '$src/domains/cyclecount/models/Difference';
 import {
   CycleCountSchema,
   cycleCountState,
   cycleCountType,
 } from '$src/domains/cyclecount/schemas/cyclecount.schema';
-import { CycleCountService } from '$src/domains/cyclecount/services/cyclecount.service';
-import { CycleCountDifference } from '$src/domains/cyclecount/models/Difference';
 import { CycleCountDifferenceSchema } from '$src/domains/cyclecount/schemas/difference.schema';
+import { CycleCountService } from '$src/domains/cyclecount/services/cyclecount.service';
+import { ResponseShape } from '$src/infra/Response';
 import {
   Filter,
   OrderBy,
@@ -24,6 +19,9 @@ import {
 import { toTypeOrmFilter } from '$src/infra/tables/filter';
 import { toUpperCase } from '$src/infra/tables/order';
 import { PaginatedResponse } from '$src/infra/tables/response';
+import { repo } from '$src/infra/utils/repo';
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { Type } from '@sinclair/typebox';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);

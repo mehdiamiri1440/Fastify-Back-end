@@ -1,13 +1,18 @@
-import { ResponseShape } from '$src/infra/Response';
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { Supplier } from '../../models/Supplier';
-import { Language } from '../../models/Language';
-import { repo } from '$src/infra/utils/repo';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
-import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { SupplierSchema } from '$src/domains/supplier/schemas/supplier.schema';
-import { Type } from '@sinclair/typebox';
+import { ResponseShape } from '$src/infra/Response';
 import ibanValidator from '$src/infra/ibanValidator';
+import {
+  Filter,
+  OrderBy,
+  PaginatedQueryString,
+  Searchable,
+} from '$src/infra/tables/PaginatedType';
+import { TableQueryBuilder } from '$src/infra/tables/Table';
+import { repo } from '$src/infra/utils/repo';
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { Type } from '@sinclair/typebox';
+import { Language } from '../../models/Language';
+import { Supplier } from '../../models/Supplier';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
@@ -23,10 +28,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['supplier@supplier::list'],
         },
       ],
-      querystring: ListQueryOptions({
-        filterable: ['name'],
-        orderable: ['id', 'name'],
-        searchable: ['id', 'name'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id', 'createdAt', 'name', 'cif']),
+        filter: Filter({
+          name: Searchable(),
+          cif: Searchable(),
+        }),
       }),
     },
     async handler(req) {

@@ -1,14 +1,20 @@
 import { TagSchema } from '$src/domains/configuration/schemas/tag.schema';
 import { ResponseShape } from '$src/infra/Response';
+import {
+  Filter,
+  OrderBy,
+  PaginatedQueryString,
+  Searchable,
+} from '$src/infra/tables/PaginatedType';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { Tag } from '../models/Tag';
 
-const Tags = repo(Tag);
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
+  const Tags = repo(Tag);
+
   app.register(ResponseShape);
   app.route({
     method: 'GET',
@@ -19,10 +25,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['configuration@tag::list'],
         },
       ],
-      querystring: ListQueryOptions({
-        filterable: ['name'],
-        orderable: ['name'],
-        searchable: ['name'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id', 'createdAt', 'name']),
+        filter: Filter({
+          name: Searchable(),
+        }),
       }),
     },
     async handler(req) {

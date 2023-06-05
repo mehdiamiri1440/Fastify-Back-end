@@ -1,21 +1,27 @@
-import { ResponseShape } from '$src/infra/Response';
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { Bin } from '../models/Bin';
-import { repo } from '$src/infra/utils/repo';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
-import { TableQueryBuilder } from '$src/infra/tables/Table';
-const Bins = repo(Bin);
-import { Type } from '@sinclair/typebox';
-import { BinSchema } from '../schemas/bin.schema';
-import { Warehouse } from '../models/Warehouse';
-import { BinSize } from '$src/domains/warehouse/models/BinSize';
 import { BinProperty } from '$src/domains/warehouse/models/BinProperty';
-const Warehouses = repo(Warehouse);
-const BinSizes = repo(BinSize);
-const BinProperties = repo(BinProperty);
+import { BinSize } from '$src/domains/warehouse/models/BinSize';
+import { ResponseShape } from '$src/infra/Response';
+import {
+  Filter,
+  OrderBy,
+  PaginatedQueryString,
+  Searchable,
+} from '$src/infra/tables/PaginatedType';
+import { TableQueryBuilder } from '$src/infra/tables/Table';
+import { repo } from '$src/infra/utils/repo';
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { Type } from '@sinclair/typebox';
+import { Bin } from '../models/Bin';
+import { Warehouse } from '../models/Warehouse';
+import { BinSchema } from '../schemas/bin.schema';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
+
+  const Bins = repo(Bin);
+  const Warehouses = repo(Warehouse);
+  const BinSizes = repo(BinSize);
+  const BinProperties = repo(BinProperty);
 
   app.route({
     method: 'GET',
@@ -26,10 +32,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['warehouse@bin::list'],
         },
       ],
-      querystring: ListQueryOptions({
-        filterable: ['name', 'province', 'city', 'street', 'postalCode'],
-        orderable: ['name', 'province', 'city', 'street', 'postalCode'],
-        searchable: ['name', 'province', 'city', 'street', 'postalCode'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id', 'name', 'createdAt']),
+        filter: Filter({
+          name: Searchable(),
+        }),
       }),
     },
     async handler(req) {
