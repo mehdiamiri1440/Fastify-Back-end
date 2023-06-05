@@ -142,7 +142,6 @@ describe('Create Inbound', () => {
         products: [
           {
             productId: product.id,
-            price: 100,
             quantity: 5,
           },
         ],

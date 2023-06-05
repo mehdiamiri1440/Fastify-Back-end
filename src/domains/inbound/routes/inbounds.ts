@@ -134,13 +134,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // POST /new
-  app.route({
-    method: 'POST',
-    url: '/new',
+  app.post('/new', {
     schema: {
       body: Type.Object({
-        driverId: Type.Optional(Type.Number()),
+        driverId: Type.Optional(Nullable(Type.Number())),
         products: Type.Array(
           Type.Object({
             productId: Type.Number(),
@@ -193,17 +190,13 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // POST /returned
-  app.route({
-    method: 'POST',
-    url: '/returned',
+  app.post('/returned', {
     schema: {
       body: Type.Object({
         driverId: Type.Optional(Type.Number()),
         products: Type.Array(
           Type.Object({
             productId: Type.Number(),
-            price: Type.Number(),
             quantity: Type.Number(),
           }),
         ),
@@ -236,9 +229,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
         // Add each product to the inbound record
         for (const productData of body.products) {
-          const { productId, price, quantity } = productData;
+          const { productId, quantity } = productData;
           await inboundService.addInboundProduct(inbound, productId, {
-            price,
             quantity,
           });
         }
