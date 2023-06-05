@@ -3,35 +3,69 @@ import { ProductService } from '$src/domains/product/ProductService';
 import { SourceType } from '$src/domains/product/models/ProductStockHistory';
 import { Bin } from '$src/domains/warehouse/models/Bin';
 import { ResponseShape } from '$src/infra/Response';
+import {
+  Filter,
+  OrderBy,
+  PaginatedQueryString,
+  Range,
+  Searchable,
+} from '$src/infra/tables/PaginatedType';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import * as where from '$src/infra/tables/filter';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
-import { InboundStatus } from '../models/Inbound';
-import { InboundProduct } from '../models/InboundProduct';
-import { InboundProductSort } from '../models/InboundProductSort';
-import { loadUserWarehouse } from '../services/utils';
 import {
   BIN_ALREADY_SORTED,
   INVALID_QUANTITY_AMOUNT,
   INVALID_STATUS,
 } from '../errors';
-
-const InboundProducts = repo(InboundProduct);
+import { InboundStatus } from '../models/Inbound';
+import { InboundProduct } from '../models/InboundProduct';
+import { InboundProductSort } from '../models/InboundProductSort';
+import { loadUserWarehouse } from '../services/utils';
 
 const sum = (array: number[]) => array.reduce((a, b) => a + b, 0);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
+  const InboundProducts = repo(InboundProduct);
+
+  function fineOne(id: number) {
+    return InboundProducts.findOneOrFail({
+      where: {
+        id,
+      },
+      relations: {
+        inbound: true,
+      },
+    });
+  }
 
   app.get('/', {
     schema: {
-      querystring: ListQueryOptions({
-        filterable: ['status'],
-        orderable: ['id', 'status', 'creator.fullName', 'createdAt'],
-        searchable: ['id', 'creator.fullName'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy([
+          'id',
+          'product.name',
+          'supplier.name',
+          'createdAt',
+          'requestedQuantity',
+          'actualQuantity',
+          'product.unit.name',
+        ]),
+        filter: Filter({
+          product: Filter({
+            name: Searchable(),
+            unit: Type.Object({
+              name: Searchable(),
+            }),
+          }),
+          supplier: Type.Object({
+            name: Searchable(),
+          }),
+          createdAt: Range(Type.String({ format: 'date-time' })),
+        }),
       }),
       security: [
         {
@@ -61,7 +95,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
               name: true,
             },
           },
-          inbound: {},
+          inbound: {
+            id: true,
+            warehouse: {
+              id: true,
+            },
+          },
         })
         .relation({
           inbound: {
@@ -399,16 +438,5 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
   });
 };
-
-function fineOne(id: number) {
-  return InboundProducts.findOneOrFail({
-    where: {
-      id,
-    },
-    relations: {
-      inbound: true,
-    },
-  });
-}
 
 export default plugin;
