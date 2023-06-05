@@ -1,5 +1,5 @@
 import { ResponseShape } from '$src/infra/Response';
-import StringEnum from '$src/infra/StringEnum';
+import StringEnum from '$src/infra/utils/StringEnum';
 import {
   Filter,
   OrderBy,

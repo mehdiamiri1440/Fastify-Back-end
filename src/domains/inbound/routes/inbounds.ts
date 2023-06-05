@@ -1,7 +1,7 @@
 import AppDataSource from '$src/DataSource';
 import { User } from '$src/domains/user/models/User';
 import { ResponseShape } from '$src/infra/Response';
-import StringEnum from '$src/infra/StringEnum';
+import StringEnum from '$src/infra/utils/StringEnum';
 import {
   Filter,
   OrderBy,

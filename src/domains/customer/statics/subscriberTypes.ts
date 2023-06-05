@@ -1,4 +1,4 @@
-import StringEnum from '$src/infra/StringEnum';
+import StringEnum from '$src/infra/utils/StringEnum';
 import { Static } from '@sinclair/typebox';
 
 export const businessSubscriberTypes = ['empresa'] as const;

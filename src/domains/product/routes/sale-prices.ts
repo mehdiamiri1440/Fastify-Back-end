@@ -1,12 +1,12 @@
 import { ResponseShape } from '$src/infra/Response';
+import { OrderBy, PaginatedQueryString } from '$src/infra/tables/PaginatedType';
+import { TableQueryBuilder } from '$src/infra/tables/Table';
 import { repo } from '$src/infra/utils/repo';
 import createError from '@fastify/error';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { Product } from '../models/Product';
 import { ProductSalePrice } from '../models/ProductSalePrice';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
-import { TableQueryBuilder } from '$src/infra/tables/Table';
 
 const PRODUCT_NOT_FOUND = createError(
   'PRODUCT_NOT_FOUND',
@@ -27,10 +27,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Number(),
       }),
-      querystring: ListQueryOptions({
-        filterable: [],
-        orderable: ['id'],
-        searchable: [],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id', 'createdAt']),
       }),
       security: [
         {

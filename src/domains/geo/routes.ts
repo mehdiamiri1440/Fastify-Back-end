@@ -1,11 +1,11 @@
-import { ResponseShape } from '$src/infra/Response';
+import { Response, ResponseShape } from '$src/infra/Response';
 import {
-  ListQueryOptions,
-  ListQueryParams,
-} from '$src/infra/tables/schema_builder';
+  Filter,
+  OrderBy,
+  PaginatedQueryString,
+  Searchable,
+} from '$src/infra/tables/PaginatedType';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { Response } from '$src/infra/Response';
-import { Type } from '@sinclair/typebox';
 import {
   generateQueryParamForPaginationAndOrder,
   getCities,
@@ -23,15 +23,16 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/provinces',
     schema: {
-      querystring: ListQueryOptions({
-        filterable: [],
-        orderable: ['id'],
-        searchable: ['code', 'name'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id']),
+        filter: Filter({
+          code: Searchable(),
+          name: Searchable(),
+        }),
       }),
     },
     async handler(req) {
-      const { page, pageSize, filter, order, orderBy } =
-        req.query as ListQueryParams;
+      const { page, pageSize, filter, order, orderBy } = req.query;
       const queryParams = generateQueryParamForPaginationAndOrder({
         page,
         pageSize,
@@ -65,15 +66,17 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/cities',
     schema: {
-      querystring: ListQueryOptions({
-        filterable: [],
-        orderable: ['id'],
-        searchable: ['code', 'name', 'provinceCode'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id']),
+        filter: Filter({
+          code: Searchable(),
+          name: Searchable(),
+          provinceCode: Searchable(),
+        }),
       }),
     },
     async handler(req, rep) {
-      const { page, pageSize, filter, order, orderBy } =
-        req.query as ListQueryParams;
+      const { page, pageSize, filter, order, orderBy } = req.query;
       const queryParams = generateQueryParamForPaginationAndOrder({
         page,
         pageSize,
@@ -117,15 +120,17 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/streets',
     schema: {
-      querystring: ListQueryOptions({
-        filterable: [],
-        orderable: ['id'],
-        searchable: ['code', 'name', 'cityCode'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id']),
+        filter: Filter({
+          code: Searchable(),
+          name: Searchable(),
+          cityCode: Searchable(),
+        }),
       }),
     },
     async handler(req, rep) {
-      const { page, pageSize, filter, order, orderBy } =
-        req.query as ListQueryParams;
+      const { page, pageSize, filter, order, orderBy } = req.query;
 
       const queryParams = generateQueryParamForPaginationAndOrder({
         page,
@@ -167,14 +172,14 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/postal-codes',
     schema: {
-      querystring: ListQueryOptions({
-        filterable: [],
-        orderable: [],
-        searchable: ['cityCode'],
+      querystring: PaginatedQueryString({
+        filter: Filter({
+          cityCode: Searchable(),
+        }),
       }),
     },
     async handler(req) {
-      const { filter } = req.query as ListQueryParams;
+      const { filter } = req.query;
 
       const queryParams = new URLSearchParams();
 
@@ -194,15 +199,19 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/numbers',
     schema: {
-      querystring: ListQueryOptions({
-        filterable: [],
-        orderable: ['id'],
-        searchable: ['code', 'number', 'street_code'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id']),
+
+        filter: Filter({
+          code: Searchable(),
+          name: Searchable(),
+          number: Searchable(),
+          streetCode: Searchable(),
+        }),
       }),
     },
     async handler(req) {
-      const { page, pageSize, filter, order, orderBy } =
-        req.query as ListQueryParams;
+      const { page, pageSize, filter, order, orderBy } = req.query;
 
       const queryParams = generateQueryParamForPaginationAndOrder({
         page,
@@ -222,12 +231,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }
 
       if (
-        typeof filter?.street_code === 'object' &&
-        '$like' in filter.street_code
+        typeof filter?.streetCode === 'object' &&
+        '$like' in filter.streetCode
       ) {
         filters.push({
           key: 'GeoStreet.code',
-          value: filter.street_code.$like,
+          value: filter.streetCode.$like,
         });
       }
 

@@ -1,8 +1,8 @@
 import { InboundStatus } from '$src/domains/inbound/models/Inbound';
 import { InboundProduct } from '$src/domains/inbound/models/InboundProduct';
 import { ResponseShape } from '$src/infra/Response';
+import { OrderBy, PaginatedQueryString } from '$src/infra/tables/PaginatedType';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
 import { repo } from '$src/infra/utils/repo';
 import {
   FastifyPluginAsyncTypebox,
@@ -14,18 +14,13 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
   const InboundProducts = repo(InboundProduct);
 
-  // GET /products/:id/inbounds
-  app.route({
-    method: 'GET',
-    url: '/products/:id/inbounds',
+  app.get('/products/:id/inbounds', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
       }),
-      querystring: ListQueryOptions({
-        filterable: [],
-        orderable: ['id'],
-        searchable: [],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id']),
       }),
       security: [
         {
@@ -59,9 +54,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           product: {
             id,
           },
-        })
-        .order({
-          id: 'DESC',
         })
         .exec();
     },

@@ -7,7 +7,11 @@ export const QueryString = <T extends TProperties>(props: T) =>
     explode: true,
   });
 
-export const PaginatedQueryString = <T extends TProperties>(props: T) =>
+export const PaginatedQueryString = <
+  T extends { orderBy?: TSchema; filter?: TSchema },
+>(
+  props: T,
+) =>
   Type.Object(
     {
       page: Page(),

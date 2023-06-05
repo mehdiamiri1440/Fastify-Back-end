@@ -1,20 +1,21 @@
-import { ResponseShape } from '$src/infra/Response';
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { Warehouse } from '../models/Warehouse';
-import { repo } from '$src/infra/utils/repo';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
-import { TableQueryBuilder } from '$src/infra/tables/Table';
-import { Type } from '@sinclair/typebox';
-import { WarehouseStaff } from '$src/domains/warehouse/models/WarehouseStaff';
 import { User } from '$src/domains/user/models/User';
+import { WarehouseStaff } from '$src/domains/warehouse/models/WarehouseStaff';
 import { WarehouseStaffSchema } from '$src/domains/warehouse/schemas/warehouse-staff';
+import { ResponseShape } from '$src/infra/Response';
+import { OrderBy, PaginatedQueryString } from '$src/infra/tables/PaginatedType';
+import { TableQueryBuilder } from '$src/infra/tables/Table';
+import { repo } from '$src/infra/utils/repo';
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { Type } from '@sinclair/typebox';
 import { IsNull } from 'typeorm';
-const Warehouses = repo(Warehouse);
-const WarehouseStaffs = repo(WarehouseStaff);
-const Users = repo(User);
+import { Warehouse } from '../models/Warehouse';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
+
+  const Warehouses = repo(Warehouse);
+  const WarehouseStaffs = repo(WarehouseStaff);
+  const Users = repo(User);
 
   app.route({
     method: 'GET',
@@ -25,10 +26,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['warehouse@warehouse::update'],
         },
       ],
-      querystring: ListQueryOptions({
-        filterable: ['warehouse.id', 'user.id'],
-        orderable: ['warehouse.id', 'user.id'],
-        searchable: ['warehouse.id', 'user.id'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['warehouse.id', 'user.id']),
       }),
     },
     async handler(req) {

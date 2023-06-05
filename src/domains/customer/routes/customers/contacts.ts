@@ -1,14 +1,14 @@
-import { ResponseShape } from '$src/infra/Response';
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { repo } from '$src/infra/utils/repo';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
-import { TableQueryBuilder } from '$src/infra/tables/Table';
-import { Type } from '@sinclair/typebox';
-import { Customer } from '$src/domains/customer/models/Customer';
 import { CustomerContact } from '$src/domains/customer/models/Contact';
-import createError from '@fastify/error';
-import { isBusiness } from '$src/domains/customer/statics/subscriberTypes';
+import { Customer } from '$src/domains/customer/models/Customer';
 import { ContactSchema } from '$src/domains/customer/schemas/contact.schema';
+import { isBusiness } from '$src/domains/customer/statics/subscriberTypes';
+import { ResponseShape } from '$src/infra/Response';
+import { OrderBy, PaginatedQueryString } from '$src/infra/tables/PaginatedType';
+import { TableQueryBuilder } from '$src/infra/tables/Table';
+import { repo } from '$src/infra/utils/repo';
+import createError from '@fastify/error';
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { Type } from '@sinclair/typebox';
 
 const NEED_NAME_DATA = createError(
   'NEED_NAME_DATA',
@@ -31,10 +31,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['customer@contact::list'],
         },
       ],
-      querystring: ListQueryOptions({
-        filterable: [],
-        orderable: [],
-        searchable: [],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id', 'createdAt']),
       }),
       params: Type.Object({
         id: Type.Number(),

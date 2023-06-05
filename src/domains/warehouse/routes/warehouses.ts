@@ -1,19 +1,18 @@
-import { ResponseShape } from '$src/infra/Response';
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { Warehouse } from '../models/Warehouse';
-import { repo } from '$src/infra/utils/repo';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
-import { TableQueryBuilder } from '$src/infra/tables/Table';
-import { Type } from '@sinclair/typebox';
-import { WarehouseSchema } from '../schemas/warehouse.schema';
 import { User } from '$src/domains/user/models/User';
-import { getStreets } from '$src/domains/geo/service';
-import createError from '@fastify/error';
-const STREET_NAME_NOT_FOUND = createError(
-  'STREET_NAME_NOT_FOUND',
-  'we can not find name of this street code',
-  404,
-);
+import { ResponseShape } from '$src/infra/Response';
+import {
+  Filter,
+  OrderBy,
+  PaginatedQueryString,
+  Range,
+  Searchable,
+} from '$src/infra/tables/PaginatedType';
+import { TableQueryBuilder } from '$src/infra/tables/Table';
+import { repo } from '$src/infra/utils/repo';
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { Type } from '@sinclair/typebox';
+import { Warehouse } from '../models/Warehouse';
+import { WarehouseSchema } from '../schemas/warehouse.schema';
 
 const Warehouses = repo(Warehouse);
 const Users = repo(User);
@@ -30,33 +29,22 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['warehouse@warehouse::list'],
         },
       ],
-      querystring: ListQueryOptions({
-        filterable: [
-          'province',
-          'cityCode',
-          'streetCode',
-          'streetName',
-          'postalCode',
-          'supervisor.fullName',
-        ],
-        orderable: [
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy([
+          'id',
           'name',
-          'province',
-          'cityCode',
-          'streetCode',
           'streetName',
-          'postalCode',
           'supervisor.fullName',
-        ],
-        searchable: [
-          'name',
-          'province',
-          'cityCode',
-          'streetCode',
-          'streetName',
-          'postalCode',
-          'supervisor.fullName',
-        ],
+          'createdAt',
+        ]),
+        filter: Filter({
+          name: Searchable(),
+          streetName: Searchable(),
+          supervisor: Type.Object({
+            fullName: Searchable(),
+          }),
+          createdAt: Range(Type.String({ format: 'date-time' })),
+        }),
       }),
     },
     async handler(req) {

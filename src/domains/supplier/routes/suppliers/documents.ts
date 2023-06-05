@@ -1,12 +1,12 @@
-import { repo } from '$src/infra/utils/repo';
-import { ResponseShape } from '$src/infra/Response';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
-import { TableQueryBuilder } from '$src/infra/tables/Table';
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { Type } from '@sinclair/typebox';
-import { DocumentSchema } from '$src/domains/supplier/schemas/document.schema';
 import { SupplierDocument } from '$src/domains/supplier/models/Documents';
 import { Supplier } from '$src/domains/supplier/models/Supplier';
+import { DocumentSchema } from '$src/domains/supplier/schemas/document.schema';
+import { ResponseShape } from '$src/infra/Response';
+import { OrderBy, PaginatedQueryString } from '$src/infra/tables/PaginatedType';
+import { TableQueryBuilder } from '$src/infra/tables/Table';
+import { repo } from '$src/infra/utils/repo';
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { Type } from '@sinclair/typebox';
 
 const Suppliers = repo(Supplier);
 const Documents = repo(SupplierDocument);
@@ -18,10 +18,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/:id/documents',
     schema: {
-      querystring: ListQueryOptions({
-        filterable: [],
-        orderable: ['id'],
-        searchable: ['id'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id', 'createdAt']),
       }),
       security: [
         {

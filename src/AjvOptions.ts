@@ -3,7 +3,7 @@ import { FastifyServerOptions } from 'fastify';
 
 export const ajvOptions = {
   customOptions: {
-    removeAdditional: true,
+    removeAdditional: 'all',
   },
   plugins: [
     (ajv: Ajv) => {

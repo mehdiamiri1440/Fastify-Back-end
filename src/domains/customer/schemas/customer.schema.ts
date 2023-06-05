@@ -1,5 +1,5 @@
 import { Type } from '@sinclair/typebox';
-import StringEnum from '$src/infra/StringEnum';
+import StringEnum from '$src/infra/utils/StringEnum';
 import { allSubscriberTypes } from '$src/domains/customer/statics/subscriberTypes';
 import { allDocumentTypes } from '$src/domains/customer/statics/documentTypes';
 

@@ -1,15 +1,20 @@
+import { BinProperty } from '$src/domains/warehouse/models/BinProperty';
 import { ResponseShape } from '$src/infra/Response';
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { repo } from '$src/infra/utils/repo';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
+import {
+  Filter,
+  OrderBy,
+  PaginatedQueryString,
+  Searchable,
+} from '$src/infra/tables/PaginatedType';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
+import { repo } from '$src/infra/utils/repo';
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { BinPropertySchema } from '../schemas/bin-property.schema';
-import { BinProperty } from '$src/domains/warehouse/models/BinProperty';
-const BinProperties = repo(BinProperty);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
+  const BinProperties = repo(BinProperty);
 
   app.route({
     method: 'GET',
@@ -20,10 +25,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['warehouse@bin-property::list'],
         },
       ],
-      querystring: ListQueryOptions({
-        filterable: ['title'],
-        orderable: ['title'],
-        searchable: ['title'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id', 'createdAt', 'title']),
+        filter: Filter({
+          title: Searchable(),
+        }),
       }),
     },
     async handler(req) {

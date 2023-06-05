@@ -1,27 +1,33 @@
-import { repo } from '$src/infra/utils/repo';
-import { ResponseShape } from '$src/infra/Response';
-import { ListQueryOptions } from '$src/infra/tables/schema_builder';
-import { TableQueryBuilder } from '$src/infra/tables/Table';
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { Supplier } from '$src/domains/supplier/models/Supplier';
 import { SupplierContact } from '$src/domains/supplier/models/Contact';
-import { Type } from '@sinclair/typebox';
+import { Supplier } from '$src/domains/supplier/models/Supplier';
 import { ContactSchema } from '$src/domains/supplier/schemas/contact.schema';
-
-const Suppliers = repo(Supplier);
-const SupplierContacts = repo(SupplierContact);
+import { ResponseShape } from '$src/infra/Response';
+import {
+  Filter,
+  OrderBy,
+  PaginatedQueryString,
+  Searchable,
+} from '$src/infra/tables/PaginatedType';
+import { TableQueryBuilder } from '$src/infra/tables/Table';
+import { repo } from '$src/infra/utils/repo';
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { Type } from '@sinclair/typebox';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
+
+  const Suppliers = repo(Supplier);
+  const SupplierContacts = repo(SupplierContact);
 
   app.route({
     method: 'GET',
     url: '/:id/contacts',
     schema: {
-      querystring: ListQueryOptions({
-        filterable: ['name'],
-        orderable: ['name'],
-        searchable: ['name'],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id', 'createdAt', 'name']),
+        filter: Filter({
+          name: Searchable(),
+        }),
       }),
       security: [
         {
