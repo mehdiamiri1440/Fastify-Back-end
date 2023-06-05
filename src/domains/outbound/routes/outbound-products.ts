@@ -25,10 +25,44 @@ function fineOne(id: number) {
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
 
-  // PATCH /:id
-  app.route({
-    method: 'PATCH',
-    url: '/:id',
+  async function getSupplyState(id: number, userId: number) {
+    const manager = new OutboundProductManager(AppDataSource, id, userId);
+    await manager.load();
+    return {
+      supplied: manager.supplied,
+      suppliedQuantity: manager.suppliedQuantity,
+      freeQuantity: manager.freeQuantity,
+      expectedQuantity: manager.entity.quantity,
+      bins: manager.supplyState,
+    };
+  }
+
+  app.get('/:id', {
+    schema: {
+      params: Type.Object({
+        id: Type.Integer(),
+      }),
+      security: [
+        {
+          OAuth2: ['outbound@outbound::list'],
+        },
+      ],
+    },
+    async handler(req) {
+      const { id } = req.params;
+
+      return outboundProductsRepo.findOneOrFail({
+        where: { id },
+        relations: {
+          product: {
+            unit: true,
+          },
+        },
+      });
+    },
+  });
+
+  app.patch('/:id', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -55,10 +89,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // DELETE /:id
-  app.route({
-    method: 'DELETE',
-    url: '/:id',
+  app.delete('/:id', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -86,22 +117,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  async function getSupplyState(id: number, userId: number) {
-    const manager = new OutboundProductManager(AppDataSource, id, userId);
-    await manager.load();
-    return {
-      supplied: manager.supplied,
-      suppliedQuantity: manager.suppliedQuantity,
-      freeQuantity: manager.freeQuantity,
-      expectedQuantity: manager.entity.quantity,
-      bins: manager.supplyState,
-    };
-  }
-
-  // GET /:id/supply-state
-  app.route({
-    method: 'GET',
-    url: '/:id/supply-state',
+  app.get('/:id/supply-state', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -119,10 +135,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // POST /:id/supplies
-  app.route({
-    method: 'POST',
-    url: '/:id/supplies',
+  app.post('/:id/supplies', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -160,10 +173,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // DELETE /:id/supplies/:binId
-  app.route({
-    method: 'DELETE',
-    url: '/:id/supplies/:binId',
+  app.delete('/:id/supplies/:binId', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
