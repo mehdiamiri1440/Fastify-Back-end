@@ -20,6 +20,10 @@ import { WarehouseStaff } from '../../warehouse/models/WarehouseStaff';
 import { Outbound, OutboundStatus } from '../models/Outbound';
 import { OutboundProduct } from '../models/OutboundProduct';
 import routes from '../routes/outbounds';
+import { BinProduct } from '$src/domains/product/models/BinProduct';
+import { Bin } from '$src/domains/warehouse/models/Bin';
+import { randomUUID } from 'crypto';
+import { DeepPartial } from 'typeorm';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -86,6 +90,27 @@ const createSampleCustomer = async () => {
   return customer;
 };
 
+const createSampleBin = async (
+  warehouse: Warehouse,
+  overrides?: DeepPartial<Bin>,
+) => {
+  await disableForeignKeyCheck();
+
+  const bin = await repo(Bin).save({
+    name: 'bin1',
+    warehouse,
+    internalCode: 'internalCode1',
+    physicalCode: randomUUID(),
+    property: { id: 1 },
+    size: { id: 1 },
+    creator: { id: 1 },
+    ...overrides,
+  });
+
+  await enableForeignKeyCheck();
+  return bin;
+};
+
 beforeAll(async () => {
   app = await createTestFastifyApp();
   await app.register(routes);
@@ -135,12 +160,19 @@ describe('Get Outbound', () => {
     });
   });
 
-  it('should get outbound by id', async () => {
+  it('should get list of outbound products', async () => {
     const warehouse = await createSampleWarehouse();
     const product = await createSampleProduct();
+    const bin = await createSampleBin(warehouse);
 
     assert(app);
     assert(user);
+
+    await repo(BinProduct).save({
+      product,
+      bin,
+      quantity: 25,
+    });
 
     const outbound = await repo(Outbound).save({
       status: OutboundStatus.DRAFT,
@@ -157,6 +189,44 @@ describe('Get Outbound', () => {
 
     const response = await user.inject({
       method: 'GET',
+      url: `/${outbound.id}/products`,
+    });
+
+    expect(response).statusCodeToBe(200);
+    const body = response.json();
+    expect(body).toMatchObject({
+      data: [
+        {
+          quantity: 5,
+          availableQuantity: 25,
+          product: {
+            name: product.name,
+            unit: {
+              name: product.unit.name,
+            },
+          },
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        },
+      ],
+    });
+  });
+
+  it('should get outbound by id', async () => {
+    const warehouse = await createSampleWarehouse();
+
+    assert(app);
+    assert(user);
+
+    await repo(Outbound).save({
+      status: OutboundStatus.DRAFT,
+      code: 'test',
+      warehouse,
+      creator: { id: 1 },
+    });
+
+    const response = await user.inject({
+      method: 'GET',
       url: '/1',
     });
 
@@ -167,22 +237,6 @@ describe('Get Outbound', () => {
         id: 1,
         status: 'draft',
         code: expect.any(String),
-        products: [
-          {
-            id: 1,
-            quantity: 5,
-            product: {
-              id: 1,
-              name: 'test',
-              // quantity: 10, // TODO(erfan)
-              unit: {
-                id: 1,
-                name: 'unit',
-              },
-            },
-            createdAt: expect.any(String),
-          },
-        ],
         creator: { id: 1, fullName: 'tester tester' },
         createdAt: expect.any(String),
         updatedAt: expect.any(String),

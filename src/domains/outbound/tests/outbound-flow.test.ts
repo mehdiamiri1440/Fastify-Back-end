@@ -156,20 +156,28 @@ it('Outbound Flow - With Driver', async () => {
   expect(confirmOrderResult.status).toBe('new_order');
 
   // doing the supply
-  const outbound = await inject({
+  const outboundProducts = await inject({
     method: 'GET',
-    url: `/outbounds/${id}`,
+    url: `/outbounds/${id}/products`,
   });
 
-  expect(outbound.products).toHaveLength(1);
+  expect(outboundProducts).toHaveLength(1);
   assert(bin);
 
-  for (const product of outbound.products) {
+  for (const product of outboundProducts) {
+    expect(product.availableQuantity).toBe(10);
+
     const beforeSupplyState = await inject({
       method: 'GET',
       url: `/outbound-products/${product.id}/supply-state`,
     });
-    expect(beforeSupplyState.supplied).toBe(false);
+
+    expect(beforeSupplyState).toMatchObject({
+      supplied: false,
+      freeQuantity: 10,
+      suppliedQuantity: 0,
+      expectedQuantity: 5,
+    });
 
     await inject({
       method: 'POST',
@@ -185,6 +193,12 @@ it('Outbound Flow - With Driver', async () => {
       url: `/outbound-products/${product.id}/supply-state`,
     });
     expect(afterSupplyState.supplied).toBe(true);
+    expect(afterSupplyState).toMatchObject({
+      supplied: true,
+      freeQuantity: 5,
+      suppliedQuantity: 5,
+      expectedQuantity: 5,
+    });
   }
 
   // confirm that the outbound was created
@@ -253,13 +267,5 @@ it('Outbound Flow - With Driver', async () => {
     creatorSignature: 'creator-sign-id',
     customerSignature: 'creator-customer-id',
     driverSignature: 'creator-driver-id',
-    products: [
-      {
-        quantity: 5,
-        product: {
-          id: product.id,
-        },
-      },
-    ],
   });
 });
