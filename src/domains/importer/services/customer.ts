@@ -8,6 +8,7 @@ import { Customer } from '$src/domains/customer/models/Customer';
 import { Nationality } from '$src/domains/customer/models/Nationality';
 import { validateCustomerData } from '$src/domains/customer/utils';
 import Ajv from 'ajv';
+import { NOT_VALID } from '$src/domains/importer/errors';
 const ajv = new Ajv({ coerceTypes: true });
 
 const Customers = repo(Customer);
@@ -33,27 +34,31 @@ const UploadedCustomerValidator = ajv.compile<typeof UploadedCustomerSchema>(
 
 export class CustomerUploaded extends Uploaded {
   async parse(): Promise<DeepPartial<Customer>[]> {
-    const customers = await parse(
-      await this.getBuffer(),
-      UploadedCustomerSchema,
-      UploadedCustomerValidator,
-    );
+    try {
+      const customers = await parse(
+        await this.getBuffer(),
+        UploadedCustomerSchema,
+        UploadedCustomerValidator,
+      );
 
-    // if one customer have problem we don't want to insert any customer at all
-    const customersToSave: DeepPartial<Customer>[] = [];
-    for (const customer of customers) {
-      // check if subscriber type need business data, business data exist else business data must not exist
-      validateCustomerData(customer);
+      // if one customer have problem we don't want to insert any customer at all
+      const customersToSave: DeepPartial<Customer>[] = [];
+      for (const customer of customers) {
+        // check if subscriber type need business data, business data exist else business data must not exist
+        validateCustomerData(customer);
 
-      customersToSave.push({
-        ...customer,
-        nationality: await Nationalities.findOneByOrFail({
-          id: customer.nationalityId,
-        }),
-        creator: { id: this.userId },
-      });
+        customersToSave.push({
+          ...customer,
+          nationality: await Nationalities.findOneByOrFail({
+            id: customer.nationalityId,
+          }),
+          creator: { id: this.userId },
+        });
+      }
+      return customersToSave;
+    } catch (e: any) {
+      throw e.message.includes('cannot validate') ? new NOT_VALID() : e;
     }
-    return customersToSave;
   }
   async insert() {
     return await Customers.insert(await this.parse());
