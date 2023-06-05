@@ -7,6 +7,7 @@ import { repo } from '$src/infra/utils/repo';
 import { Supplier } from '$src/domains/supplier/models/Supplier';
 import { Language } from '$src/domains/supplier/models/Language';
 import Ajv from 'ajv';
+import { NOT_VALID } from '$src/domains/importer/errors';
 const ajv = new Ajv({ coerceTypes: true });
 
 const Suppliers = repo(Supplier);
@@ -27,24 +28,28 @@ const UploadedSupplierValidator = ajv.compile<typeof UploadedSupplierSchema>(
 
 export class SupplierUploaded extends Uploaded {
   async parse(): Promise<DeepPartial<Supplier>[]> {
-    const suppliers = await parse(
-      await this.getBuffer(),
-      UploadedSupplierSchema,
-      UploadedSupplierValidator,
-    );
+    try {
+      const suppliers = await parse(
+        await this.getBuffer(),
+        UploadedSupplierSchema,
+        UploadedSupplierValidator,
+      );
 
-    // if one supplier have problem we don't want to insert any supplier at all
-    const suppliersToSave: DeepPartial<Supplier>[] = [];
-    for (const supplier of suppliers) {
-      suppliersToSave.push({
-        ...supplier,
-        language: await Languages.findOneByOrFail({
-          id: supplier.language,
-        }),
-        creator: { id: this.userId },
-      });
+      // if one supplier have problem we don't want to insert any supplier at all
+      const suppliersToSave: DeepPartial<Supplier>[] = [];
+      for (const supplier of suppliers) {
+        suppliersToSave.push({
+          ...supplier,
+          language: await Languages.findOneByOrFail({
+            id: supplier.language,
+          }),
+          creator: { id: this.userId },
+        });
+      }
+      return suppliersToSave;
+    } catch (e: any) {
+      throw e.message.includes('cannot validate') ? new NOT_VALID() : e;
     }
-    return suppliersToSave;
   }
   async insert() {
     return await Suppliers.insert(await this.parse());
