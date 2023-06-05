@@ -1,7 +1,7 @@
 import AppDataSource from '$src/DataSource';
+import { Customer } from '$src/domains/customer/models/Customer';
 import { User } from '$src/domains/user/models/User';
 import { ResponseShape } from '$src/infra/Response';
-import StringEnum from '$src/infra/utils/StringEnum';
 import {
   Filter,
   OrderBy,
@@ -11,17 +11,20 @@ import {
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import * as where from '$src/infra/tables/filter';
 import { Nullable } from '$src/infra/utils/Nullable';
+import StringEnum from '$src/infra/utils/StringEnum';
 import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { INVALID_STATUS } from '../errors';
 import { Outbound, OutboundStatus } from '../models/Outbound';
+import { OutboundProduct } from '../models/OutboundProduct';
 import { OutboundService } from '../services/outbound.service';
 import { loadUserWarehouse } from '../utils';
-import { Customer } from '$src/domains/customer/models/Customer';
+import { BinProduct } from '$src/domains/product/models/BinProduct';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   const outboundsRepo = repo(Outbound);
+  const outboundProductsRepo = repo(OutboundProduct);
   const usersRepo = repo(User);
   const customersRepo = repo(Customer);
 
@@ -93,33 +96,59 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             id: true,
             fullName: true,
           },
-          products: {
-            id: true,
-            quantity: true,
-            createdAt: true,
-            product: {
-              id: true,
-              name: true,
-              unit: {
-                id: true,
-                name: true,
-              },
-            },
-          },
         },
 
         relations: {
           creator: true,
           driver: true,
-          products: {
-            product: {
-              unit: true,
-            },
-          },
         },
         loadRelationIds: false,
       });
       return inbound;
+    },
+  });
+
+  app.get('/:id/products', {
+    schema: {
+      params: Type.Object({
+        id: Type.Integer(),
+      }),
+      security: [
+        {
+          OAuth2: ['outbound@outbound::list'],
+        },
+      ],
+    },
+    handler: async (req) => {
+      const { id } = req.params;
+      const { raw, entities } = await outboundProductsRepo
+        .createQueryBuilder('outbound_product')
+        .addSelect('product_quantity.quantity', 'availableQuantity')
+        .where({
+          outbound: {
+            id,
+          },
+        })
+        .leftJoinAndMapOne(
+          'product_quantity.quantity',
+          (qb) =>
+            qb
+              .select('bin_product.product_id')
+              .addSelect('SUM(bin_product.quantity)', 'quantity')
+              .groupBy('bin_product.product_id')
+              .from(BinProduct, 'bin_product'),
+
+          'product_quantity',
+          'product_quantity.product_id = outbound_product.product_id',
+        )
+        .leftJoinAndSelect('outbound_product.product', 'product')
+        .leftJoinAndSelect('product.unit', 'unit')
+        .getRawAndEntities();
+
+      return entities.map((entity, index) => ({
+        ...entity,
+        availableQuantity: Number(raw[index].availableQuantity),
+      }));
     },
   });
 
