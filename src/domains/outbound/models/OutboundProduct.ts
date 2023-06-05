@@ -1,13 +1,14 @@
 import { Product } from '$src/domains/product/models/Product';
 import { User } from '$src/domains/user/models/User';
-import { OneToMany, Relation } from 'typeorm';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
+  Relation,
   UpdateDateColumn,
 } from 'typeorm';
 import { Outbound } from './Outbound';

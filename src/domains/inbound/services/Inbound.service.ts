@@ -81,8 +81,8 @@ export class InboundService {
       price,
     }: {
       supplierId?: number;
+      price?: number;
       quantity: number;
-      price: number;
     },
   ) {
     const product = await this.productsRepo.findOneByOrFail({ id: productId });
