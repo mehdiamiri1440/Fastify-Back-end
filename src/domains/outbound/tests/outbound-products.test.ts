@@ -211,7 +211,31 @@ describe('Supply', () => {
     await enableForeignKeyCheck();
   });
 
-  it('should list outbound-products', async () => {
+  it('should get single outbound-product', async () => {
+    assert(app);
+    assert(user);
+    assert(product);
+
+    const response = await user.inject({
+      method: 'GET',
+      url: `/${outboundProduct.id}`,
+    });
+
+    expect(response).statusCodeToBe(200);
+    const data = response.json().data;
+    expect(data).toMatchObject({
+      id: outboundProduct.id,
+      product: {
+        id: product.id,
+        name: product.name,
+        unit: {
+          name: expect.any(String),
+        },
+      },
+    });
+  });
+
+  it('should get supply state', async () => {
     assert(app);
     assert(user);
     const response = await user.inject({
