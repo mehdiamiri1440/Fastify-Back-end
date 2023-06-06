@@ -157,4 +157,12 @@ export default {
     'with this permission you can create a cycle count',
   'cycle-count@cycle-count::update':
     'with this permission you can update cycle count',
+
+  // notification
+  'notification@all::list':
+    'with this permission you can get list of all notifications',
+  'notification@global::create':
+    'with this permission you can create a notification for all users',
+  'notification@specify::delete':
+    'with this permission you can delete specify notification',
 };
