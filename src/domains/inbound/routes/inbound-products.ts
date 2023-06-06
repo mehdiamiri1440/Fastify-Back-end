@@ -23,7 +23,7 @@ import {
 import { InboundStatus } from '../models/Inbound';
 import { InboundProduct } from '../models/InboundProduct';
 import { InboundProductSort } from '../models/InboundProductSort';
-import { loadUserWarehouse } from '../services/utils';
+import { loadUserWarehouse } from '../utils';
 
 const sum = (array: number[]) => array.reduce((a, b) => a + b, 0);
 

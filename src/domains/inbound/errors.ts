@@ -23,3 +23,9 @@ export const BIN_ALREADY_SORTED = createError(
   'Bin already sorted',
   400,
 );
+
+export const NOT_IN_WAREHOUSE = createError(
+  'NOT_IN_WAREHOUSE',
+  'You are not a warehouse staff',
+  403,
+);

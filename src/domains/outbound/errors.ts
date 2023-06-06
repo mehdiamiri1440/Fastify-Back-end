@@ -11,3 +11,8 @@ export const INVALID_USER_ID = createError(
   'user with id:%s not found',
   400,
 );
+export const NOT_IN_WAREHOUSE = createError(
+  'NOT_IN_WAREHOUSE',
+  'You are not a warehouse staff',
+  403,
+);

@@ -19,7 +19,7 @@ import { Inbound, InboundStatus, InboundType } from '../models/Inbound';
 import { InboundImage } from '../models/InboundImage';
 import { InboundProduct } from '../models/InboundProduct';
 import { InboundService } from '../services/Inbound.service';
-import { loadUserWarehouse } from '../services/utils';
+import { loadUserWarehouse } from '../utils';
 import {
   INCOMPLETE_LOADING,
   INCOMPLETE_SORTING,
