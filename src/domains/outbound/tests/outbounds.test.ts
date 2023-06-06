@@ -112,7 +112,7 @@ const createSampleBin = async (
   const bin = await repo(Bin).save({
     name: 'bin1',
     warehouse,
-    internalCode: 'internalCode1',
+    internalCode: randomUUID(),
     physicalCode: randomUUID(),
     property: { id: 1 },
     size: { id: 1 },
@@ -173,6 +173,40 @@ describe('Get Outbound', () => {
     });
   });
 
+  it('should get outbound by id', async () => {
+    const warehouse = await createSampleWarehouse();
+
+    assert(app);
+    assert(user);
+
+    await repo(Outbound).save({
+      status: OutboundStatus.DRAFT,
+      code: 'test',
+      warehouse,
+      creator: { id: 1 },
+    });
+
+    const response = await user.inject({
+      method: 'GET',
+      url: '/1',
+    });
+
+    expect(response).statusCodeToBe(200);
+    const body = response.json();
+    expect(body).toMatchObject({
+      data: {
+        id: 1,
+        status: 'draft',
+        code: expect.any(String),
+        creator: { id: 1, fullName: 'tester tester' },
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      },
+    });
+  });
+});
+
+describe('Get outbound products', () => {
   it('should get list of outbound products', async () => {
     const warehouse = await createSampleWarehouse();
     const product = await createSampleProduct();
@@ -225,35 +259,63 @@ describe('Get Outbound', () => {
     });
   });
 
-  it('should get outbound by id', async () => {
+  it('should exclude bins from other warehouses when calculating the availableQuantity', async () => {
     const warehouse = await createSampleWarehouse();
+    const warehouse2 = await createSampleWarehouse();
+    const product = await createSampleProduct();
+    const bin = await createSampleBin(warehouse);
+    const bin2 = await createSampleBin(warehouse2);
 
     assert(app);
     assert(user);
 
-    await repo(Outbound).save({
+    await repo(BinProduct).save({
+      product,
+      bin,
+      quantity: 25,
+    });
+
+    await repo(BinProduct).save({
+      product,
+      bin: bin2,
+      quantity: 25,
+    });
+
+    const outbound = await repo(Outbound).save({
       status: OutboundStatus.DRAFT,
       code: 'test',
       warehouse,
       creator: { id: 1 },
     });
 
+    await repo(OutboundProduct).save({
+      outbound,
+      product,
+      quantity: 5,
+    });
+
     const response = await user.inject({
       method: 'GET',
-      url: '/1',
+      url: `/${outbound.id}/products`,
     });
 
     expect(response).statusCodeToBe(200);
     const body = response.json();
     expect(body).toMatchObject({
-      data: {
-        id: 1,
-        status: 'draft',
-        code: expect.any(String),
-        creator: { id: 1, fullName: 'tester tester' },
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-      },
+      data: [
+        {
+          quantity: 5,
+          availableQuantity: 25,
+          product: {
+            name: product.name,
+            unit: {
+              name: product.unit.name,
+            },
+          },
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        },
+      ],
     });
   });
 });

@@ -128,6 +128,14 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     handler: async (req) => {
       const { id } = req.params;
+
+      const outbound = await outboundsRepo.findOneOrFail({
+        where: { id },
+        loadRelationIds: {
+          disableMixedMap: true,
+        },
+      });
+
       const { raw, entities } = await outboundProductsRepo
         .createQueryBuilder('outbound_product')
         .addSelect('product_quantity.quantity', 'availableQuantity')
@@ -141,9 +149,13 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           (qb) =>
             qb
               .select('bin_product.product_id')
+              .from(BinProduct, 'bin_product')
               .addSelect('SUM(bin_product.quantity)', 'quantity')
-              .groupBy('bin_product.product_id')
-              .from(BinProduct, 'bin_product'),
+              .leftJoin('bin_product.bin', 'bin')
+              .andWhere('bin.warehouse_id = :warehouseId', {
+                warehouseId: outbound.warehouse.id,
+              })
+              .groupBy('bin_product.product_id'),
 
           'product_quantity',
           'product_quantity.product_id = outbound_product.product_id',
