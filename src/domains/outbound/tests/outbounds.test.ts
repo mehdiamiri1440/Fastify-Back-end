@@ -24,6 +24,7 @@ import { BinProduct } from '$src/domains/product/models/BinProduct';
 import { Bin } from '$src/domains/warehouse/models/Bin';
 import { randomUUID } from 'crypto';
 import { DeepPartial } from 'typeorm';
+import { CustomerContact } from '$src/domains/customer/models/Contact';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -86,6 +87,18 @@ const createSampleCustomer = async () => {
   });
 
   await enableForeignKeyCheck();
+
+  return customer;
+};
+
+const createSampleCustomerWithContact = async () => {
+  const customer = await createSampleCustomer();
+  await repo(CustomerContact).save({
+    customer,
+    email: 'customer@email.com',
+    phoneNumber: 'hey',
+    creator: { id: 1 },
+  });
 
   return customer;
 };
@@ -245,25 +258,30 @@ describe('Get Outbound', () => {
   });
 });
 
-describe('Set CustomerId', () => {
-  it('should set customer id when inbound state is draft', async () => {
-    assert(app);
-    assert(user);
+describe('Set receiver', () => {
+  async function createOutbound() {
     const warehouse = await createSampleWarehouse();
-    const customer = await createSampleCustomer();
 
-    const outbound = await repo(Outbound).save({
+    return repo(Outbound).save({
       status: OutboundStatus.DRAFT,
       code: 'test',
       warehouse,
       creator: { id: 1 },
     });
+  }
+
+  it('should set customer as receiver when inbound state is draft', async () => {
+    assert(app);
+    assert(user);
+    const customer = await createSampleCustomerWithContact();
+    const outbound = await createOutbound();
 
     const response = await user.inject({
       method: 'POST',
-      url: `/${outbound.id}/set-customer`,
+      url: `/${outbound.id}/set-receiver`,
       payload: {
-        customerId: customer.id,
+        receiverType: 'customer',
+        receiverId: customer.id,
       },
     });
 
@@ -273,10 +291,101 @@ describe('Set CustomerId', () => {
       data: {
         id: 1,
         status: 'draft',
-        customer: {
-          id: customer.id,
-        },
+        receiverType: 'customer',
+        receiverId: customer.id,
       },
     });
+
+    const outboundInfo = await user.inject({
+      method: 'GET',
+      url: `/${outbound.id}`,
+    });
+
+    expect(outboundInfo).statusCodeToBe(200);
+    expect(outboundInfo.json().data).toMatchObject({
+      receiver: {
+        type: 'customer',
+        typeId: customer.id,
+        name: customer.name,
+        email: 'customer@email.com',
+      },
+    });
+  });
+
+  it('should not set customer id when customerId is invalid', async () => {
+    assert(app);
+    assert(user);
+    const outbound = await createOutbound();
+
+    const response = await user.inject({
+      method: 'POST',
+      url: `/${outbound.id}/set-receiver`,
+      payload: {
+        receiverType: 'customer',
+        receiverId: 16515,
+      },
+    });
+
+    expect(response).statusCodeToBe(400);
+    expect(response).errorCodeToBe('INVALID_CUSTOMER_ID');
+  });
+
+  it('should set user as receiver when inbound state is draft', async () => {
+    assert(app);
+    assert(user);
+    const outbound = await createOutbound();
+
+    const response = await user.inject({
+      method: 'POST',
+      url: `/${outbound.id}/set-receiver`,
+      payload: {
+        receiverType: 'user',
+        receiverId: user.user.id,
+      },
+    });
+
+    expect(response).statusCodeToBe(200);
+    const body = response.json();
+    expect(body).toMatchObject({
+      data: {
+        id: 1,
+        status: 'draft',
+        receiverType: 'user',
+        receiverId: user.user.id,
+      },
+    });
+
+    const outboundInfo = await user.inject({
+      method: 'GET',
+      url: `/${outbound.id}`,
+    });
+
+    expect(outboundInfo).statusCodeToBe(200);
+    expect(outboundInfo.json().data).toMatchObject({
+      receiver: {
+        type: 'user',
+        typeId: user.id,
+        name: user.user.fullName,
+        email: user.user.email,
+      },
+    });
+  });
+
+  it('should not set user id when customerId is invalid', async () => {
+    assert(app);
+    assert(user);
+    const outbound = await createOutbound();
+
+    const response = await user.inject({
+      method: 'POST',
+      url: `/${outbound.id}/set-receiver`,
+      payload: {
+        receiverType: 'user',
+        receiverId: 16515,
+      },
+    });
+
+    expect(response).statusCodeToBe(400);
+    expect(response).errorCodeToBe('INVALID_USER_ID');
   });
 });

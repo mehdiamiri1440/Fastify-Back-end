@@ -13,7 +13,7 @@ import {
   FastifyPluginAsyncTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
-import { Outbound, OutboundStatus } from '../models/Outbound';
+import { Outbound, OutboundStatus, ReceiverType } from '../models/Outbound';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   const outboundsRepo = repo(Outbound);
@@ -47,7 +47,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           where.merge([
             where.from(req),
             {
-              customer: { id },
+              receiverType: ReceiverType.CUSTOMER,
+              receiverId: id,
             },
           ]),
         )

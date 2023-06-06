@@ -23,6 +23,11 @@ export enum OutboundStatus {
   DELIVERED = 'delivered',
 }
 
+export enum ReceiverType {
+  CUSTOMER = 'customer',
+  USER = 'user',
+}
+
 @Entity()
 export class Outbound {
   @PrimaryGeneratedColumn()
@@ -41,8 +46,19 @@ export class Outbound {
   @Column({ type: 'integer', nullable: true })
   docId!: number | null;
 
-  @ManyToOne(() => Customer, { nullable: true })
-  customer?: Customer | null;
+  @Column({
+    type: 'enum',
+    enum: ReceiverType,
+    nullable: true,
+  })
+  receiverType!: ReceiverType | null;
+
+  @Column({
+    type: 'int4',
+    enum: ReceiverType,
+    nullable: true,
+  })
+  receiverId!: number | null;
 
   @ManyToOne(() => User, { nullable: true })
   driver?: User | null;
