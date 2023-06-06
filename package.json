@@ -48,6 +48,7 @@
     "dottie": "^2.0.3",
     "fastify": "^4.17.0",
     "fastify-plugin": "^4.5.0",
+    "fastify-socket.io": "^4.0.0",
     "imgproxy": "^1.1.1",
     "mime-types": "^2.1.35",
     "minio": "^7.1.0",
@@ -59,6 +60,7 @@
     "qs": "^6.11.1",
     "reflect-metadata": "^0.1.13",
     "sharp": "^0.32.0",
+    "socket.io": "^4.6.2",
     "swagger-themes": "^1.2.28",
     "ts-node": "^10.9.1",
     "ts-paths-esm-loader": "^1.4.1",
@@ -87,6 +89,7 @@
     "jest-junit": "^16.0.0",
     "pino-pretty": "^10.0.0",
     "prettier": "^2.8.4",
+    "types-fastify-socket.io": "^0.0.1",
     "typescript": "^4.9.5",
     "undici": "^5.21.0"
   },
