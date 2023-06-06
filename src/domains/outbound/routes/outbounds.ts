@@ -15,12 +15,17 @@ import StringEnum from '$src/infra/utils/StringEnum';
 import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
-import { INVALID_STATUS } from '../errors';
-import { Outbound, OutboundStatus } from '../models/Outbound';
+import {
+  INVALID_CUSTOMER_ID,
+  INVALID_STATUS,
+  INVALID_USER_ID,
+} from '../errors';
+import { Outbound, OutboundStatus, ReceiverType } from '../models/Outbound';
 import { OutboundProduct } from '../models/OutboundProduct';
 import { OutboundService } from '../services/outbound.service';
 import { loadUserWarehouse } from '../utils';
 import { BinProduct } from '$src/domains/product/models/BinProduct';
+import { loadReceiver, validateReceiver } from '../Receiver';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   const outboundsRepo = repo(Outbound);
@@ -86,7 +91,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         where: {
           id,
         },
-
         select: {
           creator: {
             id: true,
@@ -97,14 +101,17 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             fullName: true,
           },
         },
-
         relations: {
           creator: true,
           driver: true,
         },
         loadRelationIds: false,
       });
-      return inbound;
+
+      return {
+        ...inbound,
+        receiver: await loadReceiver(inbound),
+      };
     },
   });
 
@@ -217,14 +224,21 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  app.post('/:id/set-customer', {
+  app.post('/:id/set-receiver', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
       }),
-      body: Type.Object({
-        customerId: Nullable(Type.Number()),
-      }),
+      body: Type.Union([
+        Type.Object({
+          receiverType: StringEnum(Object.values(ReceiverType)),
+          receiverId: Type.Integer(),
+        }),
+        Type.Object({
+          receiverType: Type.Null(),
+          receiverId: Type.Null(),
+        }),
+      ]),
       security: [
         {
           OAuth2: ['outbound@outbound::update'],
@@ -233,7 +247,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     async handler(req) {
       const { id } = req.params;
-      const { customerId } = req.body;
+      const { receiverType, receiverId } = req.body;
 
       const outbound = await outboundsRepo.findOneByOrFail({ id });
 
@@ -243,14 +257,17 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         );
       }
 
-      const customer = customerId
-        ? await customersRepo.findOneBy({
-            id: customerId,
-          })
-        : null;
+      if (!receiverType && !receiverId) {
+        outbound.receiverId = null;
+        outbound.receiverType = null;
+        await outboundsRepo.save(outbound);
+        return outbound;
+      }
 
-      outbound.customer = customer;
+      await validateReceiver({ receiverId, receiverType });
 
+      outbound.receiverId = receiverId;
+      outbound.receiverType = receiverType;
       await outboundsRepo.save(outbound);
       return outbound;
     },

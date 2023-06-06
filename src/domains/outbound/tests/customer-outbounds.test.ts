@@ -17,7 +17,7 @@ import { describe } from 'node:test';
 import 'reflect-metadata';
 import { Warehouse } from '../../warehouse/models/Warehouse';
 import { WarehouseStaff } from '../../warehouse/models/WarehouseStaff';
-import { Outbound, OutboundStatus } from '../models/Outbound';
+import { Outbound, OutboundStatus, ReceiverType } from '../models/Outbound';
 import routes from '../routes/customer-outbounds';
 
 let app: FastifyInstance | undefined;
@@ -109,14 +109,16 @@ describe('Get Outbound of single customer', () => {
         code: 'test',
         warehouse,
         creator: { id: 1 },
-        customer: customerA,
+        receiverType: ReceiverType.CUSTOMER,
+        receiverId: customerA.id,
       },
       {
         status: OutboundStatus.DRAFT,
         code: 'test2',
         warehouse,
         creator: { id: 1 },
-        customer: customerB,
+        receiverType: ReceiverType.CUSTOMER,
+        receiverId: customerB.id,
       },
     ]);
 

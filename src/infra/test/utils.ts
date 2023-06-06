@@ -10,7 +10,7 @@ import AppDataSource from '$src/DataSource';
 import { ajvOptions } from '$src/AjvOptions';
 
 export async function createTestUser() {
-  return await repo(User).save({
+  const user = await repo(User).save({
     firstName: 'tester',
     lastName: 'tester',
     role: await repo(Role).save({
@@ -24,6 +24,9 @@ export async function createTestUser() {
     position: 'tester',
     isActive: true,
   });
+
+  user.fullName = `${user.firstName} ${user.lastName}`;
+  return user;
 }
 
 export class TestUser {

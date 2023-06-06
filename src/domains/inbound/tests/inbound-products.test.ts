@@ -2,6 +2,7 @@ import AppDataSource from '$src/DataSource';
 import { Unit } from '$src/domains/configuration/models/Unit';
 import { BinProduct } from '$src/domains/product/models/BinProduct';
 import { Bin } from '$src/domains/warehouse/models/Bin';
+import { WarehouseStaff } from '$src/domains/warehouse/models/WarehouseStaff';
 import '$src/infra/test/statusCodeExpect';
 import {
   createTestFastifyApp,
@@ -11,15 +12,15 @@ import {
 } from '$src/infra/test/utils';
 import { repo } from '$src/infra/utils/repo';
 import {
-  beforeAll,
-  expect,
-  it,
   afterAll,
+  beforeAll,
   beforeEach,
   describe,
-  jest,
+  expect,
+  it,
 } from '@jest/globals';
 import assert from 'assert';
+import { randomUUID } from 'crypto';
 import { FastifyInstance } from 'fastify';
 import { DeepPartial } from 'typeorm';
 import { Product } from '../../product/models/Product';
@@ -28,10 +29,6 @@ import { Warehouse } from '../../warehouse/models/Warehouse';
 import { Inbound, InboundStatus, InboundType } from '../models/Inbound';
 import { InboundProduct } from '../models/InboundProduct';
 import routes from '../routes/inbound-products';
-import { WarehouseStaff } from '$src/domains/warehouse/models/WarehouseStaff';
-import { randomUUID } from 'crypto';
-
-jest.setTimeout(99999999);
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
