@@ -1,5 +1,6 @@
 import AppDataSource from '$src/DataSource';
 import { Customer } from '$src/domains/customer/models/Customer';
+import { BinProduct } from '$src/domains/product/models/BinProduct';
 import { User } from '$src/domains/user/models/User';
 import { ResponseShape } from '$src/infra/Response';
 import {
@@ -15,23 +16,17 @@ import StringEnum from '$src/infra/utils/StringEnum';
 import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
-import {
-  INVALID_CUSTOMER_ID,
-  INVALID_STATUS,
-  INVALID_USER_ID,
-} from '../errors';
+import { loadReceiver, validateReceiver } from '../Receiver';
+import { INVALID_STATUS } from '../errors';
 import { Outbound, OutboundStatus, ReceiverType } from '../models/Outbound';
 import { OutboundProduct } from '../models/OutboundProduct';
 import { OutboundService } from '../services/outbound.service';
 import { loadUserWarehouse } from '../utils';
-import { BinProduct } from '$src/domains/product/models/BinProduct';
-import { loadReceiver, validateReceiver } from '../Receiver';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   const outboundsRepo = repo(Outbound);
   const outboundProductsRepo = repo(OutboundProduct);
   const usersRepo = repo(User);
-  const customersRepo = repo(Customer);
 
   app.register(ResponseShape);
 
@@ -87,7 +82,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     handler: async (req) => {
       const { id } = req.params;
-      const inbound = await outboundsRepo.findOneOrFail({
+      const outbound = await outboundsRepo.findOneOrFail({
         where: {
           id,
         },
@@ -109,8 +104,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       });
 
       return {
-        ...inbound,
-        receiver: await loadReceiver(inbound),
+        ...outbound,
+        receiver: await loadReceiver(outbound),
       };
     },
   });
@@ -269,7 +264,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       outbound.receiverId = receiverId;
       outbound.receiverType = receiverType;
       await outboundsRepo.save(outbound);
-      return outbound;
+      return {
+        ...outbound,
+        receiver: await loadReceiver(outbound),
+      };
     },
   });
 
