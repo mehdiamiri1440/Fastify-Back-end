@@ -88,29 +88,32 @@ export class OutboundProductManager {
             {
               outboundProductId: this.id,
             },
-          )
-          .andWhere('outbound_product_supply.deleted_at IS NULL');
+          );
       }, 'suppliedQuantity')
       .addSelect((subQuery) => {
         return subQuery
           .select('SUM(bin_product.quantity)', 'freeQuantity')
           .from('BinProduct', 'bin_product')
           .where('bin_product.bin_id = bin.id')
-          .andWhere('bin_product.deleted_at IS NULL');
+          .andWhere('bin_product.product_id = :productId', {
+            productId: this.entity.product.id,
+          });
       }, 'freeQuantity')
 
-      .andWhere('bin.warehouse_id = :warehouseId', {
+      .where('bin.warehouse_id = :warehouseId', {
         warehouseId: this.warehouseId,
       })
-      .andWhere('bin.deleted_at IS NULL')
       .getRawMany();
 
-    const data: BinSupplyState[] = rawData.map((row) => ({
-      binId: row.binId,
-      binName: row.binName,
-      suppliedQuantity: parseInt(row.suppliedQuantity, 10) || 0,
-      freeQuantity: parseInt(row.freeQuantity, 10) || 0,
-    }));
+    const data: BinSupplyState[] = rawData
+      .map((row) => ({
+        binId: row.binId,
+        binName: row.binName,
+        suppliedQuantity: parseInt(row.suppliedQuantity, 10) || 0,
+        freeQuantity: parseInt(row.freeQuantity, 10) || 0,
+      }))
+      // remove useless states
+      .filter((r) => r.freeQuantity > 0 || r.suppliedQuantity > 0);
 
     return data;
   }
