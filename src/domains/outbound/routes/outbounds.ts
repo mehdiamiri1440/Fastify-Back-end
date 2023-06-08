@@ -312,15 +312,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // POST /:id/set-driver
   /**
    * This route this receive a driverId or null.
    * if current state of outbound is `Transfer`, then it will change the state of outbound to `Picking`
    * else if user wants to remove the driverId, we will transfer the state back `Transfer`
    */
-  app.route({
-    method: 'POST',
-    url: '/:id/set-driver',
+  app.post('/:id/set-driver', {
     schema: {
       params: Type.Object({
         id: Type.Number(),
@@ -352,7 +349,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         driver,
       });
 
-      return outboundsRepo.findOneByOrFail({ id });
+      return outboundsRepo.findOneOrFail({
+        where: { id },
+        relations: {
+          driver: true,
+        },
+      });
     },
   });
 
