@@ -20,6 +20,7 @@ import { SourceType } from '../models/ProductStockHistory';
 import { ProductSchema } from '../schemas/product.schema';
 import { hydrateProductInfo } from '../utils';
 import { toTsQuery } from '../utils/tsquery';
+import { Nullable } from '$src/infra/utils/Nullable';
 
 const PRODUCT_NOT_FOUND = createError(
   'PRODUCT_NOT_FOUND',
@@ -47,11 +48,11 @@ const InputProduct = Type.Composite([
   Type.Object({
     unitId: Type.Integer(),
     categoryId: Type.Integer(),
-    taxTypeId: Type.Optional(Type.Integer()),
-    colorId: Type.Optional(Type.Integer()),
-    shapeId: Type.Optional(Type.Integer()),
-    sizeId: Type.Optional(Type.Integer()),
-    brandId: Type.Optional(Type.Integer()),
+    taxTypeId: Type.Optional(Nullable(Type.Integer())),
+    colorId: Type.Optional(Nullable(Type.Integer())),
+    shapeId: Type.Optional(Nullable(Type.Integer())),
+    sizeId: Type.Optional(Nullable(Type.Integer())),
+    brandId: Type.Optional(Nullable(Type.Integer())),
   }),
 ]);
 
