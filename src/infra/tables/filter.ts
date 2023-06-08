@@ -2,10 +2,11 @@ import { FastifyRequest } from 'fastify';
 import {
   Between,
   FindOptionsWhere,
+  ILike,
   LessThanOrEqual,
-  Like,
   MoreThanOrEqual,
 } from 'typeorm';
+import { autoCastId } from './cast';
 
 function _toTypeOrmFilter(obj: any) {
   for (const key in obj) {
@@ -13,7 +14,7 @@ function _toTypeOrmFilter(obj: any) {
     if (value === undefined) {
       delete obj[key];
     } else if (value.$like) {
-      obj[key] = Like(value.$like);
+      obj[key] = ILike(value.$like);
     } else if (value.$gte && value.$lte) {
       obj[key] = Between(value.$gte, value.$lte);
     } else if (value.$gte) {
@@ -26,7 +27,7 @@ function _toTypeOrmFilter(obj: any) {
   }
 }
 
-export function toTypeOrmFilter(filter: any) {
+export function toTypeOrmFilter(filter: any): FindOptionsWhere<any> {
   const clonedFilter = structuredClone(filter);
   _toTypeOrmFilter(clonedFilter);
   return clonedFilter;
@@ -63,5 +64,5 @@ export function from(req: FastifyRequest) {
     return;
   }
 
-  return toTypeOrmFilter(filter);
+  return autoCastId(toTypeOrmFilter(filter));
 }

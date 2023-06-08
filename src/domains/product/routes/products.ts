@@ -112,7 +112,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           'rank',
         )
         .orderBy('rank', 'DESC')
-        .where('search_text like :like')
+        .where('search_text ilike :like')
         .orWhere(
           `to_tsvector('english', search_text) @@ to_tsquery('english', :q)`,
         )

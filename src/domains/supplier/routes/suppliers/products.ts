@@ -70,7 +70,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             AND product_supplier.deleted_at IS NULL
           )`,
         )
-        .andWhere(`product.name like :search`, { search: `%${search ?? ''}%` })
+        .andWhere(`product.name ilike :search`, { search: `%${search ?? ''}%` })
         .setParameter('supplierId', req.params.id)
         .skip((page - 1) * pageSize)
         .take(pageSize)
