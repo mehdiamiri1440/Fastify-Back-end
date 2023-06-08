@@ -48,7 +48,15 @@ export const OrderBy = (arr: string[]) =>
 export const Searchable = () => Type.Object({ $like: Type.String() });
 
 export const Range = <T extends TSchema>(props: T) =>
-  Type.Object({
-    $lte: Type.Optional(props),
-    $gte: Type.Optional(props),
-  });
+  Type.Union([
+    Type.Object({
+      $lte: props,
+      $gte: props,
+    }),
+    Type.Object({
+      $gte: props,
+    }),
+    Type.Object({
+      $lte: props,
+    }),
+  ]);
