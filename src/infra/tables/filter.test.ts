@@ -1,6 +1,6 @@
 import { expect, it } from '@jest/globals';
 import { describe } from 'node:test';
-import { Between, LessThanOrEqual, Like, MoreThanOrEqual } from 'typeorm';
+import { Between, ILike, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { merge, toTypeOrmFilter } from './filter';
 
 describe('toTypeOrmFilter function', () => {
@@ -33,9 +33,9 @@ describe('toTypeOrmFilter function', () => {
         },
       }),
     ).toEqual({
-      foo: Like('bar'),
+      foo: ILike('bar'),
       bar: {
-        zar: Like('zar'),
+        zar: ILike('zar'),
       },
     });
   });
@@ -53,9 +53,9 @@ describe('toTypeOrmFilter function', () => {
         },
       }),
     ).toEqual({
-      foo: Like('bar'),
+      foo: ILike('bar'),
       bar: {
-        zar: Like('zar'),
+        zar: ILike('zar'),
       },
     });
   });

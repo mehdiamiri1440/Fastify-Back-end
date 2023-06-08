@@ -62,21 +62,21 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         .where(toTypeOrmFilter(normalFilters));
 
       if (id) {
-        qb.andWhere(`customer.id::varchar(255) like :id`, {
+        qb.andWhere(`customer.id::varchar(255) ilike :id`, {
           id: id.$like,
         });
       }
 
       if (emailOrPhone) {
         qb.andWhere(
-          `CONCAT(contact.email, ' ', contact.phone_number) like :emailOrPhone`,
+          `CONCAT(contact.email, ' ', contact.phone_number) ilike :emailOrPhone`,
           { emailOrPhone: emailOrPhone.$like },
         );
       }
 
       if (fiscalIdOrAddress) {
         qb.andWhere(
-          `CONCAT(customer.fiscal_id, ' ', (customer.address ->> 'formatted')) like :fiscalIdOrAddress`,
+          `CONCAT(customer.fiscal_id, ' ', (customer.address ->> 'formatted')) ilike :fiscalIdOrAddress`,
           {
             fiscalIdOrAddress: fiscalIdOrAddress.$like,
           },
