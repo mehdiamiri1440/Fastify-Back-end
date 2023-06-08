@@ -12,13 +12,13 @@ import { Shape } from '../configuration/models/Shape';
 import { Size } from './models/Size';
 
 interface ProductRelationForeignKeys {
-  unitId?: number;
-  categoryId?: number;
-  taxTypeId?: number;
-  colorId?: number;
-  shapeId?: number;
-  sizeId?: number;
-  brandId?: number;
+  unitId?: number | null;
+  categoryId?: number | null;
+  taxTypeId?: number | null;
+  colorId?: number | null;
+  shapeId?: number | null;
+  sizeId?: number | null;
+  brandId?: number | null;
 }
 
 interface HydratedRelations {
