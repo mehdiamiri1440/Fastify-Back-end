@@ -1,73 +1,54 @@
-import { Response } from '$src/infra/Response';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import assert from 'assert';
 import { Type } from '@sinclair/typebox';
 import { User } from '../models/User';
-import { RolePermission } from '$src/domains/user/models/RolePermission';
 import { repo } from '$src/infra/utils/repo';
-import { createError } from '@fastify/error';
 import permissions from '$src/permissions';
-import { compare } from 'bcrypt';
+import StringEnum from '$src/infra/utils/StringEnum';
+import { ACCESS_DENIED } from '$src/domains/user/routes/errors';
+import {
+  GenerateTokensForUser,
+  GetLoginAndActiveUserByRefreshToken,
+  GetActiveUserByEmailAndPassword,
+} from '$src/domains/user/utils';
 
-const ACCESS_DENIED = createError('ACCESS_DENIED', 'you dont have access', 403);
 const Users = repo(User);
-const RolePermissions = repo(RolePermission);
-const { TOKEN_TTL_SECONDS } = process.env;
-
-if (TOKEN_TTL_SECONDS) {
-  assert(Number(TOKEN_TTL_SECONDS) > 0, 'Invalid TOKEN_TTL_SECONDS');
-}
-
-const TTL = TOKEN_TTL_SECONDS ? Number(TOKEN_TTL_SECONDS) : 200 * 60; // 20 mins
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
-    url: '/login',
+    url: '/token',
     schema: {
       body: Type.Object({
-        username: Type.String(),
-        password: Type.String(),
+        grant_type: StringEnum(['password', 'refresh_token']),
+        username: Type.Optional(Type.String()),
+        password: Type.Optional(Type.String()),
+        refresh_token: Type.Optional(Type.String()),
       }),
     },
     async handler(req) {
-      const user = await Users.findOne({
-        where: {
-          email: req.body.username,
-          isActive: true,
-        },
-        relations: ['role'],
-      });
-      if (!user || !(await compare(req.body.password, user.password))) {
-        return new ACCESS_DENIED();
-      }
-      let scope: string;
-      if (user.role.title === 'root') {
-        scope = Object.keys(permissions).join(' ');
-      } else {
-        if (user.role.isActive) {
-          const { id } = user.role;
-          const permissions = await RolePermissions.findBy({ role: { id } });
-          scope = permissions.map((p) => p.permission).join(' ');
-        } else {
-          scope = '';
+      switch (req.body.grant_type) {
+        case 'password': {
+          if (!req.body.username || !req.body.password)
+            throw new ACCESS_DENIED();
+
+          const user = await GetActiveUserByEmailAndPassword(
+            req.body.username,
+            req.body.password,
+          );
+
+          return await GenerateTokensForUser(app, user);
+        }
+        case 'refresh_token': {
+          if (!req.body.refresh_token) throw new ACCESS_DENIED();
+
+          const user = await GetLoginAndActiveUserByRefreshToken(
+            app,
+            req.body.refresh_token,
+          );
+
+          return await GenerateTokensForUser(app, user);
         }
       }
-      const token = app.jwt.sign(
-        {
-          id: user.id,
-          scope,
-        },
-        {
-          expiresIn: TTL,
-        },
-      );
-      return {
-        access_token: token,
-        token_type: 'bearer',
-        expires_in: TTL,
-        scope,
-      };
     },
   });
 

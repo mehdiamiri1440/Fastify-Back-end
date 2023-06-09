@@ -43,8 +43,10 @@ export class TestUser {
 
     const token = app.jwt.sign(
       {
+        tokenType: 'access_token',
         id: user.id,
         scope: Object.keys(permissions).join(' '),
+        time: new Date().getTime(),
       },
       {
         expiresIn: 1000,
