@@ -258,8 +258,9 @@ it('user flow', async () => {
     // should login
     const response = await user.inject({
       method: 'POST',
-      url: '/login',
+      url: '/token',
       payload: {
+        grant_type: 'password',
         username: userData.email,
         password: userData.password,
       },
@@ -334,8 +335,9 @@ it('user flow', async () => {
     // should login but with empty scope
     const response = await user.inject({
       method: 'POST',
-      url: '/login',
+      url: '/token',
       payload: {
+        grant_type: 'password',
         username: userData.email,
         password: userData.password,
       },
