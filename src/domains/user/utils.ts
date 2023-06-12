@@ -4,7 +4,6 @@ import { repo } from '$src/infra/utils/repo';
 import { RolePermission } from '$src/domains/user/models/RolePermission';
 import assert from 'assert';
 import { compare } from 'bcrypt';
-import { ACCESS_DENIED } from '$src/domains/user/routes/errors';
 import { UserLogout } from '$src/domains/user/models/UserLogout';
 import { FastifyInstance } from 'fastify';
 import { FastifyJWT } from '@fastify/jwt';
@@ -19,10 +18,10 @@ const TTL = TOKEN_TTL_SECONDS ? Number(TOKEN_TTL_SECONDS) : 10 * 60; // 10 mins
 export const GetLoginAndActiveUserByRefreshToken = async (
   app: FastifyInstance,
   token: string,
-) => {
+): Promise<User | void> => {
   // verify refresh token
   const refresh_token: FastifyJWT['payload'] = await app.jwt.verify(token);
-  if (refresh_token.tokenType != 'refresh_token') throw new ACCESS_DENIED();
+  if (refresh_token.tokenType != 'refresh_token') return;
 
   // check if logged out or not
   const lastLogOut = await repo(UserLogout).findOne({
@@ -32,7 +31,7 @@ export const GetLoginAndActiveUserByRefreshToken = async (
   if (lastLogOut) {
     if (lastLogOut.createdAt.getTime() > refresh_token.time)
       // it means user logged out
-      throw new ACCESS_DENIED();
+      return;
   }
 
   // finding active user with that id
@@ -43,14 +42,13 @@ export const GetLoginAndActiveUserByRefreshToken = async (
     },
     relations: ['role'],
   });
-  if (!user) throw new ACCESS_DENIED();
-  return user;
+  if (user) return user;
 };
 
 export const GetActiveUserByEmailAndPassword = async (
   email: string,
   password: string,
-) => {
+): Promise<User | void> => {
   // finding active user with that username
   const user = await repo(User).findOne({
     where: {
@@ -62,7 +60,7 @@ export const GetActiveUserByEmailAndPassword = async (
 
   // comparing password
   if (!user || !(await compare(password, user.password))) {
-    throw new ACCESS_DENIED();
+    return
   }
 
   return user;

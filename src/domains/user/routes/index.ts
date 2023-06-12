@@ -36,6 +36,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             req.body.password,
           );
 
+          if (!user) throw new ACCESS_DENIED();
+
           return await GenerateTokensForUser(app, user);
         }
         case 'refresh_token': {
@@ -45,6 +47,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             app,
             req.body.refresh_token,
           );
+
+          if (!user) throw new ACCESS_DENIED();
 
           return await GenerateTokensForUser(app, user);
         }
