@@ -4,6 +4,7 @@ import {
   Filter,
   OrderBy,
   PaginatedQueryString,
+  Range,
   Searchable,
 } from '$src/infra/tables/PaginatedType';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
@@ -28,7 +29,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       querystring: PaginatedQueryString({
         orderBy: OrderBy(['id', 'createdAt', 'name']),
         filter: Filter({
+          id: Searchable(),
           name: Searchable(),
+          createdAt: Range(Type.String({ format: 'date-time' })),
         }),
       }),
     },
