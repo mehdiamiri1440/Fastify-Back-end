@@ -13,6 +13,11 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { Language } from '../../models/Language';
 import { Supplier } from '../../models/Supplier';
+import { toTypeOrmFilter } from '$src/infra/tables/filter';
+import { toUpperCase } from '$src/infra/tables/order';
+import { PaginatedResponse } from '$src/infra/tables/response';
+import { ProductSupplier } from '$src/domains/product/models/ProductSupplier';
+import { SUPPLIER_SUPPLYING_OUR_PRODUCT } from '$src/domains/supplier/errors';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
@@ -33,18 +38,36 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         filter: Filter({
           name: Searchable(),
           cif: Searchable(),
+          phoneOrEmailOrName: Searchable(),
         }),
       }),
     },
     async handler(req) {
-      return new TableQueryBuilder(Suppliers, req)
-        .relation({
-          creator: true,
-        })
-        .loadRelationIds({
-          disableMixedMap: false,
-        })
-        .exec();
+      const { page, pageSize, filter, order, orderBy } = req.query;
+      const { phoneOrEmailOrName, ...normalFilters } = filter ?? {};
+
+      const qb = Suppliers.createQueryBuilder('supplier')
+        .leftJoinAndSelect('supplier.creator', 'creator')
+        .where(toTypeOrmFilter(normalFilters));
+
+      if (phoneOrEmailOrName) {
+        qb.andWhere(
+          `CONCAT(supplier.email, ' ', supplier.phone_number, supplier.name) ilike :phoneOrEmailOrName`,
+          { phoneOrEmailOrName: phoneOrEmailOrName.$like },
+        );
+      }
+
+      const [rows, total] = await qb
+        .skip((page - 1) * pageSize)
+        .take(pageSize)
+        .orderBy(`supplier.${orderBy}`, toUpperCase(order))
+        .getManyAndCount();
+
+      return new PaginatedResponse(rows, {
+        page: page,
+        pageSize: pageSize,
+        total,
+      });
     },
   });
 
@@ -165,8 +188,16 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      const { id } = await Suppliers.findOneByOrFail({ id: req.params.id });
-      await Suppliers.softDelete({ id });
+      const supplier = await Suppliers.findOneByOrFail({ id: req.params.id });
+
+      if (
+        (await repo(ProductSupplier).countBy({
+          supplier: { id: supplier.id },
+        })) > 0
+      )
+        throw new SUPPLIER_SUPPLYING_OUR_PRODUCT();
+
+      await Suppliers.softRemove(supplier);
     },
   });
 

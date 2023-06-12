@@ -15,6 +15,8 @@ import { Language } from './models/Language';
 import routes from './routes';
 import { ProductSupplier } from '$src/domains/product/models/ProductSupplier';
 import { Product } from '$src/domains/product/models/Product';
+import { Supplier } from '$src/domains/supplier/models/Supplier';
+import { SUPPLIER_SUPPLYING_OUR_PRODUCT } from '$src/domains/supplier/errors';
 import { File } from '../files/models/File';
 
 const Languages = repo(Language);
@@ -25,7 +27,6 @@ const languageData = { title: 'SPN' };
 const supplierData = {
   name: 'good supplier',
   cif: 'B12345678',
-  language: 1,
   iban: 'ES4930584005432720801245',
   email: 'good@supplier.sup',
   phoneNumber: '+989112223344',
@@ -52,7 +53,7 @@ afterEach(async () => {
   await app?.close();
 });
 
-it('cycle count flow', async () => {
+it('supplier flow', async () => {
   assert(app);
   assert(user);
   let languageId: number;
@@ -98,7 +99,7 @@ it('cycle count flow', async () => {
     const response = await user.inject({
       method: 'POST',
       url: '/suppliers',
-      payload: supplierData,
+      payload: { ...supplierData, language: languageId },
     });
     expect(response.json()).toMatchObject({
       data: {
@@ -115,7 +116,7 @@ it('cycle count flow', async () => {
   }
   {
     // should return all products of supplier
-    await AppDataSource.getRepository(ProductSupplier).save({
+    const ps = await AppDataSource.getRepository(ProductSupplier).save({
       supplier: { id: supplierId },
       product: { id: productId },
       creator: { id: 1 },
@@ -135,6 +136,7 @@ it('cycle count flow', async () => {
         }),
       ]),
     );
+    await AppDataSource.getRepository(ProductSupplier).remove(ps);
   }
   {
     // should return all suppliers
@@ -149,7 +151,6 @@ it('cycle count flow', async () => {
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         deletedAt: null,
-        language: languageId,
       },
     ]);
   }
@@ -175,7 +176,7 @@ it('cycle count flow', async () => {
     const response = await user.inject({
       method: 'PUT',
       url: '/suppliers/' + supplierId,
-      payload: { ...supplierData, name: 'edited' },
+      payload: { ...supplierData, name: 'edited', language: languageId },
     });
 
     expect(response).statusCodeToBe(200);
@@ -307,4 +308,29 @@ it('cycle count flow', async () => {
 
     expect(response).statusCodeToBe(200);
   }
+});
+
+it('should not delete supplier if supplying any our products', async () => {
+  assert(app);
+  assert(user);
+  const { supplier } = await withoutForeignKeyCheck(async () => {
+    const supplier = await repo(Supplier).save({
+      ...supplierData,
+      language: { id: 1 },
+      creator: { id: 1 },
+    });
+    await repo(ProductSupplier).save({
+      supplier,
+      product: { id: 1 },
+      creator: { id: 1 },
+    });
+    return { supplier };
+  });
+  const response = await user.inject({
+    method: 'DELETE',
+    url: '/suppliers/' + supplier.id,
+  });
+
+  expect(response).statusCodeToBe(400);
+  expect(response.json().code).toBe(SUPPLIER_SUPPLYING_OUR_PRODUCT().code);
 });
