@@ -1,3 +1,4 @@
+import { File } from '$src/domains/files/models/File';
 import { SupplierDocument } from '$src/domains/supplier/models/Documents';
 import { Supplier } from '$src/domains/supplier/models/Supplier';
 import { DocumentSchema } from '$src/domains/supplier/schemas/document.schema';
@@ -10,6 +11,7 @@ import { Type } from '@sinclair/typebox';
 
 const Suppliers = repo(Supplier);
 const Documents = repo(SupplierDocument);
+const Files = repo(File);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
@@ -36,6 +38,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
       return new TableQueryBuilder(Documents, req)
         .where({ supplier: { id: supplier.id } })
+        .relation({ file: true })
         .exec();
     },
   });
@@ -56,11 +59,21 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       // validating references
       const supplier = await Suppliers.findOneByOrFail({ id: req.params.id });
+      const file = await Files.findOneByOrFail({ id: req.body.fileId });
 
-      return await Documents.save({
+      const document = await Documents.save({
         ...req.body,
         supplier,
+        file,
         creator: { id: req.user.id },
+      });
+
+      return Documents.findOneOrFail({
+        where: { id: document.id },
+        relations: {
+          file: true,
+          supplier: true,
+        },
       });
     },
   });

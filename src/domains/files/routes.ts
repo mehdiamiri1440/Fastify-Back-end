@@ -1,8 +1,11 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import Files from '$src/infra/files/plugin';
+import Files from './plugin';
 import { minio } from '$src/infra/s3';
+import fastifyMultipart from '@fastify/multipart';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
+  app.register(fastifyMultipart);
+
   await app.register(Files, {
     minio: minio,
     bucketName: 'product-images',

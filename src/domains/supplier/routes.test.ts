@@ -12,11 +12,11 @@ import { repo } from '$src/infra/utils/repo';
 import { afterEach, beforeEach, expect, it } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance } from 'fastify';
-import { describe } from 'node:test';
 import { Language } from './models/Language';
 import routes from './routes';
 import { ProductSupplier } from '$src/domains/product/models/ProductSupplier';
 import { Product } from '$src/domains/product/models/Product';
+import { File } from '../files/models/File';
 
 const Languages = repo(Language);
 let app: FastifyInstance | undefined;
@@ -241,15 +241,26 @@ it('cycle count flow', async () => {
   }
   {
     // should create a document for supplier
+
+    await repo(File).save({
+      id: 'testFileId.txt',
+      bucketName: 'bucketName',
+      mimetype: 'text/plain',
+      originalName: 'original.txt',
+      size: 100,
+    });
+
     const response = await user.inject({
       method: 'POST',
       url: '/suppliers/' + supplierId + '/documents',
-      payload: { fileId: 'testFileId', supplier: supplierId },
+      payload: { fileId: 'testFileId.txt', supplier: supplierId },
     });
     expect(response.json()).toMatchObject({
       data: {
         id: expect.any(Number),
-        fileId: 'testFileId',
+        file: {
+          id: 'testFileId.txt',
+        },
         supplier: { id: supplierId },
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
@@ -268,18 +279,16 @@ it('cycle count flow', async () => {
 
     expect(response).statusCodeToBe(200);
 
-    expect(response.json().data).toMatchObject(
-      expect.arrayContaining([
-        expect.objectContaining({
-          id: documentId,
-          fileId: 'testFileId',
-          supplier: supplierId,
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
-          deletedAt: null,
-        }),
-      ]),
-    );
+    expect(response.json().data).toMatchObject([
+      {
+        file: {
+          id: 'testFileId.txt',
+        },
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        deletedAt: null,
+      },
+    ]);
   }
   {
     // should delete document of supplier

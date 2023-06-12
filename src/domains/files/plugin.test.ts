@@ -1,13 +1,17 @@
-import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
-import Fastify, { FastifyInstance } from 'fastify';
-import { Client } from 'minio';
-import plugin from './plugin';
-// see https://github.com/fastify/light-my-request/issues/35
+import AppDataSource from '$src/DataSource';
 import '$src/infra/test/statusCodeExpect';
+import { createTestFastifyApp } from '$src/infra/test/utils';
+import { repo } from '$src/infra/utils/repo';
+import fastifyMultipart from '@fastify/multipart';
+import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
+import { FastifyInstance } from 'fastify';
 import FormData from 'form-data';
+import { Client } from 'minio';
 import assert from 'node:assert';
 import { createReadStream } from 'node:fs';
 import { join } from 'node:path';
+import { File } from './models/File';
+import plugin from './plugin';
 
 async function ensureBucket(client: Client, bucketName: string) {
   // Check if the bucket already exists
@@ -57,7 +61,7 @@ async function ensureBucket(client: Client, bucketName: string) {
   );
 }
 
-let fastify: FastifyInstance;
+let app: FastifyInstance;
 const { S3_URI } = process.env;
 assert(S3_URI, 'S3_URI env is required');
 const s3Uri = new URL(S3_URI);
@@ -74,21 +78,23 @@ const bucketName = 'test-bucket';
 
 describe('Upload, download', () => {
   beforeEach(async () => {
-    fastify = Fastify();
-    // fastify.register(fastifyMultipart);
-    fastify.register(plugin, {
+    app = await createTestFastifyApp();
+    await AppDataSource.synchronize(true);
+    await app.register(fastifyMultipart);
+    app.register(plugin, {
       minio: minio,
       bucketName: 'test-bucket',
       schema: {
         security: [{ apiKey: [] }],
       },
     });
-    await fastify.ready();
+
+    await app.ready();
     await ensureBucket(minio, bucketName);
   });
 
   afterEach(() => {
-    return fastify.close();
+    return app.close();
   });
 
   it('POST /', async () => {
@@ -98,7 +104,7 @@ describe('Upload, download', () => {
       createReadStream(join(__dirname, `./test_data/test.txt`)),
     );
 
-    const response = await fastify.inject({
+    const response = await app.inject({
       method: 'POST',
       url: '/',
       payload: form,
@@ -106,7 +112,22 @@ describe('Upload, download', () => {
     });
 
     expect(response).statusCodeToBe(200);
-    expect(JSON.parse(response.payload)).toHaveProperty('filename');
+    const data = response.json();
+    expect(data).toHaveProperty('filename');
+
+    expect(
+      await repo(File).findBy({
+        id: data.filename,
+      }),
+    ).toMatchObject([
+      {
+        id: data.filename,
+        bucketName: 'test-bucket',
+        mimetype: 'text/plain',
+        size: expect.any(Number),
+        originalName: 'test.txt',
+      },
+    ]);
   });
 
   it('GET /:filename', async () => {
@@ -116,27 +137,39 @@ describe('Upload, download', () => {
       createReadStream(join(__dirname, `./test_data/test.txt`)),
     );
 
-    const response = await fastify.inject({
+    const response = await app.inject({
       method: 'GET',
       url: `/test.txt`,
     });
 
     expect(response).statusCodeToBe(200);
+    expect(response.headers['content-disposition']).toBe(
+      `attachment; filename="test.txt"`,
+    );
     expect(response.body).toBe('hety');
   });
 });
 
 describe('Errors', () => {
-  it('should error on invalid mime-type', async () => {
-    const fastify = Fastify();
-    fastify.register(plugin, {
+  beforeEach(async () => {
+    app = await createTestFastifyApp();
+    await AppDataSource.synchronize(true);
+    await app.register(fastifyMultipart);
+    app.register(plugin, {
       minio: minio,
       bucketName: 'test-bucket',
       allowedMimeTypes: ['image/jpeg', 'image/png'],
     });
-    await fastify.ready();
-    await ensureBucket(minio, bucketName);
 
+    await app.ready();
+    await ensureBucket(minio, bucketName);
+  });
+
+  afterEach(() => {
+    return app.close();
+  });
+
+  it('should error on invalid mime-type', async () => {
     const form = new FormData();
     form.append(
       'file',
@@ -146,7 +179,7 @@ describe('Errors', () => {
       },
     );
 
-    const response = await fastify.inject({
+    const response = await app.inject({
       method: 'POST',
       url: '/',
       payload: form,

@@ -1,21 +1,22 @@
-import { User } from '$src/domains/user/models/User';
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  CreateDateColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
-  Relation,
-} from 'typeorm';
-import { DocumentSchema } from '$src/domains/supplier/schemas/document.schema';
+import { File } from '$src/domains/files/models/File';
 import { Supplier } from '$src/domains/supplier/models/Supplier';
+import { DocumentSchema } from '$src/domains/supplier/schemas/document.schema';
+import { User } from '$src/domains/user/models/User';
 import { Static, Type } from '@sinclair/typebox';
+import {
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Relation,
+  UpdateDateColumn,
+} from 'typeorm';
 
 const DocumentSchemaWithoutRelations = Type.Omit(DocumentSchema, [
   'creator',
   'supplier',
+  'fileId',
 ]);
 
 @Entity()
@@ -28,8 +29,8 @@ export class SupplierDocument
   @ManyToOne(() => Supplier, { nullable: false })
   supplier!: Relation<Supplier>;
 
-  @Column({ nullable: false })
-  fileId!: string;
+  @ManyToOne(() => File, { nullable: false })
+  file!: Relation<File>;
 
   @ManyToOne(() => User, { nullable: false })
   creator!: Relation<User>;
