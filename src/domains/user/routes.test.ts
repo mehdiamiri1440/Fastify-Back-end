@@ -11,6 +11,7 @@ import { User } from './models/User';
 import routes from './routes';
 import bcrypt from 'bcrypt';
 import { UserLogout } from '$src/domains/user/models/UserLogout';
+import * as util from 'util';
 
 let app: FastifyInstance | undefined;
 let user: TestUser;
@@ -576,6 +577,8 @@ it('auth flow', async () => {
   {
     // should not get access token with refresh token after logout
     await repo(UserLogout).save({ user: testUser });
+    const sleep = util.promisify(setTimeout);
+    await sleep(2000);
     const response = await user.inject({
       method: 'POST',
       url: '/token',
