@@ -70,7 +70,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         const role = await service.createRole({ title, isActive });
 
         // update role permissions
-        await service.updatePermissionsOfRole(role.id, req.body.permissions);
+        if (req.body.permissions) {
+          await service.updatePermissionsOfRole(role.id, req.body.permissions);
+        }
 
         return role;
       });
@@ -103,10 +105,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         await service.updateRole(req.params.id, { title, isActive });
 
         // update role permissions
-        await service.updatePermissionsOfRole(
-          req.params.id,
-          req.body.permissions,
-        );
+        if (req.body.permissions) {
+          await service.updatePermissionsOfRole(
+            req.params.id,
+            req.body.permissions,
+          );
+        }
       });
     },
   });
@@ -206,7 +210,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Number(),
       }),
-      body: RolePermissionsSchema,
+      body: Type.Required(RolePermissionsSchema),
     },
     async handler(req) {
       return await AppDataSource.transaction(async (manager) => {
