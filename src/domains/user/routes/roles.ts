@@ -17,6 +17,8 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { Role } from '../../user/models/Role';
 import { RolePermission } from '../models/RolePermission';
+import systemPermissions from '$src/permissions';
+import { INVALID_PERMISSION } from '$src/domains/user/errors';
 
 const Roles = repo(Role);
 const RolePermissions = repo(RolePermission);
@@ -70,7 +72,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         const role = await service.createRole({ title, isActive });
 
         // update role permissions
-        await service.updatePermissionsOfRole(role.id, req.body.permissions);
+        if (req.body.permissions) {
+          await service.updatePermissionsOfRole(role.id, req.body.permissions);
+        }
 
         return role;
       });
@@ -103,10 +107,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         await service.updateRole(req.params.id, { title, isActive });
 
         // update role permissions
-        await service.updatePermissionsOfRole(
-          req.params.id,
-          req.body.permissions,
-        );
+        if (req.body.permissions) {
+          await service.updatePermissionsOfRole(
+            req.params.id,
+            req.body.permissions,
+          );
+        }
       });
     },
   });
@@ -206,7 +212,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Number(),
       }),
-      body: RolePermissionsSchema,
+      body: Type.Required(RolePermissionsSchema),
     },
     async handler(req) {
       return await AppDataSource.transaction(async (manager) => {
@@ -238,6 +244,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const roleId: number = req.params.id;
       const permission: string = req.params.code;
       const creatorId = req.user.id;
+      if (!(permission in systemPermissions)) throw new INVALID_PERMISSION(); // check if we have this permission or not
       return await RolePermissions.save({
         permission: permission,
         role: { id: roleId },

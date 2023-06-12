@@ -51,7 +51,10 @@ it('user flow', async () => {
     const response = await user.inject({
       method: 'POST',
       url: '/roles',
-      payload: { ...roleData, permissions: ['permission1', 'permission2'] },
+      payload: {
+        ...roleData,
+        permissions: ['user@user::list', 'user@user::create'],
+      },
     });
     expect(response.json()).toMatchObject({
       data: {
@@ -110,14 +113,14 @@ it('user flow', async () => {
       expect.arrayContaining([
         expect.objectContaining({
           role: roleId,
-          permission: 'permission1',
+          permission: 'user@user::list',
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
           deletedAt: null,
         }),
         expect.objectContaining({
           role: roleId,
-          permission: 'permission2',
+          permission: 'user@user::create',
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
           deletedAt: null,
@@ -184,18 +187,26 @@ it('user flow', async () => {
     // should add permission to role
     const response = await user.inject({
       method: 'POST',
-      url: '/roles/' + roleId + '/permissions/testPermission',
+      url: '/roles/' + roleId + '/permissions/user@user::list',
     });
     expect(response.json()).toMatchObject({
       data: {
         role: { id: roleId },
-        permission: 'testPermission',
+        permission: 'user@user::list',
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         deletedAt: null,
       },
       meta: {},
     });
+  }
+  {
+    // should not add random permission to role
+    const response = await user.inject({
+      method: 'POST',
+      url: '/roles/' + roleId + '/permissions/random',
+    });
+    expect(response.statusCode).toBe(400);
   }
   {
     // should return all permissions after adding new
@@ -207,7 +218,7 @@ it('user flow', async () => {
     expect(response.json().data).toMatchObject([
       {
         role: roleId,
-        permission: 'testPermission',
+        permission: 'user@user::list',
       },
     ]);
   }
@@ -215,7 +226,7 @@ it('user flow', async () => {
     // should delete permission of role
     const response = await user.inject({
       method: 'DELETE',
-      url: '/roles/' + roleId + '/permissions/testPermission',
+      url: '/roles/' + roleId + '/permissions/user@user::list',
     });
 
     expect(response).statusCodeToBe(200);

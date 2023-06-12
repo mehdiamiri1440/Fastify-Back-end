@@ -7,7 +7,8 @@ import {
 } from 'typeorm';
 import { Role } from '$src/domains/user/models/Role';
 import { RolePermission } from '$src/domains/user/models/RolePermission';
-
+import systemPermissions from '$src/permissions';
+import { INVALID_PERMISSION } from '$src/domains/user/errors';
 export class RoleService {
   private roleRepo: Repository<Role>;
   private rolePermissionRepo: Repository<RolePermission>;
@@ -36,6 +37,7 @@ export class RoleService {
     // create list that new permissions assigned to role
     const newRolePermissions: DeepPartial<RolePermission>[] = [];
     for (const permission of permissions) {
+      if (!(permission in systemPermissions)) throw new INVALID_PERMISSION(); // check if we have this permission or not
       newRolePermissions.push({
         role: { id: roleId },
         permission,
