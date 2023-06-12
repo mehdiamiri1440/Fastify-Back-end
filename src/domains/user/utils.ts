@@ -60,7 +60,7 @@ export const GetActiveUserByEmailAndPassword = async (
 
   // comparing password
   if (!user || !(await compare(password, user.password))) {
-    return
+    return;
   }
 
   return user;
