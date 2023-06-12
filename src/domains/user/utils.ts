@@ -103,7 +103,7 @@ export const GenerateTokensForUser = async (
       id: user.id,
       time: new Date().getTime(),
     },
-    { notBefore: TTL },
+    // { notBefore: TTL },
   );
 
   return {

@@ -9,6 +9,7 @@ import { FastifyInstance } from 'fastify';
 import { Role } from './models/Role';
 import { User } from './models/User';
 import routes from './routes';
+import bcrypt from 'bcrypt';
 
 let app: FastifyInstance | undefined;
 let user: TestUser;
@@ -509,4 +510,65 @@ it('should return a user that logged in', async () => {
     },
     meta: {},
   });
+});
+
+it('auth flow', async () => {
+  assert(app);
+  assert(user);
+
+  const testEmail = 'test@auth.flow';
+  const testPassword = 'testPassword';
+  let testRefreshToken: string;
+
+  const testUser = await repo(User).save({
+    ...userData,
+    email: testEmail,
+    password: await bcrypt.hash(testPassword, 10),
+    role: await repo(Role).save({ title: 'testxg', isActive: true }),
+  });
+
+  {
+    // get tokens with password
+    const response = await user.inject({
+      method: 'POST',
+      url: '/token',
+      payload: {
+        grant_type: 'password',
+        username: testEmail,
+        password: testPassword,
+      },
+    });
+
+    expect(response).statusCodeToBe(200);
+    const body = response.json();
+    expect(body).toMatchObject({
+      access_token: expect.any(String),
+      refresh_token: expect.any(String),
+      token_type: 'bearer',
+      expires_in: expect.any(Number),
+      scope: expect.any(String),
+    });
+    testRefreshToken = body.refresh_token;
+  }
+  {
+    // get tokens with refresh token
+    const response = await user.inject({
+      method: 'POST',
+      url: '/token',
+      payload: {
+        grant_type: 'refresh_token',
+        refresh_token: testRefreshToken,
+      },
+    });
+
+    expect(response).statusCodeToBe(200);
+    const body = response.json();
+    expect(body).toMatchObject({
+      access_token: expect.any(String),
+      refresh_token: expect.any(String),
+      token_type: 'bearer',
+      expires_in: expect.any(Number),
+      scope: expect.any(String),
+    });
+  }
 });
