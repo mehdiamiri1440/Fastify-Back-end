@@ -10,8 +10,9 @@ import { Role } from './models/Role';
 import { User } from './models/User';
 import routes from './routes';
 import bcrypt from 'bcrypt';
-import { UserLogout } from '$src/domains/user/models/UserLogout';
+import { RefreshToken } from '$src/domains/user/models/RefreshToken';
 import * as util from 'util';
+import { FastifyJWT } from '@fastify/jwt';
 
 let app: FastifyInstance | undefined;
 let user: TestUser;
@@ -575,10 +576,17 @@ it('auth flow', async () => {
     });
   }
   {
-    // should not get access token with refresh token after logout
-    await repo(UserLogout).save({ user: testUser });
-    const sleep = util.promisify(setTimeout);
-    await sleep(2000);
+    // should not get access token with invalid refresh token
+
+    await repo(RefreshToken).update(
+      {
+        jti: ((await app.jwt.verify(testRefreshToken)) as FastifyJWT['payload'])
+          .jti,
+      },
+      {
+        valid: false,
+      },
+    );
     const response = await user.inject({
       method: 'POST',
       url: '/token',

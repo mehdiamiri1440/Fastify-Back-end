@@ -12,6 +12,7 @@ declare module '@fastify/jwt' {
   interface FastifyJWT {
     payload: {
       tokenType: 'access_token' | 'refresh_token';
+      jti?: number;
       id: number;
       scope?: string;
       time: number;

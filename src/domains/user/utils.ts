@@ -4,7 +4,7 @@ import { repo } from '$src/infra/utils/repo';
 import { RolePermission } from '$src/domains/user/models/RolePermission';
 import assert from 'assert';
 import { compare } from 'bcrypt';
-import { UserLogout } from '$src/domains/user/models/UserLogout';
+import { RefreshToken } from '$src/domains/user/models/RefreshToken';
 import { FastifyInstance } from 'fastify';
 import { FastifyJWT } from '@fastify/jwt';
 const { TOKEN_TTL_SECONDS } = process.env;
@@ -23,26 +23,17 @@ export const GetLoginAndActiveUserByRefreshToken = async (
   const refresh_token: FastifyJWT['payload'] = await app.jwt.verify(token);
   if (refresh_token.tokenType != 'refresh_token') return;
 
-  // check if logged out or not
-  const lastLogOut = await repo(UserLogout).findOne({
-    where: { user: { id: refresh_token.id } },
-    order: { createdAt: 'DESC' },
+  // check refresh token valid or not
+  const refreshTokenFromDatabase = await repo(RefreshToken).findOne({
+    where: { jti: refresh_token.jti },
+    relations: { user: { role: true } },
   });
-  if (lastLogOut) {
-    if (lastLogOut.createdAt.getTime() < refresh_token.time)
-      // it means user logged out
-      return;
+  if (!refreshTokenFromDatabase || !refreshTokenFromDatabase.valid) {
+    return;
   }
 
-  // finding active user with that id
-  const user = await repo(User).findOne({
-    where: {
-      id: refresh_token.id,
-      isActive: true,
-    },
-    relations: ['role'],
-  });
-  if (user) return user;
+  if (refreshTokenFromDatabase.user && refreshTokenFromDatabase.user.isActive)
+    return refreshTokenFromDatabase.user;
 };
 
 export const GetActiveUserByEmailAndPassword = async (
@@ -100,6 +91,7 @@ export const GenerateTokensForUser = async (
       tokenType: 'refresh_token',
       id: user.id,
       time: new Date().getTime(),
+      jti: (await repo(RefreshToken).save({ user })).jti,
     },
     // { notBefore: TTL },
   );
