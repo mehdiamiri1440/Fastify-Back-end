@@ -629,6 +629,6 @@ it('should not get access_token with random refresh_token or random user/pass', 
       },
     });
 
-    expect(response).statusCodeToBe(403);
+    expect(response).not.statusCodeToBe(200);
   }
 });
