@@ -523,6 +523,7 @@ it('auth flow', async () => {
   const testUser = await repo(User).save({
     ...userData,
     email: testEmail,
+    phoneNumber: '+989303590057',
     password: await bcrypt.hash(testPassword, 10),
     role: await repo(Role).save({ title: 'testxg', isActive: true }),
   });
