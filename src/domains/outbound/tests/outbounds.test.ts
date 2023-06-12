@@ -5,8 +5,7 @@ import '$src/infra/test/statusCodeExpect';
 import {
   TestUser,
   createTestFastifyApp,
-  disableForeignKeyCheck,
-  enableForeignKeyCheck,
+  withoutForeignKeyCheck,
 } from '$src/infra/test/utils';
 import { repo } from '$src/infra/utils/repo';
 import { afterAll, beforeAll, beforeEach, expect, it } from '@jest/globals';
@@ -38,58 +37,55 @@ const createSampleProduct = async () =>
 
 const createSampleWarehouse = async () => {
   assert(user);
-  await disableForeignKeyCheck();
+  const { warehouse } = await withoutForeignKeyCheck(async () => {
+    const warehouse = await repo(Warehouse).save({
+      name: 'warehouse test',
+      description: 'description',
+      addressProvinceCode: 'P43',
+      addressProvinceName: 'TARRAGONA',
+      addressCityCode: 'C07.062',
+      addressCityName: 'SON SERVERA',
+      addressStreetCode: 'S43.001.00104',
+      addressStreetName: 'Alicante  en  ur mas en pares',
+      addressPostalCode: '7820',
+      addressNumber: '9',
+      addressNumberCode: 'N07.046.00097.00009.2965903CD5126N',
+      creator: {
+        id: 1,
+      },
+    });
 
-  const warehouse = await repo(Warehouse).save({
-    name: 'warehouse test',
-    description: 'description',
-    addressProvinceCode: 'P43',
-    addressProvinceName: 'TARRAGONA',
-    addressCityCode: 'C07.062',
-    addressCityName: 'SON SERVERA',
-    addressStreetCode: 'S43.001.00104',
-    addressStreetName: 'Alicante  en  ur mas en pares',
-    addressPostalCode: '7820',
-    addressNumber: '9',
-    addressNumberCode: 'N07.046.00097.00009.2965903CD5126N',
-    creator: {
-      id: 1,
-    },
+    await repo(WarehouseStaff).save({
+      name: 'warehouse test',
+      description: 'description',
+      user: user?.user,
+      warehouse,
+      creator: {
+        id: 1,
+      },
+    });
+    return { warehouse };
   });
 
-  await repo(WarehouseStaff).save({
-    name: 'warehouse test',
-    description: 'description',
-    user: user?.user,
-    warehouse,
-    creator: {
-      id: 1,
-    },
-  });
-  await enableForeignKeyCheck();
   return warehouse;
 };
 
-const createSampleCustomer = async () => {
-  await disableForeignKeyCheck();
-
-  const customer = await repo(Customer).save({
-    name: 'my name',
-    contactName: 'my business name',
-    subscriberType: 'empresa',
-    documentType: 'dni',
-    contactDocumentType: 'passaporte',
-    fiscalId: 'my fiscal id 123456',
-    contactFamily1: '1',
-    nationality: { id: 1 },
-    isActive: true,
-    creator: { id: 1 },
-  });
-
-  await enableForeignKeyCheck();
-
-  return customer;
-};
+const createSampleCustomer = async () =>
+  await withoutForeignKeyCheck(
+    async () =>
+      await repo(Customer).save({
+        name: 'my name',
+        contactName: 'my business name',
+        subscriberType: 'empresa',
+        documentType: 'dni',
+        contactDocumentType: 'passaporte',
+        fiscalId: 'my fiscal id 123456',
+        contactFamily1: '1',
+        nationality: { id: 1 },
+        isActive: true,
+        creator: { id: 1 },
+      }),
+  );
 
 const createSampleCustomerWithContact = async () => {
   const customer = await createSampleCustomer();
@@ -106,23 +102,20 @@ const createSampleCustomerWithContact = async () => {
 const createSampleBin = async (
   warehouse: Warehouse,
   overrides?: DeepPartial<Bin>,
-) => {
-  await disableForeignKeyCheck();
-
-  const bin = await repo(Bin).save({
-    name: 'bin1',
-    warehouse,
-    internalCode: randomUUID(),
-    physicalCode: randomUUID(),
-    property: { id: 1 },
-    size: { id: 1 },
-    creator: { id: 1 },
-    ...overrides,
-  });
-
-  await enableForeignKeyCheck();
-  return bin;
-};
+) =>
+  await withoutForeignKeyCheck(
+    async () =>
+      await repo(Bin).save({
+        name: 'bin1',
+        warehouse,
+        internalCode: randomUUID(),
+        physicalCode: randomUUID(),
+        property: { id: 1 },
+        size: { id: 1 },
+        creator: { id: 1 },
+        ...overrides,
+      }),
+  );
 
 beforeAll(async () => {
   app = await createTestFastifyApp();

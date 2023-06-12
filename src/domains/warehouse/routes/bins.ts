@@ -14,6 +14,10 @@ import { Type } from '@sinclair/typebox';
 import { Bin } from '../models/Bin';
 import { Warehouse } from '../models/Warehouse';
 import { BinSchema } from '../schemas/bin.schema';
+import { BinProduct } from '$src/domains/product/models/BinProduct';
+import { BIN_HAVE_PRODUCT } from '$src/domains/warehouse/errors';
+import { ProductService } from '$src/domains/product/ProductService';
+import AppDataSource from '$src/DataSource';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
@@ -164,6 +168,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     async handler(req) {
       const bin = await Bins.findOneByOrFail({ id: req.params.id });
+      const productService = new ProductService(AppDataSource, req.user.id);
+
+      if ((await productService.getBinQuantity(bin)) != 0)
+        throw new BIN_HAVE_PRODUCT();
+
       await Bins.softRemove(bin);
     },
   });

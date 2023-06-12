@@ -4,8 +4,7 @@ import AppDataSource from '$src/DataSource';
 import '$src/infra/test/statusCodeExpect';
 import {
   createTestFastifyApp,
-  disableForeignKeyCheck,
-  enableForeignKeyCheck,
+  withoutForeignKeyCheck,
   TestUser,
 } from '$src/infra/test/utils';
 import { repo } from '$src/infra/utils/repo';
@@ -60,18 +59,18 @@ it('cycle count flow', async () => {
   let supplierId: number;
   let contactId: number;
   let documentId: number;
-  await disableForeignKeyCheck();
-  const productId = (
-    await AppDataSource.getRepository(Product).save({
-      name: 'name',
-      code: 'code',
-      barcode: 'barcode',
-      invoiceSystemCode: 1,
-      description: 'description',
-      weight: 1,
-    })
-  ).id;
-  await enableForeignKeyCheck();
+  const productId = await withoutForeignKeyCheck(async () => {
+    return (
+      await AppDataSource.getRepository(Product).save({
+        name: 'name',
+        code: 'code',
+        barcode: 'barcode',
+        invoiceSystemCode: 1,
+        description: 'description',
+        weight: 1,
+      })
+    ).id;
+  });
 
   {
     // language

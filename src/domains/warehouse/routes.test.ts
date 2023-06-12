@@ -1,13 +1,21 @@
 import AppDataSource from '$src/DataSource';
 import { User } from '$src/domains/user/models/User';
 import '$src/infra/test/statusCodeExpect';
-import { createTestFastifyApp, TestUser } from '$src/infra/test/utils';
+import {
+  createTestFastifyApp,
+  withoutForeignKeyCheck,
+  TestUser,
+} from '$src/infra/test/utils';
 import { repo } from '$src/infra/utils/repo';
 import { afterEach, beforeEach, expect, it } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance } from 'fastify';
 import routes from './routes';
 import { Role } from '$src/domains/user/models/Role';
+import { BinProduct } from '$src/domains/product/models/BinProduct';
+import { Bin } from '$src/domains/warehouse/models/Bin';
+import { Product } from '$src/domains/product/models/Product';
+import { BIN_HAVE_PRODUCT } from '$src/domains/warehouse/errors';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -475,4 +483,33 @@ it('warehouse flow', async () => {
 
     expect(response).statusCodeToBe(200);
   }
+});
+
+it('should not delete bin when we have product in it', async function () {
+  assert(app);
+  assert(user);
+
+  const { binProduct } = await withoutForeignKeyCheck(async () => {
+    const binProduct = await repo(BinProduct).save({
+      bin: await repo(Bin).save({
+        name: 'test',
+        internalCode: 'test',
+        warehouse: { id: 1 },
+        size: { id: 1 },
+        property: { id: 1 },
+        creator: { id: 1 },
+      }),
+      product: await repo(Product).save({ name: 'test' }),
+      quantity: 1,
+    });
+    return { binProduct };
+  });
+
+  const response = await user.inject({
+    method: 'DELETE',
+    url: '/bins/' + binProduct.bin.id,
+  });
+
+  expect(response).statusCodeToBe(400);
+  expect(response.json().code).toBe(BIN_HAVE_PRODUCT().code);
 });

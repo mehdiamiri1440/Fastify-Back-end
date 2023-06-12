@@ -7,8 +7,7 @@ import { Warehouse } from '$src/domains/warehouse/models/Warehouse';
 import {
   TestUser,
   createTestFastifyApp,
-  disableForeignKeyCheck,
-  enableForeignKeyCheck,
+  withoutForeignKeyCheck,
 } from '$src/infra/test/utils';
 import { repo } from '$src/infra/utils/repo';
 import { afterEach, beforeEach, expect, it } from '@jest/globals';
@@ -43,26 +42,24 @@ beforeEach(async () => {
   await app.ready();
   user = await TestUser.create(app);
 
-  await disableForeignKeyCheck();
-
-  warehouse = await repo(Warehouse).save({
-    name: 'warehouse test',
-    description: 'description',
-    addressProvinceCode: 'P43',
-    addressProvinceName: 'TARRAGONA',
-    addressCityCode: 'C07.062',
-    addressCityName: 'SON SERVERA',
-    addressStreetCode: 'S43.001.00104',
-    addressStreetName: 'Alicante  en  ur mas en pares',
-    addressPostalCode: '7820',
-    addressNumber: '9',
-    addressNumberCode: 'N07.046.00097.00009.2965903CD5126N',
-    creator: {
-      id: 1,
-    },
+  await withoutForeignKeyCheck(async () => {
+    warehouse = await repo(Warehouse).save({
+      name: 'warehouse test',
+      description: 'description',
+      addressProvinceCode: 'P43',
+      addressProvinceName: 'TARRAGONA',
+      addressCityCode: 'C07.062',
+      addressCityName: 'SON SERVERA',
+      addressStreetCode: 'S43.001.00104',
+      addressStreetName: 'Alicante  en  ur mas en pares',
+      addressPostalCode: '7820',
+      addressNumber: '9',
+      addressNumberCode: 'N07.046.00097.00009.2965903CD5126N',
+      creator: {
+        id: 1,
+      },
+    });
   });
-
-  await enableForeignKeyCheck();
 });
 
 afterEach(async () => {
@@ -70,42 +67,46 @@ afterEach(async () => {
 });
 
 const createSampleProduct = async (overrides?: DeepPartial<Product>) =>
-  await repo(Product).save({
-    name: 'product 1',
-    barcode: '123',
-    invoiceSystemCode: 1,
-    description: 'description',
-    weight: 1,
-    unit: await repo(Unit).save({
-      id: 1,
-      name: 'meter',
-      creator: { id: 1 },
-    }),
-    creator: { id: 1 },
-    ...overrides,
-  });
+  await withoutForeignKeyCheck(
+    async () =>
+      await repo(Product).save({
+        name: 'product 1',
+        barcode: '123',
+        invoiceSystemCode: 1,
+        description: 'description',
+        weight: 1,
+        unit: await repo(Unit).save({
+          id: 1,
+          name: 'meter',
+          creator: { id: 1 },
+        }),
+        creator: { id: 1 },
+        ...overrides,
+      }),
+  );
 
 const createSampleSupplier = async (overrides?: DeepPartial<Supplier>) =>
-  repo(Supplier).save({
-    name: 'test',
-    cif: 'cif',
-    iban: 'iban',
-    email: 'email',
-    phoneNumber: 'phone',
-    accountNumber: 'account',
-    language: {
-      id: 1,
-    },
-    creator: {
-      id: 1,
-    },
-    ...overrides,
-  });
+  await withoutForeignKeyCheck(
+    async () =>
+      await repo(Supplier).save({
+        name: 'test',
+        cif: 'cif',
+        iban: 'iban',
+        email: 'email',
+        phoneNumber: 'phone',
+        accountNumber: 'account',
+        language: {
+          id: 1,
+        },
+        creator: {
+          id: 1,
+        },
+        ...overrides,
+      }),
+  );
 
 it('GET /products/:id should be working', async () => {
   assert(user);
-  await disableForeignKeyCheck();
-
   const product = await createSampleProduct();
   const supplier = await createSampleSupplier();
   // const bin = await createSampleBin();
@@ -123,15 +124,16 @@ it('GET /products/:id should be working', async () => {
 
   await repo(Product).save(product);
 
-  await repo(ProductSupplier).save({
-    product,
-    supplier,
-    creator: {
-      id: 1,
-    },
-  });
-
-  await enableForeignKeyCheck();
+  await withoutForeignKeyCheck(
+    async () =>
+      await repo(ProductSupplier).save({
+        product,
+        supplier,
+        creator: {
+          id: 1,
+        },
+      }),
+  );
 
   const response = await user.inject({
     method: 'GET',
@@ -163,12 +165,8 @@ it('GET /products/:id should be working', async () => {
 });
 
 it('POST /products/:id/suppliers should be working', async () => {
-  await disableForeignKeyCheck();
-
   const product = await createSampleProduct();
   const supplier = await createSampleSupplier();
-
-  await enableForeignKeyCheck();
 
   const response = await user?.inject({
     method: 'POST',
@@ -197,10 +195,8 @@ it('POST /products/:id/suppliers should be working', async () => {
 });
 
 it('DELETE /product-suppliers/:id should be working', async () => {
-  await disableForeignKeyCheck();
   const product = await createSampleProduct();
   const supplier = await createSampleSupplier();
-  await enableForeignKeyCheck();
 
   const createResponse = await user?.inject({
     method: 'POST',
@@ -229,10 +225,8 @@ it('DELETE /product-suppliers/:id should be working', async () => {
 });
 
 it('PUT /product-suppliers/:id should be working', async () => {
-  await disableForeignKeyCheck();
   const product = await createSampleProduct();
   const supplier = await createSampleSupplier();
-  await enableForeignKeyCheck();
 
   const createResponse = await user?.inject({
     method: 'POST',
@@ -267,9 +261,7 @@ it('PUT /product-suppliers/:id should be working', async () => {
 });
 
 it('POST /products/:id/images should be working', async () => {
-  await disableForeignKeyCheck();
   const product = await createSampleProduct();
-  await enableForeignKeyCheck();
 
   const createResponse = await user?.inject({
     method: 'POST',
@@ -296,36 +288,34 @@ it('POST /products/:id/images should be working', async () => {
 
 it('POST /products/:id/move-bin-quantity', async () => {
   assert(user);
-  await disableForeignKeyCheck();
-
   const product = await createSampleProduct();
+  const { sourceBin, targetBin } = await withoutForeignKeyCheck(async () => {
+    const sourceBin = await repo(Bin).save({
+      name: 'bin1',
+      warehouse,
+      internalCode: 'hey1',
+      size: { id: 1 },
+      property: { id: 1 },
+      creator: { id: 1 },
+    });
 
-  const sourceBin = await repo(Bin).save({
-    name: 'bin1',
-    warehouse,
-    internalCode: 'hey1',
-    size: { id: 1 },
-    property: { id: 1 },
-    creator: { id: 1 },
+    const targetBin = await repo(Bin).save({
+      name: 'bin2',
+      warehouse,
+      size: { id: 1 },
+      property: { id: 1 },
+      internalCode: 'hey2',
+      creator: { id: 1 },
+    });
+
+    await repo(BinProduct).save({
+      bin: sourceBin,
+      product,
+      quantity: 10,
+      creator: { id: 1 },
+    });
+    return { sourceBin, targetBin };
   });
-
-  const targetBin = await repo(Bin).save({
-    name: 'bin2',
-    warehouse,
-    size: { id: 1 },
-    property: { id: 1 },
-    internalCode: 'hey2',
-    creator: { id: 1 },
-  });
-
-  await repo(BinProduct).save({
-    bin: sourceBin,
-    product,
-    quantity: 10,
-    creator: { id: 1 },
-  });
-
-  await enableForeignKeyCheck();
 
   const response = await user?.inject({
     method: 'POST',
@@ -355,51 +345,51 @@ it('POST /products/:id/move-bin-quantity', async () => {
 describe('history', () => {
   it('GET /products/:id/history should be working', async () => {
     assert(user);
-    await disableForeignKeyCheck();
 
     const product = await createSampleProduct();
     const otherProduct = await createSampleProduct();
 
-    const bin = await repo(Bin).save({
-      name: 'bin1',
-      warehouse,
-      internalCode: 'hey1',
-      size: { id: 1 },
-      property: { id: 1 },
-      creator: { id: 1 },
+    const { bin } = await withoutForeignKeyCheck(async () => {
+      const bin = await repo(Bin).save({
+        name: 'bin1',
+        warehouse,
+        internalCode: 'hey1',
+        size: { id: 1 },
+        property: { id: 1 },
+        creator: { id: 1 },
+      });
+
+      await repo(ProductStockHistory).insert([
+        {
+          product,
+          quantity: 10,
+          bin,
+          sourceType: SourceType.INBOUND,
+          sourceId: null,
+          description: 'test',
+          creator: { id: 1 },
+        },
+        {
+          product,
+          quantity: 20,
+          bin,
+          sourceType: SourceType.OUTBOUND,
+          sourceId: null,
+          description: 'test',
+          creator: { id: 1 },
+        },
+        {
+          product: otherProduct,
+          quantity: 30,
+          bin,
+          sourceType: SourceType.OUTBOUND,
+          sourceId: null,
+          description: 'test',
+          creator: { id: 1 },
+        },
+      ]);
+      return { bin };
     });
-
-    await repo(ProductStockHistory).insert([
-      {
-        product,
-        quantity: 10,
-        bin,
-        sourceType: SourceType.INBOUND,
-        sourceId: null,
-        description: 'test',
-        creator: { id: 1 },
-      },
-      {
-        product,
-        quantity: 20,
-        bin,
-        sourceType: SourceType.OUTBOUND,
-        sourceId: null,
-        description: 'test',
-        creator: { id: 1 },
-      },
-      {
-        product: otherProduct,
-        quantity: 30,
-        bin,
-        sourceType: SourceType.OUTBOUND,
-        sourceId: null,
-        description: 'test',
-        creator: { id: 1 },
-      },
-    ]);
-
-    await enableForeignKeyCheck();
 
     const response = await user.inject({
       method: 'GET',
@@ -437,51 +427,51 @@ describe('history', () => {
   });
   it('GET /bins/:id/history should be working', async () => {
     assert(user);
-    await disableForeignKeyCheck();
-
     const product = await createSampleProduct();
+
     const otherProduct = await createSampleProduct();
 
-    const bin = await repo(Bin).save({
-      name: 'bin1',
-      warehouse,
-      internalCode: 'hey1',
-      size: { id: 1 },
-      property: { id: 1 },
-      creator: { id: 1 },
+    const { bin } = await withoutForeignKeyCheck(async () => {
+      const bin = await repo(Bin).save({
+        name: 'bin1',
+        warehouse,
+        internalCode: 'hey1',
+        size: { id: 1 },
+        property: { id: 1 },
+        creator: { id: 1 },
+      });
+
+      await repo(ProductStockHistory).insert([
+        {
+          product,
+          quantity: 10,
+          bin,
+          sourceType: SourceType.INBOUND,
+          sourceId: null,
+          description: 'test',
+          creator: { id: 1 },
+        },
+        {
+          product,
+          quantity: 20,
+          bin,
+          sourceType: SourceType.OUTBOUND,
+          sourceId: null,
+          description: 'test',
+          creator: { id: 1 },
+        },
+        {
+          product: otherProduct,
+          quantity: 30,
+          bin,
+          sourceType: SourceType.OUTBOUND,
+          sourceId: null,
+          description: 'test',
+          creator: { id: 1 },
+        },
+      ]);
+      return { bin };
     });
-
-    await repo(ProductStockHistory).insert([
-      {
-        product,
-        quantity: 10,
-        bin,
-        sourceType: SourceType.INBOUND,
-        sourceId: null,
-        description: 'test',
-        creator: { id: 1 },
-      },
-      {
-        product,
-        quantity: 20,
-        bin,
-        sourceType: SourceType.OUTBOUND,
-        sourceId: null,
-        description: 'test',
-        creator: { id: 1 },
-      },
-      {
-        product: otherProduct,
-        quantity: 30,
-        bin,
-        sourceType: SourceType.OUTBOUND,
-        sourceId: null,
-        description: 'test',
-        creator: { id: 1 },
-      },
-    ]);
-
-    await enableForeignKeyCheck();
 
     const response = await user.inject({
       method: 'GET',
@@ -537,40 +527,41 @@ describe('bins', () => {
     assert(user);
     assert(warehouse);
 
-    await disableForeignKeyCheck();
-
     const product = await createSampleProduct();
 
-    const binProductA = await repo(BinProduct).save({
-      bin: await repo(Bin).save({
-        name: 'bin1',
-        warehouse,
-        internalCode: 'hey1',
-        size: { id: 1 },
-        property: { id: 1 },
-        creator: { id: 1 },
-      }),
-      product,
+    const { binProductA, binProductB } = await withoutForeignKeyCheck(
+      async () => {
+        const binProductA = await repo(BinProduct).save({
+          bin: await repo(Bin).save({
+            name: 'bin1',
+            warehouse,
+            internalCode: 'hey1',
+            size: { id: 1 },
+            property: { id: 1 },
+            creator: { id: 1 },
+          }),
+          product,
 
-      quantity: 10,
-      creator: { id: 1 },
-    });
+          quantity: 10,
+          creator: { id: 1 },
+        });
 
-    const binProductB = await repo(BinProduct).save({
-      bin: await repo(Bin).save({
-        name: 'bin2',
-        warehouse,
-        internalCode: 'hey2',
-        size: { id: 1 },
-        property: { id: 1 },
-        creator: { id: 1 },
-      }),
-      product,
-      quantity: 30,
-      creator: { id: 1 },
-    });
-
-    await enableForeignKeyCheck();
+        const binProductB = await repo(BinProduct).save({
+          bin: await repo(Bin).save({
+            name: 'bin2',
+            warehouse,
+            internalCode: 'hey2',
+            size: { id: 1 },
+            property: { id: 1 },
+            creator: { id: 1 },
+          }),
+          product,
+          quantity: 30,
+          creator: { id: 1 },
+        });
+        return { binProductA, binProductB };
+      },
+    );
 
     const response = await user.inject({
       method: 'GET',
@@ -616,33 +607,34 @@ describe('bins', () => {
     assert(user);
     assert(warehouse);
 
-    await disableForeignKeyCheck();
+    const { bin, binProductA, binProductB } = await withoutForeignKeyCheck(
+      async () => {
+        const bin = await repo(Bin).save({
+          name: 'bin',
+          warehouse,
+          internalCode: 'hey2',
+          size: { id: 1 },
+          property: { id: 1 },
+          creator: { id: 1 },
+        });
 
-    const bin = await repo(Bin).save({
-      name: 'bin',
-      warehouse,
-      internalCode: 'hey2',
-      size: { id: 1 },
-      property: { id: 1 },
-      creator: { id: 1 },
-    });
+        const binProductA = await repo(BinProduct).save({
+          bin,
+          product: await createSampleProduct(),
 
-    const binProductA = await repo(BinProduct).save({
-      bin,
-      product: await createSampleProduct(),
+          quantity: 10,
+          creator: { id: 1 },
+        });
 
-      quantity: 10,
-      creator: { id: 1 },
-    });
-
-    const binProductB = await repo(BinProduct).save({
-      bin,
-      product: await createSampleProduct(),
-      quantity: 30,
-      creator: { id: 1 },
-    });
-
-    await enableForeignKeyCheck();
+        const binProductB = await repo(BinProduct).save({
+          bin,
+          product: await createSampleProduct(),
+          quantity: 30,
+          creator: { id: 1 },
+        });
+        return { bin, binProductA, binProductB };
+      },
+    );
 
     const response = await user.inject({
       method: 'GET',
@@ -753,12 +745,9 @@ describe('sizes', () => {
 describe('inbounds', () => {
   it('GET /products/:id/inbounds should be working', async () => {
     assert(user);
-    await disableForeignKeyCheck();
 
     const product = await createSampleProduct();
     const supplier = await createSampleSupplier();
-
-    await enableForeignKeyCheck();
 
     const inbound = await repo(Inbound).save({
       code: 'code',
@@ -788,7 +777,6 @@ describe('inbounds', () => {
         actualQuantity: 21,
       },
     ]);
-    await enableForeignKeyCheck();
 
     const response = await user.inject({
       method: 'GET',
@@ -814,10 +802,8 @@ describe('inbounds', () => {
 describe('Search', () => {
   it('GET /products/search should be working', async () => {
     assert(user);
-    await disableForeignKeyCheck();
     await createSampleProduct({ name: 'abcdef', description: 'iPhone 11 pro' });
     await createSampleProduct({ name: 'def', description: 'Samsung 13 pro' });
-    await enableForeignKeyCheck();
 
     const response = await user.inject({
       method: 'GET',
@@ -837,31 +823,30 @@ describe('Search', () => {
 describe('Suppliers', () => {
   describe('Search', () => {
     const initData = async () => {
-      await disableForeignKeyCheck();
       const p1 = await createSampleProduct();
       const p2 = await createSampleProduct();
       const s1 = await createSampleSupplier();
       const s2 = await createSampleSupplier({ name: 'hey' });
 
-      await repo(ProductSupplier).save({
-        product: p1,
-        supplier: s1,
-        creator: { id: 1 },
-      });
+      await withoutForeignKeyCheck(async () => {
+        await repo(ProductSupplier).save({
+          product: p1,
+          supplier: s1,
+          creator: { id: 1 },
+        });
 
-      await repo(ProductSupplier).save({
-        product: p2,
-        supplier: s2,
-        creator: { id: 1 },
-      });
+        await repo(ProductSupplier).save({
+          product: p2,
+          supplier: s2,
+          creator: { id: 1 },
+        });
 
-      await repo(ProductSupplier).save({
-        product: p2,
-        supplier: s1,
-        creator: { id: 1 },
+        await repo(ProductSupplier).save({
+          product: p2,
+          supplier: s1,
+          creator: { id: 1 },
+        });
       });
-
-      await enableForeignKeyCheck();
 
       return {
         s1,
@@ -920,9 +905,7 @@ describe('Suppliers', () => {
 describe('Content', async () => {
   it('GET and PUT of /products/:id/content should be working', async () => {
     assert(user);
-    await disableForeignKeyCheck();
     const product = await createSampleProduct();
-    await enableForeignKeyCheck();
 
     const { identifiers: tags } = await repo(Tag).insert([
       {
@@ -938,8 +921,6 @@ describe('Content', async () => {
         creator: { id: 1 },
       },
     ]);
-
-    await enableForeignKeyCheck();
 
     const emptyContentResponse = await user.inject({
       method: 'GET',
@@ -986,9 +967,7 @@ describe('Content', async () => {
 describe('Sale Price', () => {
   it('GET and POST /products/:id/sale-prices should be working', async () => {
     assert(user);
-    await disableForeignKeyCheck();
     const product = await createSampleProduct();
-    await enableForeignKeyCheck();
 
     const createResponse = await user.inject({
       method: 'POST',
