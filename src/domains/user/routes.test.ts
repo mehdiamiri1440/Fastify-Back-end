@@ -569,7 +569,7 @@ it('auth flow', async () => {
     const body = response.json();
     expect(body).toMatchObject({
       access_token: expect.any(String),
-      refresh_token: expect.any(String),
+      refresh_token: testRefreshToken,
       token_type: 'bearer',
       expires_in: expect.any(Number),
       scope: expect.any(String),
@@ -593,6 +593,39 @@ it('auth flow', async () => {
       payload: {
         grant_type: 'refresh_token',
         refresh_token: testRefreshToken,
+      },
+    });
+
+    expect(response).statusCodeToBe(403);
+  }
+});
+
+it('should not get access_token with random refresh_token or random user/pass', async () => {
+  assert(app);
+  assert(user);
+
+  {
+    // password
+    const response = await user.inject({
+      method: 'POST',
+      url: '/token',
+      payload: {
+        grant_type: 'password',
+        username: '34qwtyerg',
+        password: '2345awesf',
+      },
+    });
+
+    expect(response).statusCodeToBe(403);
+  }
+  {
+    // get tokens with refresh token
+    const response = await user.inject({
+      method: 'POST',
+      url: '/token',
+      payload: {
+        grant_type: 'refresh_token',
+        refresh_token: 'asdfefasdf3e9fpasd0f9',
       },
     });
 
