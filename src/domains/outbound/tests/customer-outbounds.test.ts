@@ -5,8 +5,7 @@ import '$src/infra/test/statusCodeExpect';
 import {
   TestUser,
   createTestFastifyApp,
-  disableForeignKeyCheck,
-  enableForeignKeyCheck,
+  withoutForeignKeyCheck,
 } from '$src/infra/test/utils';
 import { repo } from '$src/infra/utils/repo';
 import { afterAll, beforeAll, beforeEach, expect, it } from '@jest/globals';
@@ -24,58 +23,52 @@ let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
 
 const createSampleWarehouse = async () => {
-  assert(user);
-  await disableForeignKeyCheck();
+  return await withoutForeignKeyCheck(async () => {
+    const warehouse = await repo(Warehouse).save({
+      name: 'warehouse test',
+      description: 'description',
+      addressProvinceCode: 'P43',
+      addressProvinceName: 'TARRAGONA',
+      addressCityCode: 'C07.062',
+      addressCityName: 'SON SERVERA',
+      addressStreetCode: 'S43.001.00104',
+      addressStreetName: 'Alicante  en  ur mas en pares',
+      addressPostalCode: '7820',
+      addressNumber: '9',
+      addressNumberCode: 'N07.046.00097.00009.2965903CD5126N',
+      creator: {
+        id: 1,
+      },
+    });
 
-  const warehouse = await repo(Warehouse).save({
-    name: 'warehouse test',
-    description: 'description',
-    addressProvinceCode: 'P43',
-    addressProvinceName: 'TARRAGONA',
-    addressCityCode: 'C07.062',
-    addressCityName: 'SON SERVERA',
-    addressStreetCode: 'S43.001.00104',
-    addressStreetName: 'Alicante  en  ur mas en pares',
-    addressPostalCode: '7820',
-    addressNumber: '9',
-    addressNumberCode: 'N07.046.00097.00009.2965903CD5126N',
-    creator: {
-      id: 1,
-    },
+    await repo(WarehouseStaff).save({
+      name: 'warehouse test',
+      description: 'description',
+      user: user?.user,
+      warehouse,
+      creator: {
+        id: 1,
+      },
+    });
+    return warehouse;
   });
-
-  await repo(WarehouseStaff).save({
-    name: 'warehouse test',
-    description: 'description',
-    user: user?.user,
-    warehouse,
-    creator: {
-      id: 1,
-    },
-  });
-  await enableForeignKeyCheck();
-  return warehouse;
 };
 
 const createSampleCustomer = async () => {
-  await disableForeignKeyCheck();
-
-  const customer = await repo(Customer).save({
-    name: 'my name',
-    contactName: 'my business name',
-    subscriberType: 'empresa',
-    documentType: 'dni',
-    contactDocumentType: 'passaporte',
-    fiscalId: randomUUID(),
-    contactFamily1: '1',
-    nationality: { id: 1 },
-    isActive: true,
-    creator: { id: 1 },
+  return await withoutForeignKeyCheck(async () => {
+    return await repo(Customer).save({
+      name: 'my name',
+      contactName: 'my business name',
+      subscriberType: 'empresa',
+      documentType: 'dni',
+      contactDocumentType: 'passaporte',
+      fiscalId: randomUUID(),
+      contactFamily1: '1',
+      nationality: { id: 1 },
+      isActive: true,
+      creator: { id: 1 },
+    });
   });
-
-  await enableForeignKeyCheck();
-
-  return customer;
 };
 
 beforeAll(async () => {

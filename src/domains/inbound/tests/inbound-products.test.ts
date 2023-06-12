@@ -6,8 +6,7 @@ import { WarehouseStaff } from '$src/domains/warehouse/models/WarehouseStaff';
 import '$src/infra/test/statusCodeExpect';
 import {
   createTestFastifyApp,
-  disableForeignKeyCheck,
-  enableForeignKeyCheck,
+  withoutForeignKeyCheck,
   TestUser,
 } from '$src/infra/test/utils';
 import { repo } from '$src/infra/utils/repo';
@@ -37,21 +36,18 @@ const createSampleBin = async (
   warehouse: Warehouse,
   overrides?: DeepPartial<Bin>,
 ) => {
-  await disableForeignKeyCheck();
-
-  const bin = await repo(Bin).save({
-    name: 'bin1',
-    warehouse,
-    internalCode: 'internalCode1',
-    physicalCode: randomUUID(),
-    property: { id: 1 },
-    size: { id: 1 },
-    creator: { id: 1 },
-    ...overrides,
+  return await withoutForeignKeyCheck(async () => {
+    return await repo(Bin).save({
+      name: 'bin1',
+      warehouse,
+      internalCode: 'internalCode1',
+      physicalCode: randomUUID(),
+      property: { id: 1 },
+      size: { id: 1 },
+      creator: { id: 1 },
+      ...overrides,
+    });
   });
-
-  await enableForeignKeyCheck();
-  return bin;
 };
 
 const createSampleProduct = async (overrides?: DeepPartial<Product>) =>
@@ -71,24 +67,23 @@ const createSampleProduct = async (overrides?: DeepPartial<Product>) =>
   });
 
 const createSampleSupplier = async (overrides?: DeepPartial<Supplier>) => {
-  await disableForeignKeyCheck();
-  const s = await repo(Supplier).save({
-    name: 'test',
-    cif: 'cif',
-    iban: 'iban',
-    email: 'email',
-    phoneNumber: 'phone',
-    accountNumber: 'account',
-    language: {
-      id: 1,
-    },
-    creator: {
-      id: 1,
-    },
-    ...overrides,
+  return await withoutForeignKeyCheck(async () => {
+    return await repo(Supplier).save({
+      name: 'test',
+      cif: 'cif',
+      iban: 'iban',
+      email: 'email',
+      phoneNumber: 'phone',
+      accountNumber: 'account',
+      language: {
+        id: 1,
+      },
+      creator: {
+        id: 1,
+      },
+      ...overrides,
+    });
   });
-  await enableForeignKeyCheck();
-  return s;
 };
 
 const createSampleInbound = async (

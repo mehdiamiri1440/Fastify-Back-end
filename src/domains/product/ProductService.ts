@@ -5,7 +5,13 @@ import { Product } from './models/Product';
 import { ProductStockHistory, SourceType } from './models/ProductStockHistory';
 
 import assert from 'assert';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import {
+  DataSource,
+  EntityManager,
+  LessThanOrEqual,
+  Not,
+  Repository,
+} from 'typeorm';
 
 const QUANTITY_OUT_OF_RANGE = createError(
   'QUANTITY_OUT_OF_RANGE',
@@ -157,5 +163,17 @@ export class ProductService {
       sourceId: sourceBin.id,
       description,
     });
+  }
+  async getBinQuantity(bin: Bin): Promise<number> {
+    return (
+      (await this.binProductsRepo.sum('quantity', { bin: { id: bin.id } })) ?? 0
+    );
+  }
+  async getProductQuantity(product: Product): Promise<number> {
+    return (
+      (await this.binProductsRepo.sum('quantity', {
+        product: { id: product.id },
+      })) ?? 0
+    );
   }
 }

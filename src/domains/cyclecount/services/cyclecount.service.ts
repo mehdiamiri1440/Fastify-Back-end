@@ -7,7 +7,6 @@ import {
 } from 'typeorm';
 import { Bin } from '$src/domains/warehouse/models/Bin';
 import { BinProduct } from '$src/domains/product/models/BinProduct';
-import createError from '@fastify/error';
 import { Product } from '$src/domains/product/models/Product';
 import { loadUserWarehouse } from '../utils';
 import { ProductService } from '$src/domains/product/ProductService';
@@ -16,21 +15,13 @@ import { CycleCount } from '$src/domains/cyclecount/models/CycleCount';
 import { CycleCountDifference } from '$src/domains/cyclecount/models/Difference';
 import { Static, Type } from '@sinclair/typebox';
 import { CycleCountSchema } from '$src/domains/cyclecount/schemas/cyclecount.schema';
-const CYCLE_COUNT_IS_NOT_OPEN = createError(
-  'CYCLE_COUNT_IS_NOT_OPEN',
-  'this cycle count is not open',
-  400,
-);
-const MISS_PRODUCT = createError(
-  'MISS_PRODUCT',
-  'miss product id in cycle count type Product',
-  400,
-);
-const MISS_BIN = createError(
-  'MISS_BIN',
-  'miss bin id in cycle count type Bin',
-  400,
-);
+import {
+  EMPTY_BIN,
+  NOT_IN_ANY_BIN,
+  MISS_BIN,
+  MISS_PRODUCT,
+  CYCLE_COUNT_IS_NOT_OPEN,
+} from '../errors';
 
 const bodySchema = Type.Pick(CycleCountSchema, [
   'cycleCountType',
@@ -67,6 +58,14 @@ export class CycleCountService {
         const product = await this.ProductsRepo.findOneByOrFail({
           id: body.product,
         });
+
+        const productInbinsCount = await this.BinProductsRepo.count({
+          where: { product: { id: product.id } },
+        });
+        if (productInbinsCount == 0) {
+          throw new NOT_IN_ANY_BIN();
+        }
+
         return await this.#saveProductCycleCount({
           cycleCountState: 'open',
           cycleCountType: body.cycleCountType,
@@ -79,6 +78,14 @@ export class CycleCountService {
           throw new MISS_BIN();
         }
         const bin = await this.BinsRepo.findOneByOrFail({ id: body.bin });
+
+        const productsInbinCount = await this.BinProductsRepo.count({
+          where: { bin: { id: bin.id } },
+        });
+        if (productsInbinCount == 0) {
+          throw new EMPTY_BIN();
+        }
+
         return await this.#saveBinCycleCount({
           cycleCountState: 'open',
           cycleCountType: body.cycleCountType,

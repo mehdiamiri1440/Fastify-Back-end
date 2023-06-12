@@ -90,10 +90,17 @@ export async function createTestFastifyApp() {
   return app;
 }
 
-export function disableForeignKeyCheck() {
+function disableForeignKeyCheck() {
   return AppDataSource.query(`SET session_replication_role = 'replica';`);
 }
 
-export function enableForeignKeyCheck() {
+function enableForeignKeyCheck() {
   return AppDataSource.query(`SET session_replication_role = 'origin';`);
+}
+
+export async function withoutForeignKeyCheck<T>(fnc: () => T): Promise<T> {
+  await disableForeignKeyCheck();
+  const data = await fnc();
+  await enableForeignKeyCheck();
+  return data;
 }

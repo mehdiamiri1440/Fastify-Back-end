@@ -6,8 +6,7 @@ import '$src/infra/test/statusCodeExpect';
 import {
   TestUser,
   createTestFastifyApp,
-  disableForeignKeyCheck,
-  enableForeignKeyCheck,
+  withoutForeignKeyCheck,
 } from '$src/infra/test/utils';
 import { repo } from '$src/infra/utils/repo';
 import { afterAll, beforeAll, expect, it } from '@jest/globals';
@@ -37,43 +36,41 @@ beforeAll(async () => {
   await app.ready();
   user = await TestUser.create(app);
 
-  await disableForeignKeyCheck();
+  await withoutForeignKeyCheck(async () => {
+    product = await repo(Product).save({
+      name: 'test',
+      unit: await repo(Unit).save({ name: 'unit', creator: { id: 1 } }),
+    });
 
-  product = await repo(Product).save({
-    name: 'test',
-    unit: await repo(Unit).save({ name: 'unit', creator: { id: 1 } }),
+    warehouse = await repo(Warehouse).save({
+      name: 'warehouse test',
+      description: 'description',
+      addressProvinceCode: 'P43',
+      addressProvinceName: 'TARRAGONA',
+      addressCityCode: 'C07.062',
+      addressCityName: 'SON SERVERA',
+      addressStreetCode: 'S43.001.00104',
+      addressStreetName: 'Alicante  en  ur mas en pares',
+      addressPostalCode: '7820',
+      addressNumber: '9',
+      addressNumberCode: 'N07.046.00097.00009.2965903CD5126N',
+      creator: {
+        id: 1,
+      },
+    });
+
+    await repo(WarehouseStaff).save({
+      name: 'warehouse test',
+      description: 'description',
+      user: {
+        id: 1,
+      },
+      warehouse,
+      creator: {
+        id: 1,
+      },
+    });
   });
-
-  warehouse = await repo(Warehouse).save({
-    name: 'warehouse test',
-    description: 'description',
-    addressProvinceCode: 'P43',
-    addressProvinceName: 'TARRAGONA',
-    addressCityCode: 'C07.062',
-    addressCityName: 'SON SERVERA',
-    addressStreetCode: 'S43.001.00104',
-    addressStreetName: 'Alicante  en  ur mas en pares',
-    addressPostalCode: '7820',
-    addressNumber: '9',
-    addressNumberCode: 'N07.046.00097.00009.2965903CD5126N',
-    creator: {
-      id: 1,
-    },
-  });
-
-  await repo(WarehouseStaff).save({
-    name: 'warehouse test',
-    description: 'description',
-    user: {
-      id: 1,
-    },
-    warehouse,
-    creator: {
-      id: 1,
-    },
-  });
-
-  await enableForeignKeyCheck();
 });
 
 afterAll(async () => {
@@ -142,73 +139,71 @@ describe('Supply', () => {
     /**
      * Here we create many BinProduct rows for a single product
      */
-    await disableForeignKeyCheck();
+    await withoutForeignKeyCheck(async () => {
+      outbound = await repo(Outbound).save({
+        code: 'code',
+        creator: {
+          id: 1,
+        },
+        warehouse,
+        status: OutboundStatus.NEW_ORDER,
+      });
 
-    outbound = await repo(Outbound).save({
-      code: 'code',
-      creator: {
-        id: 1,
-      },
-      warehouse,
-      status: OutboundStatus.NEW_ORDER,
-    });
+      outboundProduct = await outboundProductsRepo.save({
+        product,
+        outbound,
+        price: 100,
+        quantity: 20,
+      });
 
-    outboundProduct = await outboundProductsRepo.save({
-      product,
-      outbound,
-      price: 100,
-      quantity: 20,
-    });
+      bin1 = await repo(Bin).save({
+        name: 'bin1',
+        warehouse,
+        internalCode: 'hey1',
+        size: { id: 1 },
+        property: { id: 1 },
+        creator: { id: 1 },
+      });
+      await repo(BinProduct).save({
+        bin: bin1,
+        product,
+        quantity: 10,
+      });
 
-    bin1 = await repo(Bin).save({
-      name: 'bin1',
-      warehouse,
-      internalCode: 'hey1',
-      size: { id: 1 },
-      property: { id: 1 },
-      creator: { id: 1 },
-    });
-    await repo(BinProduct).save({
-      bin: bin1,
-      product,
-      quantity: 10,
-    });
+      bin2 = await repo(Bin).save({
+        name: 'bin2',
+        warehouse,
+        internalCode: 'hey2',
+        size: { id: 1 },
+        property: { id: 1 },
+        creator: { id: 1 },
+      });
+      await repo(BinProduct).save({
+        bin: bin2,
+        product,
+        quantity: 20,
+      });
 
-    bin2 = await repo(Bin).save({
-      name: 'bin2',
-      warehouse,
-      internalCode: 'hey2',
-      size: { id: 1 },
-      property: { id: 1 },
-      creator: { id: 1 },
-    });
-    await repo(BinProduct).save({
-      bin: bin2,
-      product,
-      quantity: 20,
-    });
+      bin3 = await repo(Bin).save({
+        name: 'bin3',
+        warehouse,
+        internalCode: 'hey3',
+        size: { id: 1 },
+        property: { id: 1 },
+        creator: { id: 1 },
+      });
+      await repo(BinProduct).save({
+        bin: bin3,
+        product,
+        quantity: 10,
+      });
 
-    bin3 = await repo(Bin).save({
-      name: 'bin3',
-      warehouse,
-      internalCode: 'hey3',
-      size: { id: 1 },
-      property: { id: 1 },
-      creator: { id: 1 },
+      await repo(OutboundProductSupply).save({
+        outboundProduct,
+        bin: bin3,
+        quantity: 10,
+      });
     });
-    await repo(BinProduct).save({
-      bin: bin3,
-      product,
-      quantity: 10,
-    });
-
-    await repo(OutboundProductSupply).save({
-      outboundProduct,
-      bin: bin3,
-      quantity: 10,
-    });
-
-    await enableForeignKeyCheck();
   });
 
   it('should get single outbound-product', async () => {

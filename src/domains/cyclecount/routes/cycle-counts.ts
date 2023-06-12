@@ -59,6 +59,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
       const query = AppDataSource.getRepository(CycleCount)
         .createQueryBuilder('cycle_count')
+        .withDeleted()
         .addSelect(`(${subQuery}) AS not_match`)
         .leftJoinAndSelect('cycle_count.bin', 'bin')
         .leftJoinAndSelect('cycle_count.product', 'product')
@@ -107,6 +108,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           product: { category: true },
           differences: { binProduct: true },
         },
+        withDeleted: true,
       });
 
       for (const index in cycleCount.differences) {
@@ -160,6 +162,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           cycleCount: { bin: true, product: true },
           counter: true,
         },
+        withDeleted: true,
       });
 
       for (const index in differences) {
