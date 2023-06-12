@@ -53,6 +53,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     bucketName: 'importer',
     prefix: '/importer',
   });
+  await app.register(Files, {
+    minio: minio,
+    bucketName: 'support',
+    prefix: '/support',
+  });
 };
 
 export default plugin;
