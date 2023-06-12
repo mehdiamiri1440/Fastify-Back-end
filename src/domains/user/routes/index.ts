@@ -56,6 +56,29 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
+  app.route({
+    method: 'POST',
+    url: '/login',
+    schema: {
+      body: Type.Object({
+        username: Type.Optional(Type.String()),
+        password: Type.Optional(Type.String()),
+      }),
+    },
+    async handler(req) {
+      if (!req.body.username || !req.body.password) throw new ACCESS_DENIED();
+
+      const user = await GetActiveUserByEmailAndPassword(
+        req.body.username,
+        req.body.password,
+      );
+
+      if (!user) throw new ACCESS_DENIED();
+
+      return await GenerateTokensForUser(app, user);
+    },
+  });
+
   await app.register(import('./users'), { prefix: '/users' });
   await app.register(import('./roles'), { prefix: '/roles' });
 
