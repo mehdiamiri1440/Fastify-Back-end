@@ -40,6 +40,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         orderBy: OrderBy(['id', 'name', 'createdAt']),
         filter: Filter({
           name: Searchable(),
+          warehouse: Type.Object({ id: Type.Integer() }),
         }),
       }),
     },
