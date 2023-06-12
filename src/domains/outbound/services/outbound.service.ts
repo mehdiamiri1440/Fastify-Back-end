@@ -157,7 +157,7 @@ export class OutboundService {
     }
 
     await this.outboundsRepo.update(outbound.id, {
-      status: OutboundStatus.TRANSFER,
+      status: nextStatus,
     });
   }
 

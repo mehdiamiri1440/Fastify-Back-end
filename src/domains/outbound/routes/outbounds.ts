@@ -86,16 +86,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         where: {
           id,
         },
-        select: {
-          creator: {
-            id: true,
-            fullName: true,
-          },
-          driver: {
-            id: true,
-            fullName: true,
-          },
-        },
         relations: {
           creator: true,
           driver: true,
