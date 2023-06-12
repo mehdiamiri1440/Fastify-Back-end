@@ -50,7 +50,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
           if (!user) throw new ACCESS_DENIED();
 
-          return await GenerateTokensForUser(app, user);
+          return await GenerateTokensForUser(app, user, req.body.refresh_token);
         }
       }
     },

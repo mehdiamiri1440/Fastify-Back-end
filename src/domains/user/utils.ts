@@ -60,6 +60,7 @@ export const GetActiveUserByEmailAndPassword = async (
 export const GenerateTokensForUser = async (
   app: FastifyInstance,
   user: User,
+  access_token?: string,
 ) => {
   // getting scope
   let scope: string;
@@ -75,7 +76,7 @@ export const GenerateTokensForUser = async (
   }
 
   // signing access_token
-  const access_token = app.jwt.sign(
+  access_token ??= app.jwt.sign(
     {
       tokenType: 'access_token',
       id: user.id,
