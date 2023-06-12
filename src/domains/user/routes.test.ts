@@ -10,6 +10,7 @@ import { Role } from './models/Role';
 import { User } from './models/User';
 import routes from './routes';
 import bcrypt from 'bcrypt';
+import { UserLogout } from '$src/domains/user/models/UserLogout';
 
 let app: FastifyInstance | undefined;
 let user: TestUser;
@@ -571,5 +572,19 @@ it('auth flow', async () => {
       expires_in: expect.any(Number),
       scope: expect.any(String),
     });
+  }
+  {
+    // should not get access token with refresh token after logout
+    await repo(UserLogout).save({ user: testUser });
+    const response = await user.inject({
+      method: 'POST',
+      url: '/token',
+      payload: {
+        grant_type: 'refresh_token',
+        refresh_token: testRefreshToken,
+      },
+    });
+
+    expect(response).statusCodeToBe(403);
   }
 });

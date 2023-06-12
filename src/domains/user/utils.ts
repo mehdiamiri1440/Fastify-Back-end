@@ -29,7 +29,7 @@ export const GetLoginAndActiveUserByRefreshToken = async (
     order: { createdAt: 'DESC' },
   });
   if (lastLogOut) {
-    if (lastLogOut.createdAt.getTime() > refresh_token.time)
+    if (lastLogOut.createdAt.getTime() < refresh_token.time)
       // it means user logged out
       return;
   }
