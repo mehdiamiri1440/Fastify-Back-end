@@ -1,12 +1,17 @@
-import { FastifyPluginAsync, FastifySchema } from 'fastify';
+import { FastifySchema } from 'fastify';
 import createError from '@fastify/error';
-import fastifyMultipart from '@fastify/multipart';
 import { randomUUID } from 'crypto';
 import { lookup, extension } from 'mime-types';
 import contentDisposition from 'content-disposition';
 import { to } from 'await-to-js';
 import type { Client } from 'minio';
 import assert from 'assert';
+import { repo } from '$src/infra/utils/repo';
+import { File } from './models/File';
+import {
+  FastifyPluginAsyncTypebox,
+  Type,
+} from '@fastify/type-provider-typebox';
 
 const FILE_NOT_FOUND = createError('FILE_NOT_FOUND', 'file not found', 404);
 const INVALID_FILE = createError('INVALID_FILE', 'invalid file', 400);
@@ -28,11 +33,11 @@ export interface Options {
   };
 }
 
-const plugin: FastifyPluginAsync<Options> = async (
+const plugin: FastifyPluginAsyncTypebox<Options> = async (
   app,
   { minio, bucketName, schema = {}, maxUploadSize, allowedMimeTypes },
 ) => {
-  app.register(fastifyMultipart);
+  const filesRepo = repo(File);
 
   const description = () =>
     [
@@ -44,23 +49,18 @@ const plugin: FastifyPluginAsync<Options> = async (
 
   app.route({
     method: 'GET',
-    url: '/:filename',
+    url: '/:id',
 
     schema: {
       security: schema.security,
-      params: {
-        filename: {
-          type: 'string',
-          description: 'name of file',
-        },
-      },
+      params: Type.Object({
+        id: Type.String(),
+      }),
     },
     async handler(req, rep) {
       assert(minio, 'Storage is not enable. missing env');
-      const { filename } = req.params as {
-        filename: string;
-      };
-      const [err, readable] = await to(minio.getObject(bucketName, filename));
+      const { id } = req.params;
+      const [err, readable] = await to(minio.getObject(bucketName, id));
 
       if (err) {
         if ('code' in err && err.code === 'NoSuchKey') {
@@ -70,8 +70,15 @@ const plugin: FastifyPluginAsync<Options> = async (
         throw err;
       }
 
+      const fileMetadata = await filesRepo.findOneBy({
+        id,
+        bucketName,
+      });
+
+      const filename = fileMetadata?.originalName ?? id;
+
       rep
-        .type(lookup(filename) || 'application/octet-stream')
+        .type(lookup(id) || 'application/octet-stream')
         .header(
           'Content-Disposition',
           contentDisposition(filename, { type: 'attachment' }),
@@ -88,16 +95,9 @@ const plugin: FastifyPluginAsync<Options> = async (
       consumes: ['multipart/form-data'],
       security: schema.security,
       description: description(),
-      body: {
-        type: 'object',
-        required: ['file'],
-        properties: {
-          file: {
-            type: 'string',
-            format: 'binary',
-          },
-        },
-      },
+      body: Type.Object({
+        file: Type.String({ format: 'binary' }),
+      }),
     },
     // ignore body validation
     validatorCompiler() {
@@ -123,10 +123,19 @@ const plugin: FastifyPluginAsync<Options> = async (
         );
       }
 
-      const readable = file.file;
+      const data = await file.toBuffer();
       const filename = `${randomUUID()}.${extension(file.mimetype)}`;
 
-      await minio.putObject(bucketName, filename, readable);
+      await minio.putObject(bucketName, filename, data);
+
+      await filesRepo.save({
+        id: filename,
+        bucketName,
+        mimetype: file.mimetype,
+        size: data.length,
+        originalName: file.filename,
+        creator: req.user?.id ? { id: req.user.id } : null,
+      });
 
       return { filename };
     },

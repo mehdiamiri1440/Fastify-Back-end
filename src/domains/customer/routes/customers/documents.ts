@@ -1,6 +1,7 @@
 import { Customer } from '$src/domains/customer/models/Customer';
 import { CustomerDocument } from '$src/domains/customer/models/Document';
 import { DocumentSchema } from '$src/domains/customer/schemas/document.schema';
+import { File } from '$src/domains/files/models/File';
 import { ResponseShape } from '$src/infra/Response';
 import { OrderBy, PaginatedQueryString } from '$src/infra/tables/PaginatedType';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
@@ -11,6 +12,7 @@ import { Type } from '@sinclair/typebox';
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   const Customers = repo(Customer);
   const Documents = repo(CustomerDocument);
+  const Files = repo(File);
 
   app.register(ResponseShape);
 
@@ -36,6 +38,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
       return new TableQueryBuilder(Documents, req)
         .where({ customer: { id: customer.id } })
+        .relation({ file: true })
         .exec();
     },
   });
@@ -56,11 +59,19 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       // validating references
       const customer = await Customers.findOneByOrFail({ id: req.params.id });
+      const file = await Files.findOneByOrFail({ id: req.body.fileId });
 
-      return await Documents.save({
-        fileId: req.body.fileId,
+      const document = await Documents.save({
+        file,
         customer,
         creator: { id: req.user.id },
+      });
+
+      return Documents.findOneOrFail({
+        where: { id: document.id },
+        relations: {
+          file: true,
+        },
       });
     },
   });

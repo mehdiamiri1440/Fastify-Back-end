@@ -9,6 +9,7 @@ import routes from './routes';
 import '$src/infra/test/statusCodeExpect';
 import { Customer } from '$src/domains/customer/models/Customer';
 import { DeepPartial } from 'typeorm';
+import { File } from '../files/models/File';
 
 const Nationalities = repo(Nationality);
 let app: FastifyInstance | undefined;
@@ -209,17 +210,28 @@ it('customer flow', async () => {
   }
   {
     // should create a document for customer
+
+    await repo(File).save({
+      id: 'testFileId.txt',
+      bucketName: 'bucketName',
+      mimetype: 'text/plain',
+      originalName: 'original.txt',
+      size: 100,
+    });
+
     const response = await user.inject({
       method: 'POST',
       url: '/customers/' + customerId + '/documents',
-      payload: { fileId: 'testFileId' },
+      payload: { fileId: 'testFileId.txt' },
     });
 
     expect(response).statusCodeToBe(200);
 
     expect(response.json()).toMatchObject({
       data: {
-        fileId: 'testFileId',
+        file: {
+          id: 'testFileId.txt',
+        },
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         deletedAt: null,
@@ -237,18 +249,17 @@ it('customer flow', async () => {
 
     expect(response).statusCodeToBe(200);
 
-    expect(response.json().data).toMatchObject(
-      expect.arrayContaining([
-        expect.objectContaining({
-          id: documentId,
-          fileId: 'testFileId',
-          customer: customerId,
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
-          deletedAt: null,
-        }),
-      ]),
-    );
+    expect(response.json().data).toMatchObject([
+      {
+        id: documentId,
+        file: {
+          id: 'testFileId.txt',
+        },
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        deletedAt: null,
+      },
+    ]);
   }
   {
     // should delete document of customer
