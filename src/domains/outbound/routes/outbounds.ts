@@ -148,6 +148,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         )
         .leftJoinAndSelect('outbound_product.product', 'product')
         .leftJoinAndSelect('product.unit', 'unit')
+        .orderBy('outbound_product.id', 'ASC')
         .getRawAndEntities();
 
       return entities.map((entity, index) => ({
