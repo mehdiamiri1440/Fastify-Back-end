@@ -18,10 +18,9 @@ beforeEach(async () => {
   await app.ready();
   tokenWithPermission = app.jwt.sign(
     {
-      tokenType: 'access_token',
+      type: 'access_token',
       id: 1,
       scope: 'user@user::list',
-      time: new Date().getTime(),
     },
     {
       expiresIn: 1000,
@@ -29,10 +28,9 @@ beforeEach(async () => {
   );
   tokenWithoutPermission = app.jwt.sign(
     {
-      tokenType: 'access_token',
+      type: 'access_token',
       id: 1,
       scope: '',
-      time: new Date().getTime(),
     },
     {
       expiresIn: 1000,

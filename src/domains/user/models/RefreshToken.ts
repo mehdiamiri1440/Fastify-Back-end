@@ -11,8 +11,8 @@ import { User } from './User';
 
 @Entity()
 export class RefreshToken {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
   @ManyToOne(() => User, { nullable: true })
   user!: Relation<User>;

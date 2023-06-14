@@ -13,6 +13,7 @@ import bcrypt from 'bcrypt';
 import { RefreshToken } from '$src/domains/user/models/RefreshToken';
 import * as util from 'util';
 import { FastifyJWT } from '@fastify/jwt';
+import { RefreshTokenPayload } from '$src/infra/authorization';
 
 let app: FastifyInstance | undefined;
 let user: TestUser;
@@ -274,7 +275,7 @@ it('user flow', async () => {
     const body = response.json();
     expect(body).toMatchObject({
       access_token: expect.any(String),
-      token_type: 'bearer',
+      type: 'bearer',
       expires_in: expect.any(Number),
       scope: expect.any(String),
     });
@@ -351,7 +352,7 @@ it('user flow', async () => {
     const body = response.json();
     expect(body).toMatchObject({
       access_token: expect.any(String),
-      token_type: 'bearer',
+      type: 'bearer',
       expires_in: expect.any(Number),
       scope: '',
     });
@@ -548,7 +549,7 @@ it('auth flow', async () => {
     expect(body).toMatchObject({
       access_token: expect.any(String),
       refresh_token: expect.any(String),
-      token_type: 'bearer',
+      type: 'bearer',
       expires_in: expect.any(Number),
       scope: expect.any(String),
     });
@@ -570,7 +571,7 @@ it('auth flow', async () => {
     expect(body).toMatchObject({
       access_token: expect.any(String),
       refresh_token: testRefreshToken,
-      token_type: 'bearer',
+      type: 'bearer',
       expires_in: expect.any(Number),
       scope: expect.any(String),
     });
@@ -578,10 +579,11 @@ it('auth flow', async () => {
   {
     // should not get access token with invalid refresh token
 
+    const payload: RefreshTokenPayload = app.jwt.verify(testRefreshToken);
+
     await repo(RefreshToken).update(
       {
-        id: ((await app.jwt.verify(testRefreshToken)) as FastifyJWT['payload'])
-          .jti,
+        id: payload.jti,
       },
       {
         valid: false,

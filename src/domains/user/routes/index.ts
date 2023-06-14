@@ -6,9 +6,9 @@ import permissions from '$src/permissions';
 import StringEnum from '$src/infra/utils/StringEnum';
 import { ACCESS_DENIED } from '$src/domains/user/routes/errors';
 import {
-  GenerateTokensForUser,
-  GetLoginAndActiveUserByRefreshToken,
-  GetActiveUserByEmailAndPassword,
+  generateTokensForUser,
+  getLoginAndActiveUserByRefreshToken,
+  getActiveUserByEmailAndPassword,
 } from '$src/domains/user/utils';
 
 const Users = repo(User);
@@ -18,39 +18,39 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'POST',
     url: '/token',
     schema: {
-      body: Type.Object({
-        grant_type: StringEnum(['password', 'refresh_token']),
-        username: Type.Optional(Type.String()),
-        password: Type.Optional(Type.String()),
-        refresh_token: Type.Optional(Type.String()),
-      }),
+      body: Type.Union([
+        Type.Object({
+          grant_type: Type.Literal('password'),
+          username: Type.String(),
+          password: Type.String(),
+        }),
+        Type.Object({
+          grant_type: Type.Literal('refresh_token'),
+          refresh_token: Type.String(),
+        }),
+      ]),
     },
     async handler(req) {
       switch (req.body.grant_type) {
         case 'password': {
-          if (!req.body.username || !req.body.password)
-            throw new ACCESS_DENIED();
-
-          const user = await GetActiveUserByEmailAndPassword(
+          const user = await getActiveUserByEmailAndPassword(
             req.body.username,
             req.body.password,
           );
 
           if (!user) throw new ACCESS_DENIED();
 
-          return await GenerateTokensForUser(app, user);
+          return await generateTokensForUser(app, user);
         }
         case 'refresh_token': {
-          if (!req.body.refresh_token) throw new ACCESS_DENIED();
-
-          const user = await GetLoginAndActiveUserByRefreshToken(
+          const user = await getLoginAndActiveUserByRefreshToken(
             app,
             req.body.refresh_token,
           );
 
           if (!user) throw new ACCESS_DENIED();
 
-          return await GenerateTokensForUser(app, user, req.body.refresh_token);
+          return await generateTokensForUser(app, user, req.body.refresh_token);
         }
       }
     },
@@ -61,21 +61,21 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/login',
     schema: {
       body: Type.Object({
-        username: Type.Optional(Type.String()),
-        password: Type.Optional(Type.String()),
+        username: Type.String(),
+        password: Type.String(),
       }),
     },
     async handler(req) {
       if (!req.body.username || !req.body.password) throw new ACCESS_DENIED();
 
-      const user = await GetActiveUserByEmailAndPassword(
+      const user = await getActiveUserByEmailAndPassword(
         req.body.username,
         req.body.password,
       );
 
       if (!user) throw new ACCESS_DENIED();
 
-      return await GenerateTokensForUser(app, user);
+      return await generateTokensForUser(app, user);
     },
   });
 

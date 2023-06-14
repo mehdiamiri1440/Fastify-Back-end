@@ -7,6 +7,11 @@ import { compare } from 'bcrypt';
 import { RefreshToken } from '$src/domains/user/models/RefreshToken';
 import { FastifyInstance } from 'fastify';
 import { FastifyJWT } from '@fastify/jwt';
+import {
+  AccessTokenPayload,
+  JwtPayload,
+  RefreshTokenPayload,
+} from '$src/infra/authorization';
 const { TOKEN_TTL_SECONDS } = process.env;
 
 if (TOKEN_TTL_SECONDS) {
@@ -15,13 +20,13 @@ if (TOKEN_TTL_SECONDS) {
 
 const TTL = TOKEN_TTL_SECONDS ? Number(TOKEN_TTL_SECONDS) : 10 * 60; // 10 mins
 
-export const GetLoginAndActiveUserByRefreshToken = async (
+export const getLoginAndActiveUserByRefreshToken = async (
   app: FastifyInstance,
   token: string,
 ): Promise<User | void> => {
   // verify refresh token
-  const refresh_token: FastifyJWT['payload'] = await app.jwt.verify(token);
-  if (refresh_token.tokenType != 'refresh_token') return;
+  const refresh_token = app.jwt.verify(token) as JwtPayload;
+  if (refresh_token.type != 'refresh_token') return;
 
   // check refresh token valid or not
   const refreshTokenFromDatabase = await repo(RefreshToken).findOne({
@@ -36,7 +41,7 @@ export const GetLoginAndActiveUserByRefreshToken = async (
     return refreshTokenFromDatabase.user;
 };
 
-export const GetActiveUserByEmailAndPassword = async (
+export const getActiveUserByEmailAndPassword = async (
   email: string,
   password: string,
 ): Promise<User | void> => {
@@ -57,7 +62,7 @@ export const GetActiveUserByEmailAndPassword = async (
   return user;
 };
 
-export const GenerateTokensForUser = async (
+export const generateTokensForUser = async (
   app: FastifyInstance,
   user: User,
   refresh_token?: string,
@@ -78,10 +83,9 @@ export const GenerateTokensForUser = async (
   // signing access_token
   const access_token = app.jwt.sign(
     {
-      tokenType: 'access_token',
+      type: 'access_token',
       id: user.id,
       scope,
-      time: new Date().getTime(),
     },
     { expiresIn: TTL },
   );
@@ -89,18 +93,18 @@ export const GenerateTokensForUser = async (
   // signing refresh_token
   refresh_token ??= app.jwt.sign(
     {
-      tokenType: 'refresh_token',
+      type: 'refresh_token',
       id: user.id,
-      time: new Date().getTime(),
       jti: (await repo(RefreshToken).save({ user })).id,
     },
+    {},
     // { notBefore: TTL },
   );
 
   return {
     access_token,
     refresh_token,
-    token_type: 'bearer',
+    type: 'bearer',
     expires_in: TTL,
     scope,
   };
