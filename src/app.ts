@@ -47,7 +47,8 @@ const app: FastifyPluginAsync<Options> = async (
             type: 'oauth2',
             flows: {
               password: {
-                tokenUrl: '/api/v1/login',
+                tokenUrl: '/api/v1/token',
+                refreshUrl: '/api/v1/token',
                 scopes: permissions,
               },
             },
