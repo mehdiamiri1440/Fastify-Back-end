@@ -94,6 +94,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         relations: {
           product: { unit: true, images: true },
         },
+        order: { id: 'asc' },
       });
     },
   });
