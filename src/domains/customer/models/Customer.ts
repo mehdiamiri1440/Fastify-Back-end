@@ -12,7 +12,7 @@ import {
   Relation,
   UpdateDateColumn,
 } from 'typeorm';
-import { AddressSchema } from '../schemas/address.schema';
+import { AddressSchema } from '../../geo/address.schema';
 import {
   CustomerSchema,
   documentType,
