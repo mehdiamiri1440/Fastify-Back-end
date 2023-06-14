@@ -171,7 +171,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const { bic, bankName } = await ibanValidator(req.body.iban);
 
       const { id } = await Suppliers.findOneByOrFail({ id: req.params.id });
-      await Suppliers.update({ id }, { ...req.body, bic, bankName, language });
+      const newData = { ...req.body, bic, bankName, language };
+      await Suppliers.update({ id }, newData);
+      return newData;
     },
   });
   app.route({
