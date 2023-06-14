@@ -9,7 +9,6 @@ import { Inbound } from '$src/domains/inbound/models/Inbound';
 import { Outbound } from '$src/domains/outbound/models/Outbound';
 import { Between, QueryBuilder, SelectQueryBuilder } from 'typeorm';
 import AppDataSource from '$src/DataSource';
-import StringEnum from '$src/infra/utils/StringEnum';
 import { QueryString } from '$src/infra/tables/PaginatedType';
 import {
   getEntityFromString,
@@ -53,8 +52,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         entity: stringEntitySchema,
         filter: Type.Object({
           createdAt: Type.Object({
-            $lte: Type.Optional(Type.String({ format: 'date-time' })),
-            $gte: Type.String({ format: 'date-time' }),
+            $gte: Type.String({ format: 'date' }),
+            $lte: Type.String({ format: 'date' }),
           }),
         }),
       }),
@@ -79,7 +78,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
               return offsQuery
                 .subQuery()
                 .select(
-                  `generate_series(0, (:end ::date - :start ::date) + 1)`,
+                  `generate_series(1, (:end ::date - :start ::date))`,
                   'offs',
                 )
                 .fromDummy();
