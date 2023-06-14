@@ -165,4 +165,7 @@ export default {
     'with this permission you can create a notification for all users',
   'notification@specify::delete':
     'with this permission you can delete specify notification',
+
+  // statistic
+  'statistics@counts::view': 'with this permission you can see the statistics',
 };
