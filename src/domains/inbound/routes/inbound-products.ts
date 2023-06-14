@@ -24,6 +24,7 @@ import { InboundStatus } from '../models/Inbound';
 import { InboundProduct } from '../models/InboundProduct';
 import { InboundProductSort } from '../models/InboundProductSort';
 import { loadUserWarehouse } from '../utils';
+import { Quantity } from '../types';
 
 const sum = (array: number[]) => array.reduce((a, b) => a + b, 0);
 
@@ -188,7 +189,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         id: Type.Number(),
       }),
       body: Type.Object({
-        actualQuantity: Type.Optional(Type.Number()),
+        actualQuantity: Type.Optional(Quantity()),
       }),
       security: [
         {
@@ -219,7 +220,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         id: Type.Number(),
       }),
       body: Type.Object({
-        requestedQuantity: Type.Number(),
+        requestedQuantity: Quantity(),
       }),
       security: [
         {
@@ -281,7 +282,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         id: Type.Number(),
       }),
       body: Type.Object({
-        quantity: Type.Number(),
+        quantity: Quantity(),
         binId: Type.Number(),
       }),
       security: [

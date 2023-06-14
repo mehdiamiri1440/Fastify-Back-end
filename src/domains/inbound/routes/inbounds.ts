@@ -25,6 +25,7 @@ import {
   INCOMPLETE_SORTING,
   INVALID_STATUS,
 } from '../errors';
+import { Quantity } from '../types';
 
 const sum = (array: number[]) => array.reduce((a, b) => a + b, 0);
 
@@ -143,7 +144,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             productId: Type.Number(),
             supplierId: Type.Number(),
             price: Type.Number(),
-            quantity: Type.Number(),
+            quantity: Quantity(),
           }),
         ),
       }),
@@ -197,7 +198,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         products: Type.Array(
           Type.Object({
             productId: Type.Number(),
-            quantity: Type.Number(),
+            quantity: Quantity(),
           }),
         ),
       }),

@@ -63,11 +63,13 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       });
 
-      return binProducts.map((binProduct) => ({
-        ...binProduct,
-        unit,
-        size,
-      }));
+      return binProducts
+        .filter((binProduct) => binProduct.quantity > 0)
+        .map((binProduct) => ({
+          ...binProduct,
+          unit,
+          size,
+        }));
     },
   });
 

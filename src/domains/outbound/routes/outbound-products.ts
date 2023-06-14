@@ -8,6 +8,7 @@ import { OutboundProductManager } from '../OutboundProduct.manager';
 import { OutboundStatus } from '../models/Outbound';
 import { OutboundProduct } from '../models/OutboundProduct';
 import { INVALID_STATUS } from '../errors';
+import { Quantity } from '../types';
 
 const outboundProductsRepo = repo(OutboundProduct);
 
@@ -68,7 +69,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         id: Type.Number(),
       }),
       body: Type.Object({
-        quantity: Type.Optional(Type.Number()),
+        quantity: Type.Optional(Quantity()),
       }),
       security: [
         {
@@ -141,7 +142,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         id: Type.Number(),
       }),
       body: Type.Object({
-        quantity: Type.Number(),
+        quantity: Quantity(),
         binId: Type.Number(),
       }),
       security: [
