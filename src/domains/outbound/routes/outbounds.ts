@@ -22,6 +22,7 @@ import { Outbound, OutboundStatus, ReceiverType } from '../models/Outbound';
 import { OutboundProduct } from '../models/OutboundProduct';
 import { OutboundService } from '../services/outbound.service';
 import { loadUserWarehouse } from '../utils';
+import { Quantity } from '../types';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   const outboundsRepo = repo(Outbound);
@@ -167,7 +168,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         products: Type.Array(
           Type.Object({
             productId: Type.Integer(),
-            quantity: Type.Integer(),
+            quantity: Quantity(),
           }),
         ),
       }),

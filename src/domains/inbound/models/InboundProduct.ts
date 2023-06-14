@@ -26,7 +26,7 @@ export class InboundProduct {
   @ManyToOne(() => Supplier, { nullable: true })
   supplier!: Relation<Supplier> | null;
 
-  @Column()
+  @Column({ type: 'integer' })
   requestedQuantity!: number;
 
   @Column({ type: 'integer', nullable: true })

@@ -22,7 +22,7 @@ export class OutboundProduct {
   @ManyToOne(() => Outbound, (outbound) => outbound.products)
   outbound!: Relation<Outbound>;
 
-  @Column()
+  @Column({ type: 'integer' })
   quantity!: number;
 
   @ManyToOne(() => Product)
