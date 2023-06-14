@@ -580,7 +580,7 @@ it('auth flow', async () => {
 
     await repo(RefreshToken).update(
       {
-        jti: ((await app.jwt.verify(testRefreshToken)) as FastifyJWT['payload'])
+        id: ((await app.jwt.verify(testRefreshToken)) as FastifyJWT['payload'])
           .jti,
       },
       {

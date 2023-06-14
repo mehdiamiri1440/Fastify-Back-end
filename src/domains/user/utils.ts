@@ -25,7 +25,7 @@ export const GetLoginAndActiveUserByRefreshToken = async (
 
   // check refresh token valid or not
   const refreshTokenFromDatabase = await repo(RefreshToken).findOne({
-    where: { jti: refresh_token.jti },
+    where: { id: refresh_token.jti },
     relations: { user: { role: true } },
   });
   if (!refreshTokenFromDatabase || !refreshTokenFromDatabase.valid) {
@@ -92,7 +92,7 @@ export const GenerateTokensForUser = async (
       tokenType: 'refresh_token',
       id: user.id,
       time: new Date().getTime(),
-      jti: (await repo(RefreshToken).save({ user })).jti,
+      jti: (await repo(RefreshToken).save({ user })).id,
     },
     // { notBefore: TTL },
   );

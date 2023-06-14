@@ -12,7 +12,7 @@ import { User } from './User';
 @Entity()
 export class RefreshToken {
   @PrimaryGeneratedColumn()
-  jti!: number;
+  id!: number;
 
   @ManyToOne(() => User, { nullable: true })
   user!: Relation<User>;
