@@ -13,6 +13,9 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { Warehouse } from '../models/Warehouse';
 import { WarehouseSchema } from '../schemas/warehouse.schema';
+import { toTypeOrmFilter } from '$src/infra/tables/filter';
+import { toUpperCase } from '$src/infra/tables/order';
+import { PaginatedResponse } from '$src/infra/tables/response';
 
 const Warehouses = repo(Warehouse);
 const Users = repo(User);
@@ -30,13 +33,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       querystring: PaginatedQueryString({
-        orderBy: OrderBy([
-          'id',
-          'name',
-          'streetName',
-          'supervisor.fullName',
-          'createdAt',
-        ]),
+        orderBy: OrderBy(['id', 'name', 'supervisor.fullName', 'createdAt']),
         filter: Filter({
           name: Searchable(),
           streetName: Searchable(),
@@ -48,9 +45,32 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      return new TableQueryBuilder(Warehouses, req)
-        .relation({ supervisor: true, creator: true })
-        .exec();
+      const { page, pageSize, filter, order, orderBy } = req.query;
+
+      const { streetName, ...normalFilters } = filter ?? {};
+
+      const qb = Warehouses.createQueryBuilder('warehouse')
+        .leftJoinAndSelect('warehouse.supervisor', 'supervisor')
+        .leftJoinAndSelect('warehouse.creator', 'creator')
+        .where(toTypeOrmFilter(normalFilters));
+
+      if (streetName) {
+        qb.andWhere(`(warehouse.address ->> 'streetName') ilike :streetName`, {
+          streetName: streetName.$like,
+        });
+      }
+
+      const [rows, total] = await qb
+        .skip((page - 1) * pageSize)
+        .take(pageSize)
+        .orderBy(`warehouse.${orderBy}`, toUpperCase(order))
+        .getManyAndCount();
+
+      return new PaginatedResponse(rows, {
+        page: page,
+        pageSize: pageSize,
+        total,
+      });
     },
   });
 
