@@ -9,6 +9,12 @@ import { Inbound } from '$src/domains/inbound/models/Inbound';
 import { Outbound } from '$src/domains/outbound/models/Outbound';
 import { Between, QueryBuilder, SelectQueryBuilder } from 'typeorm';
 import AppDataSource from '$src/DataSource';
+import StringEnum from '$src/infra/utils/StringEnum';
+import { QueryString } from '$src/infra/tables/PaginatedType';
+import {
+  getEntityFromString,
+  stringEntitySchema,
+} from '$src/domains/statistic/utils';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
@@ -36,26 +42,27 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
   app.route({
     method: 'GET',
-    url: '/statistics/suppliers/month',
+    url: '/statistics/days',
     schema: {
       security: [
         {
           OAuth2: ['statistics@counts::view'],
         },
       ],
+      querystring: QueryString({
+        entity: stringEntitySchema,
+        filter: Type.Object({
+          createdAt: Type.Object({
+            $lte: Type.Optional(Type.String({ format: 'date-time' })),
+            $gte: Type.String({ format: 'date-time' }),
+          }),
+        }),
+      }),
     },
     async handler(req) {
-      const subtractMonths = (date: Date, months: number) => {
-        // 👇 Make copy with "Date" constructor
-        const dateCopy = new Date(date);
-
-        dateCopy.setMonth(dateCopy.getMonth() - months);
-
-        return dateCopy;
-      };
-
-      const now = new Date();
-      const monthBeforNow = subtractMonths(now, 1);
+      const { filter } = req.query;
+      if (!filter.createdAt.$lte)
+        filter.createdAt.$lte = new Date().toISOString();
 
       const daysQuery = AppDataSource.createQueryBuilder()
         .select('day.date', 'date')
@@ -64,8 +71,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           return subQ
             .subQuery()
             .setParameters({
-              end: now.toISOString(),
-              start: monthBeforNow.toISOString(),
+              start: filter.createdAt.$gte,
+              end: filter.createdAt.$lte,
             })
             .select(":start ::date + INTERVAL '1 day' * offs", 'date')
             .from((offsQuery) => {
@@ -82,10 +89,15 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           (subQuery) => {
             return subQuery
               .subQuery()
-              .from(Supplier, 'entity')
+              .from(getEntityFromString(req.query.entity), 'entity')
               .select('COUNT(*)', 'count')
               .addSelect('entity.created_at ::date', 'created_date')
-              .where({ createdAt: Between(monthBeforNow, now) })
+              .where({
+                createdAt: Between(
+                  filter.createdAt.$gte,
+                  filter.createdAt.$lte,
+                ),
+              })
               .addGroupBy('created_date');
           },
           'entity',
