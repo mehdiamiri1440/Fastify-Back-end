@@ -60,8 +60,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     async handler(req) {
       const { filter } = req.query;
-      if (!filter.createdAt.$lte)
-        filter.createdAt.$lte = new Date().toISOString();
 
       const daysQuery = AppDataSource.createQueryBuilder()
         .select('day.date', 'date')
