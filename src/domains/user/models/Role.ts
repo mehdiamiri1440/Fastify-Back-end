@@ -25,6 +25,9 @@ export class Role implements Static<typeof RoleSchemaWithoutRelations> {
   @ManyToOne(() => User, { nullable: true })
   creator!: Relation<User>;
 
+  @Column({ default: false })
+  isRoot!: boolean;
+
   @Column({ nullable: false })
   isActive!: boolean;
 

@@ -7,10 +7,24 @@ import {
   onRequestHookHandler,
 } from 'fastify';
 
+export interface AccessTokenPayload {
+  type: 'access_token';
+  id: number;
+  scope: string;
+}
+
+export interface RefreshTokenPayload {
+  type: 'refresh_token';
+  id: number;
+  jti: string;
+}
+
+export type JwtPayload = AccessTokenPayload | RefreshTokenPayload;
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare module '@fastify/jwt' {
   interface FastifyJWT {
-    payload: { id: number; scope: string }; // payload type is used for signing and verifying
+    payload: JwtPayload; // payload type is used for signing and verifying
   }
 }
 
@@ -34,8 +48,8 @@ function createHook(routeOptions: RouteOptions): onRequestHookHandler | null {
   return async (req, rep) => {
     try {
       await req.jwtVerify();
-      const authorizedScopes = req.user.scope?.split(' ');
-
+      if (req.user.type !== 'access_token') throw new ACCESS_DENIED();
+      const authorizedScopes = req.user.scope?.split(' ') ?? [];
       const hasAccess = requiredScopes.every((requiredScope) =>
         authorizedScopes.includes(requiredScope),
       );

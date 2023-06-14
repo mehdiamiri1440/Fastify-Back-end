@@ -1,26 +1,61 @@
-import { Response } from '$src/infra/Response';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import assert from 'assert';
 import { Type } from '@sinclair/typebox';
 import { User } from '../models/User';
-import { RolePermission } from '$src/domains/user/models/RolePermission';
 import { repo } from '$src/infra/utils/repo';
-import { createError } from '@fastify/error';
 import permissions from '$src/permissions';
-import { compare } from 'bcrypt';
+import StringEnum from '$src/infra/utils/StringEnum';
+import { ACCESS_DENIED } from '$src/domains/user/routes/errors';
+import {
+  generateTokensForUser,
+  getLoginAndActiveUserByRefreshToken,
+  getActiveUserByEmailAndPassword,
+} from '$src/domains/user/utils';
 
-const ACCESS_DENIED = createError('ACCESS_DENIED', 'you dont have access', 403);
 const Users = repo(User);
-const RolePermissions = repo(RolePermission);
-const { TOKEN_TTL_SECONDS } = process.env;
-
-if (TOKEN_TTL_SECONDS) {
-  assert(Number(TOKEN_TTL_SECONDS) > 0, 'Invalid TOKEN_TTL_SECONDS');
-}
-
-const TTL = TOKEN_TTL_SECONDS ? Number(TOKEN_TTL_SECONDS) : 200 * 60; // 20 mins
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
+  app.route({
+    method: 'POST',
+    url: '/token',
+    schema: {
+      body: Type.Union([
+        Type.Object({
+          grant_type: Type.Literal('password'),
+          username: Type.String(),
+          password: Type.String(),
+        }),
+        Type.Object({
+          grant_type: Type.Literal('refresh_token'),
+          refresh_token: Type.String(),
+        }),
+      ]),
+    },
+    async handler(req) {
+      switch (req.body.grant_type) {
+        case 'password': {
+          const user = await getActiveUserByEmailAndPassword(
+            req.body.username,
+            req.body.password,
+          );
+
+          if (!user) throw new ACCESS_DENIED();
+
+          return await generateTokensForUser(app, user);
+        }
+        case 'refresh_token': {
+          const user = await getLoginAndActiveUserByRefreshToken(
+            app,
+            req.body.refresh_token,
+          );
+
+          if (!user) throw new ACCESS_DENIED();
+
+          return await generateTokensForUser(app, user, req.body.refresh_token);
+        }
+      }
+    },
+  });
+
   app.route({
     method: 'POST',
     url: '/login',
@@ -31,43 +66,16 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      const user = await Users.findOne({
-        where: {
-          email: req.body.username,
-          isActive: true,
-        },
-        relations: ['role'],
-      });
-      if (!user || !(await compare(req.body.password, user.password))) {
-        return new ACCESS_DENIED();
-      }
-      let scope: string;
-      if (user.role.title === 'root') {
-        scope = Object.keys(permissions).join(' ');
-      } else {
-        if (user.role.isActive) {
-          const { id } = user.role;
-          const permissions = await RolePermissions.findBy({ role: { id } });
-          scope = permissions.map((p) => p.permission).join(' ');
-        } else {
-          scope = '';
-        }
-      }
-      const token = app.jwt.sign(
-        {
-          id: user.id,
-          scope,
-        },
-        {
-          expiresIn: TTL,
-        },
+      if (!req.body.username || !req.body.password) throw new ACCESS_DENIED();
+
+      const user = await getActiveUserByEmailAndPassword(
+        req.body.username,
+        req.body.password,
       );
-      return {
-        access_token: token,
-        token_type: 'bearer',
-        expires_in: TTL,
-        scope,
-      };
+
+      if (!user) throw new ACCESS_DENIED();
+
+      return await generateTokensForUser(app, user);
     },
   });
 

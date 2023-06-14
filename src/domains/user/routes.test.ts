@@ -9,6 +9,11 @@ import { FastifyInstance } from 'fastify';
 import { Role } from './models/Role';
 import { User } from './models/User';
 import routes from './routes';
+import bcrypt from 'bcrypt';
+import { RefreshToken } from '$src/domains/user/models/RefreshToken';
+import * as util from 'util';
+import { FastifyJWT } from '@fastify/jwt';
+import { RefreshTokenPayload } from '$src/infra/authorization';
 
 let app: FastifyInstance | undefined;
 let user: TestUser;
@@ -269,8 +274,9 @@ it('user flow', async () => {
     // should login
     const response = await user.inject({
       method: 'POST',
-      url: '/login',
+      url: '/token',
       payload: {
+        grant_type: 'password',
         username: userData.email,
         password: userData.password,
       },
@@ -280,7 +286,7 @@ it('user flow', async () => {
     const body = response.json();
     expect(body).toMatchObject({
       access_token: expect.any(String),
-      token_type: 'bearer',
+      type: 'bearer',
       expires_in: expect.any(Number),
       scope: expect.any(String),
     });
@@ -345,8 +351,9 @@ it('user flow', async () => {
     // should login but with empty scope
     const response = await user.inject({
       method: 'POST',
-      url: '/login',
+      url: '/token',
       payload: {
+        grant_type: 'password',
         username: userData.email,
         password: userData.password,
       },
@@ -356,7 +363,7 @@ it('user flow', async () => {
     const body = response.json();
     expect(body).toMatchObject({
       access_token: expect.any(String),
-      token_type: 'bearer',
+      type: 'bearer',
       expires_in: expect.any(Number),
       scope: '',
     });
@@ -518,4 +525,123 @@ it('should return a user that logged in', async () => {
     },
     meta: {},
   });
+});
+
+it('auth flow', async () => {
+  assert(app);
+  assert(user);
+
+  const testEmail = 'test@auth.flow';
+  const testPassword = 'testPassword';
+  let testRefreshToken: string;
+
+  const testUser = await repo(User).save({
+    ...userData,
+    email: testEmail,
+    phoneNumber: '+989303590057',
+    password: await bcrypt.hash(testPassword, 10),
+    role: await repo(Role).save({ title: 'testxg', isActive: true }),
+  });
+
+  {
+    // get tokens with password
+    const response = await user.inject({
+      method: 'POST',
+      url: '/token',
+      payload: {
+        grant_type: 'password',
+        username: testEmail,
+        password: testPassword,
+      },
+    });
+
+    expect(response).statusCodeToBe(200);
+    const body = response.json();
+    expect(body).toMatchObject({
+      access_token: expect.any(String),
+      refresh_token: expect.any(String),
+      type: 'bearer',
+      expires_in: expect.any(Number),
+      scope: expect.any(String),
+    });
+    testRefreshToken = body.refresh_token;
+  }
+  {
+    // get tokens with refresh token
+    const response = await user.inject({
+      method: 'POST',
+      url: '/token',
+      payload: {
+        grant_type: 'refresh_token',
+        refresh_token: testRefreshToken,
+      },
+    });
+
+    expect(response).statusCodeToBe(200);
+    const body = response.json();
+    expect(body).toMatchObject({
+      access_token: expect.any(String),
+      refresh_token: testRefreshToken,
+      type: 'bearer',
+      expires_in: expect.any(Number),
+      scope: expect.any(String),
+    });
+  }
+  {
+    // should not get access token with invalid refresh token
+
+    const payload: RefreshTokenPayload = app.jwt.verify(testRefreshToken);
+
+    await repo(RefreshToken).update(
+      {
+        id: payload.jti,
+      },
+      {
+        valid: false,
+      },
+    );
+    const response = await user.inject({
+      method: 'POST',
+      url: '/token',
+      payload: {
+        grant_type: 'refresh_token',
+        refresh_token: testRefreshToken,
+      },
+    });
+
+    expect(response).statusCodeToBe(403);
+  }
+});
+
+it('should not get access_token with random refresh_token or random user/pass', async () => {
+  assert(app);
+  assert(user);
+
+  {
+    // password
+    const response = await user.inject({
+      method: 'POST',
+      url: '/token',
+      payload: {
+        grant_type: 'password',
+        username: '34qwtyerg',
+        password: '2345awesf',
+      },
+    });
+
+    expect(response).statusCodeToBe(403);
+  }
+  {
+    // get tokens with refresh token
+    const response = await user.inject({
+      method: 'POST',
+      url: '/token',
+      payload: {
+        grant_type: 'refresh_token',
+        refresh_token: 'asdfefasdf3e9fpasd0f9',
+      },
+    });
+
+    expect(response).not.statusCodeToBe(200);
+  }
 });

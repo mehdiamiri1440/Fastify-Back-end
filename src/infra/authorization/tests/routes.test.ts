@@ -18,6 +18,7 @@ beforeEach(async () => {
   await app.ready();
   tokenWithPermission = app.jwt.sign(
     {
+      type: 'access_token',
       id: 1,
       scope: 'user@user::list',
     },
@@ -27,6 +28,7 @@ beforeEach(async () => {
   );
   tokenWithoutPermission = app.jwt.sign(
     {
+      type: 'access_token',
       id: 1,
       scope: '',
     },
