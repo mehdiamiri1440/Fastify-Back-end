@@ -31,15 +31,22 @@ const propertyData = {
 };
 const warehouseData = {
   name: 'DI Warehouse',
-  addressProvinceCode: 'P43',
-  addressProvinceName: 'TARRAGONA',
-  addressCityCode: 'C07.062',
-  addressCityName: 'SON SERVERA',
-  addressStreetCode: 'S43.001.00104',
-  addressStreetName: 'Alicante  en  ur mas en pares',
-  addressPostalCode: '7820',
-  addressNumber: '9',
-  addressNumberCode: 'N07.046.00097.00009.2965903CD5126N',
+  address: {
+    provinceName: 'Fars',
+    provinceCode: 'Fars',
+    cityName: 'Shiraz',
+    cityCode: 'Shiraz',
+    streetName: 'Hedayat',
+    streetCode: 'Hedayat',
+    postalCode: '123456',
+    number: '1',
+    building: 'Prans',
+    stairway: 'test',
+    floor: '3',
+    door: '7',
+    latitude: 1.222334123,
+    longitude: 2.222334124,
+  },
   description: 'this is just for test',
 };
 const binData = {
