@@ -1,5 +1,4 @@
-import { TAny, TProperties, TSchema, Type } from '@sinclair/typebox';
-import assert from 'assert';
+import { TProperties, TSchema, Type } from '@sinclair/typebox';
 
 export const QueryString = <T extends TProperties>(props: T) =>
   Type.Object(props, {
@@ -8,7 +7,7 @@ export const QueryString = <T extends TProperties>(props: T) =>
   });
 
 export const PaginatedQueryString = <
-  T extends { orderBy?: TSchema; filter?: TSchema },
+  T extends { orderBy: TSchema; filter?: TSchema },
 >(
   props: T,
 ) =>
