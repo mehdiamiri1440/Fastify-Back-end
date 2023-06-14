@@ -13,6 +13,7 @@ import {
 import { WarehouseSchema } from '$src/domains/warehouse/schemas/warehouse.schema';
 import { Static, Type } from '@sinclair/typebox';
 import { WarehouseStaff } from './WarehouseStaff';
+import { AddressSchema } from '$src/domains/geo/address.schema';
 
 const WarehouseSchemaWithoutRelations = Type.Omit(WarehouseSchema, [
   'creator',
@@ -29,32 +30,11 @@ export class Warehouse
   @Column({ nullable: false })
   name!: string;
 
-  @Column({ nullable: false })
-  addressProvinceCode!: string;
-
-  @Column({ nullable: false })
-  addressProvinceName!: string;
-
-  @Column({ nullable: false })
-  addressCityCode!: string;
-
-  @Column({ nullable: false })
-  addressCityName!: string;
-
-  @Column({ nullable: false })
-  addressStreetCode!: string;
-
-  @Column({ nullable: false })
-  addressStreetName!: string;
-
-  @Column({ nullable: false })
-  addressPostalCode!: string;
-
-  @Column({ type: 'text', nullable: true })
-  addressNumber!: string | null;
-
-  @Column({ type: 'text', nullable: true })
-  addressNumberCode!: string | null;
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+  })
+  address!: Static<typeof AddressSchema>;
 
   @OneToMany(
     () => WarehouseStaff,

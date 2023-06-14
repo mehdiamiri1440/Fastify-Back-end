@@ -2,7 +2,7 @@ import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { Customer } from '$src/domains/customer/models/Customer';
-import { AddressSchema } from '$src/domains/customer/schemas/address.schema';
+import { AddressSchema } from '$src/domains/geo/address.schema';
 import createError from '@fastify/error';
 
 const CUSTOMER_HAS_NO_ADDRESS = createError(
