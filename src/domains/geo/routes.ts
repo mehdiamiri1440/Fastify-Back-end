@@ -173,6 +173,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/postal-codes',
     schema: {
       querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id']),
         filter: Filter({
           cityCode: Searchable(),
         }),
