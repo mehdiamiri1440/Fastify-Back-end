@@ -5,6 +5,7 @@ import { Type } from '@sinclair/typebox';
 import { Product } from '../models/Product';
 import { Bin } from '$src/domains/warehouse/models/Bin';
 import { BinProduct } from '$src/domains/product/models/BinProduct';
+import { MoreThan } from 'typeorm';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
@@ -90,7 +91,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const { id } = await Bins.findOneByOrFail({ id: req.params.id });
 
       return BinProducts.find({
-        where: { bin: { id } },
+        where: { bin: { id }, quantity: MoreThan(0) },
         relations: {
           product: { unit: true, images: true },
         },
