@@ -11,7 +11,9 @@ import { Notification } from '$src/domains/notification/models/Notification';
 import { UserNotification } from '$src/domains/notification/models/UserNotification';
 import { User } from '$src/domains/user/models/User';
 import { Role } from '$src/domains/user/models/Role';
+import { NormalUserFactory } from '$src/domains/user/factories/user.factory';
 
+let userFactory: NormalUserFactory | undefined;
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
 
@@ -21,6 +23,7 @@ beforeEach(async () => {
   await app.register(routes);
   await app.ready();
   user = await TestUser.create(app);
+  userFactory = new NormalUserFactory(AppDataSource);
 });
 
 afterEach(async () => {
@@ -161,17 +164,8 @@ it('should mark notification as read and unread', async () => {
 it('should not get others notifications in my notifications', async () => {
   assert(app);
   assert(user);
-  const daniel = await repo(User).save({
-    firstName: 'Daniel',
-    lastName: 'Soheil',
-    role: await repo(Role).save({ title: 'developer', isActive: true }),
-    nif: 'X12345678A',
-    email: 'daniel@sohe.ir',
-    phoneNumber: '+989303590055',
-    password: 'hackme',
-    position: 'Developer',
-    isActive: true,
-  });
+  assert(userFactory);
+  const creator = await userFactory.create();
 
   const notification1 = await repo(UserNotification).save({
     read: false,
@@ -180,17 +174,17 @@ it('should not get others notifications in my notifications', async () => {
       title: 'title1',
       detail: 'detail1',
       tag: 'tag1',
-      creator: daniel,
+      creator,
     }),
   });
   const notification2 = await repo(UserNotification).save({
     read: false,
-    user: daniel,
+    user: creator,
     notification: await repo(Notification).save({
       title: 'title2',
       detail: 'detail2',
       tag: 'tag2',
-      creator: daniel,
+      creator,
     }),
   });
 
