@@ -11,6 +11,7 @@ export const AddressSchema = Type.Object({
   streetName: Type.String(),
 
   postalCode: Type.String(),
+  numberCode: Type.Union([Type.Null(), Type.String()]),
   number: Type.Union([Type.Null(), Type.String()]),
   building: Type.Union([Type.Null(), Type.String()]),
   stairway: Type.Union([Type.Null(), Type.String()]),
