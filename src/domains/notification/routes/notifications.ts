@@ -92,6 +92,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         id: req.params.id,
       });
       app.io.emit('NOTIFICATIONS_CHANGED');
+      await repo(UserNotification).softDelete({
+        notification: { id: notification.id },
+      });
       await Notifications.softRemove(notification);
     },
   });
