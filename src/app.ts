@@ -66,6 +66,7 @@ const app: FastifyPluginAsync<Options> = async (
   await fastify.register(import('$src/infra/RouteValidator'));
 
   await fastify.register(import('$src/infra/autoTag'));
+  await fastify.register(import('$src/infra/routes-config/possibleErrors'));
 
   fastify.register(import('@fastify/formbody'));
 

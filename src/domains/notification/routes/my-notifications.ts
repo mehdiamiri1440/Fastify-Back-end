@@ -19,6 +19,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/',
     schema: {
+      description:
+        'with this api can get notifications related to that user getting this',
       security: [
         {
           OAuth2: [],

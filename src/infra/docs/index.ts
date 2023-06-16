@@ -33,9 +33,17 @@ const plugin: FastifyPluginAsyncTypebox<{ path: string }> = async function (
   }
 
   fastify.addHook('onRoute', (route) => {
+    if (route.method == 'HEAD') return; // this is for avoiding duplicate document
+
     // Tags already defined, do nothing
     if (!route.schema) route.schema = {};
-    route.schema.description = getDescription(route);
+
+    if (route.schema.description) {
+      route.schema.description =
+        route.schema.description + '\n\n' + getDescription(route);
+    } else {
+      route.schema.description = getDescription(route);
+    }
   });
 };
 
