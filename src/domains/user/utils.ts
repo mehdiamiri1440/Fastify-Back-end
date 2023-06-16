@@ -104,7 +104,7 @@ export const generateTokensForUser = async (
   return {
     access_token,
     refresh_token,
-    type: 'bearer',
+    type: 'bearer' as const,
     expires_in: TTL,
     scope,
   };

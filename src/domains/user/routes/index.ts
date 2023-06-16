@@ -29,6 +29,21 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           refresh_token: Type.String(),
         }),
       ]),
+      response: {
+        200: Type.Object({
+          access_token: Type.String(),
+          refresh_token: Type.String(),
+          type: Type.Literal('bearer'),
+          expires_in: Type.Number(),
+          scope: Type.String(),
+        }),
+        default: Type.Object({
+          statusCode: Type.Number(),
+          code: Type.String(),
+          error: Type.String(),
+          message: Type.String(),
+        }),
+      },
     },
     async handler(req) {
       switch (req.body.grant_type) {
