@@ -17,7 +17,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/token',
+    config: {
+      possibleErrors: [ACCESS_DENIED],
+    },
     schema: {
+      description:
+        'with this api you can get access token and refresh token with email and password or refresh token',
       body: Type.Union([
         Type.Object({
           grant_type: Type.Literal('password'),

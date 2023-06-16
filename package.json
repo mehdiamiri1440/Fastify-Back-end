@@ -50,6 +50,7 @@
     "fastify-plugin": "^4.5.0",
     "fastify-socket.io": "^4.0.0",
     "imgproxy": "^1.1.1",
+    "markdown-table-ts": "^1.0.3",
     "mime-types": "^2.1.35",
     "minio": "^7.1.0",
     "module-alias": "^2.2.2",
