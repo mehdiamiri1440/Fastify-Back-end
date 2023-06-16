@@ -181,6 +181,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       await Warehouses.softRemove(warehouse);
     },
   });
+  await app.register(import('./staffs'));
 };
 
 export default plugin;

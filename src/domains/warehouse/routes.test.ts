@@ -390,7 +390,7 @@ it('warehouse flow', async () => {
     // check that our user is available for staff
     const response = await user.inject({
       method: 'GET',
-      url: '/warehouse-staffs/available',
+      url: `/warehouses/${warehouseId}/staffs/available`,
     });
     expect(response.json().data).toMatchObject(
       expect.arrayContaining([expect.objectContaining(userData)]),
@@ -400,10 +400,9 @@ it('warehouse flow', async () => {
     // should create a staff for warehouse
     const response = await user.inject({
       method: 'POST',
-      url: '/warehouse-staffs',
+      url: `/warehouses/${warehouseId}/staffs`,
       payload: {
         user: userId,
-        warehouse: warehouseId,
       },
     });
     expect(response.json()).toMatchObject({
@@ -422,10 +421,9 @@ it('warehouse flow', async () => {
     // should not create a not available staff for warehouse
     const response = await user.inject({
       method: 'POST',
-      url: '/warehouse-staffs',
+      url: `/warehouses/${warehouseId}/staffs`,
       payload: {
         user: userId,
-        warehouse: warehouseId,
       },
     });
     expect(response.statusCode).not.toBe(200);
@@ -434,7 +432,7 @@ it('warehouse flow', async () => {
     // check that our user is not available for staff
     const response = await user.inject({
       method: 'GET',
-      url: '/warehouse-staffs/available',
+      url: `/warehouses/${warehouseId}/staffs/available`,
     });
     expect(response.json().data).not.toMatchObject(
       expect.arrayContaining([expect.objectContaining(userData)]),
@@ -444,7 +442,7 @@ it('warehouse flow', async () => {
     // should get list staffs assigned to a warehouse
     const response = await user.inject({
       method: 'GET',
-      url: '/warehouse-staffs',
+      url: `/warehouses/${warehouseId}/staffs`,
     });
     expect(response.json().data).toMatchObject([
       {
@@ -462,7 +460,7 @@ it('warehouse flow', async () => {
     // should delete a bin
     const response = await user.inject({
       method: 'DELETE',
-      url: '/warehouse-staffs/' + staffId,
+      url: `/warehouses/${warehouseId}/staffs/${userId}`,
     });
 
     expect(response).statusCodeToBe(200);
@@ -471,7 +469,7 @@ it('warehouse flow', async () => {
     // should get empty list of staffs assigned to a warehouse
     const response = await user.inject({
       method: 'GET',
-      url: '/warehouse-staffs',
+      url: `/warehouses/${warehouseId}/staffs`,
     });
     expect(response.json().data).toMatchObject([]);
   }
@@ -479,7 +477,7 @@ it('warehouse flow', async () => {
     // should not delete a bin
     const response = await user.inject({
       method: 'DELETE',
-      url: '/warehouse-staffs/' + staffId,
+      url: `/warehouses/${warehouseId}/staffs/${userId}`,
     });
 
     expect(response.statusCode).not.toBe(200);
