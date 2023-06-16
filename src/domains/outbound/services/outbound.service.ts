@@ -7,12 +7,6 @@ import { INVALID_STATUS } from '../errors';
 import { Outbound, OutboundStatus } from '../models/Outbound';
 import { OutboundProduct } from '../models/OutboundProduct';
 
-function getCode(id: number) {
-  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const counter = (id % 10000).toString().padStart(4, '0');
-  return `DN${date}${counter}`;
-}
-
 const INCOMPLETE_SUPPLY = createError(
   'INCOMPLETE_SUPPLY',
   'not all outbound products are supplied',
@@ -39,8 +33,8 @@ export class OutboundService {
   }
 
   async #saveOutbound(entity: DeepPartial<Outbound>) {
-    const outbound = await this.outboundsRepo.save(entity);
-    outbound.code = getCode(outbound.id);
+    const { id } = await this.outboundsRepo.save(entity);
+    const outbound = await this.outboundsRepo.findOneByOrFail({ id });
 
     const document = await this.documentService.create({
       type: 'outbound',
@@ -48,7 +42,7 @@ export class OutboundService {
     });
     outbound.docId = document.id;
 
-    await this.outboundsRepo.update(outbound.id, outbound);
+    await this.outboundsRepo.save(outbound);
     return outbound;
   }
 

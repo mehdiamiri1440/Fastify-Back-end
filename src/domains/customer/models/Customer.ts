@@ -20,6 +20,7 @@ import {
 } from '../schemas/customer.schema';
 import { CustomerContact } from './Contact';
 import { Nationality } from './Nationality';
+import { QrCodeType } from '$src/domains/qrcode/utils';
 
 const CustomerSchemaWithoutRelations = Type.Omit(CustomerSchema, [
   'creator',
@@ -30,6 +31,13 @@ const CustomerSchemaWithoutRelations = Type.Omit(CustomerSchema, [
 export class Customer implements Static<typeof CustomerSchemaWithoutRelations> {
   @PrimaryGeneratedColumn()
   id!: number;
+
+  @Column({
+    type: 'varchar',
+    generatedType: 'STORED',
+    asExpression: `('${QrCodeType.CUSTOMER}' || immutable_format_date(created_at) || LPAD((id % 10000)::text, 4, '0'))`,
+  })
+  code!: string;
 
   @Column({ nullable: false })
   name!: string;

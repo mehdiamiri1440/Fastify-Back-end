@@ -91,7 +91,6 @@ const createSampleInbound = async (
   overrides?: DeepPartial<Inbound>,
 ) =>
   repo(Inbound).save({
-    code: 'code',
     type: InboundType.NEW,
     status: InboundStatus.PRE_DELIVERY,
     creator: {

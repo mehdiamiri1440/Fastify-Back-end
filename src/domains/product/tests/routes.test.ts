@@ -30,6 +30,7 @@ import {
 } from '$src/domains/inbound/models/Inbound';
 import { DeepPartial } from 'typeorm';
 import '$src/infra/test/statusCodeExpect';
+import { Category } from '$src/domains/configuration/models/Category';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -65,6 +66,12 @@ beforeEach(async () => {
 afterEach(async () => {
   await app?.close();
 });
+
+export function getCode(type: string, id: number) {
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const counter = (id % 10000).toString().padStart(4, '0');
+  return `${type}${date}${counter}`;
+}
 
 const createSampleProduct = async (overrides?: DeepPartial<Product>) =>
   await withoutForeignKeyCheck(
@@ -104,6 +111,46 @@ const createSampleSupplier = async (overrides?: DeepPartial<Supplier>) =>
         ...overrides,
       }),
   );
+
+it('POST /products should be working', async () => {
+  assert(user);
+  const response = await user.inject({
+    method: 'POST',
+    url: `/products`,
+    payload: {
+      name: 'product 1',
+      barcode: '123',
+      invoiceSystemCode: 1,
+      description: 'description',
+      weight: 1,
+      unitId: (
+        await repo(Unit).save({
+          id: 1,
+          name: 'meter',
+          creator: { id: 1 },
+        })
+      ).id,
+      categoryId: (
+        await repo(Category).save({
+          id: 1,
+          name: 'test',
+          creator: { id: 1 },
+        })
+      ).id,
+    },
+  });
+
+  expect(response).statusCodeToBe(200);
+  expect(response?.json().data).toMatchObject({
+    name: 'product 1',
+    code: getCode('PR', 1),
+    barcode: '123',
+    invoiceSystemCode: 1,
+    description: 'description',
+    weight: 1,
+    unit: { id: 1, name: 'meter' },
+  });
+});
 
 it('GET /products/:id should be working', async () => {
   assert(user);
@@ -750,7 +797,6 @@ describe('inbounds', () => {
     const supplier = await createSampleSupplier();
 
     const inbound = await repo(Inbound).save({
-      code: 'code',
       type: InboundType.NEW,
       status: InboundStatus.SORTED,
       creator: {

@@ -131,6 +131,7 @@ const app: FastifyPluginAsync<Options> = async (
       await fastify.register(import('./domains/iban/routes'));
       await fastify.register(import('./domains/cyclecount/routes'));
       await fastify.register(import('./domains/notification/routes'));
+      await fastify.register(import('./domains/qrcode/routes'));
       await fastify.register(import('./domains/statistic/routes'));
     },
     {

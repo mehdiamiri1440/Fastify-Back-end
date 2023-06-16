@@ -75,7 +75,7 @@ export class TestUser {
 export async function createTestFastifyApp() {
   const app = fastify({
     querystringParser: (str) => qs.parse(str, { allowDots: true }),
-    pluginTimeout: 20000,
+    pluginTimeout: 200000,
     ajv: ajvOptions,
   });
   await app.register(import('$src/databases/typeorm'));
@@ -104,4 +104,9 @@ export async function withoutForeignKeyCheck<T>(fnc: () => T): Promise<T> {
   const data = await fnc();
   await enableForeignKeyCheck();
   return data;
+}
+
+export async function initDataSourceForTest() {
+  await AppDataSource.synchronize(true);
+  await AppDataSource.runMigrations();
 }

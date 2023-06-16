@@ -3,15 +3,14 @@ import assert from 'assert';
 import { DataSource } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
-const { DB_URL, DB_ENABLE_LOGGING, DB_DROP_SCHEMA, DB_ENABLE_SYNCHRONIZE } =
-  process.env;
+const { DB_URL, DB_ENABLE_LOGGING, DB_DROP_SCHEMA } = process.env;
 
 assert(DB_URL, 'DB_URL env is required');
 
 const AppDataSource = new DataSource({
   type: 'postgres',
   url: DB_URL,
-  synchronize: DB_ENABLE_SYNCHRONIZE === 'true',
+  synchronize: false,
   logging: DB_ENABLE_LOGGING === 'true',
   dropSchema: DB_DROP_SCHEMA === 'true',
   entities: models,

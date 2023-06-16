@@ -30,6 +30,7 @@ import {
 import { BinProduct } from './BinProduct';
 import { ProductImage } from './ProductImage';
 import { ProductStockHistory } from './ProductStockHistory';
+import { QrCodeType } from '$src/domains/qrcode/utils';
 
 @Entity()
 export class Product implements Static<typeof ProductSchema> {
@@ -39,8 +40,12 @@ export class Product implements Static<typeof ProductSchema> {
   @Column()
   name!: string;
 
-  @Column({ nullable: true })
-  code?: string;
+  @Column({
+    type: 'varchar',
+    generatedType: 'STORED',
+    asExpression: `('${QrCodeType.PRODUCT}' || immutable_format_date(created_at) || LPAD((id % 10000)::text, 4, '0'))`,
+  })
+  code!: string;
 
   @Column({ nullable: true })
   barcode!: string;
