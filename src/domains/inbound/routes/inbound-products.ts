@@ -17,6 +17,7 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import {
   BIN_ALREADY_SORTED,
+  BIN_FROM_ANOTHER_WAREHOUSE,
   INVALID_QUANTITY_AMOUNT,
   INVALID_STATUS,
 } from '../errors';
@@ -279,16 +280,24 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.post('/:id/sorts', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Object({
         quantity: Quantity(),
-        binId: Type.Number(),
+        binId: Type.Integer(),
       }),
       security: [
         {
           OAuth2: ['user@inbound::sort'],
         },
+      ],
+    },
+    config: {
+      possibleErrors: [
+        INVALID_STATUS,
+        BIN_ALREADY_SORTED,
+        INVALID_QUANTITY_AMOUNT,
+        BIN_FROM_ANOTHER_WAREHOUSE,
       ],
     },
     handler: (req) =>
@@ -308,13 +317,17 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             id,
           },
           relations: {
-            inbound: true,
+            inbound: {
+              warehouse: true,
+            },
             product: true,
             sorts: {
               bin: true,
             },
           },
         });
+
+        const { inbound } = inboundProduct;
 
         const currentSorted = sum(inboundProduct.sorts.map((e) => e.quantity));
         const currentUnsorted = inboundProduct.actualQuantity - currentSorted;
@@ -335,9 +348,18 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           );
         }
 
-        const bin = await Bins.findOneByOrFail({
-          id: binId,
+        const bin = await Bins.findOneOrFail({
+          where: {
+            id: binId,
+          },
+          loadRelationIds: {
+            disableMixedMap: true,
+          },
         });
+
+        if (bin.warehouse.id !== inbound.warehouse.id) {
+          throw new BIN_FROM_ANOTHER_WAREHOUSE();
+        }
 
         const sort = await inboundProductSortsRepo.save({
           inboundProduct,

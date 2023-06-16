@@ -29,3 +29,9 @@ export const NOT_IN_WAREHOUSE = createError(
   'You are not a warehouse staff',
   403,
 );
+
+export const BIN_FROM_ANOTHER_WAREHOUSE = createError(
+  'BIN_FROM_ANOTHER_WAREHOUSE',
+  'The selected bin is not in your warehouse',
+  400,
+);
