@@ -142,7 +142,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         subscriberType,
       });
 
-      return await Customers.save({
+      const { id } = await Customers.save({
         ...restBody,
         contactName,
         contactFiscalId,
@@ -150,6 +150,15 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         subscriberType,
         nationality,
         creator: { id: req.user.id },
+      });
+
+      // we should load the customer again to get the generated code
+      return Customers.findOneOrFail({
+        where: { id },
+        relations: {
+          nationality: true,
+          creator: true,
+        },
       });
     },
   });

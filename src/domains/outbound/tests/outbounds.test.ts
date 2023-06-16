@@ -141,7 +141,6 @@ describe('Get Outbound', () => {
 
     await repo(Outbound).save({
       status: OutboundStatus.DRAFT,
-      code: 'test',
       warehouse,
       creator: { id: 1 },
     });
@@ -158,7 +157,7 @@ describe('Get Outbound', () => {
         {
           status: 'draft',
           creator: { fullName: 'tester tester' },
-          code: expect.any(String),
+          code: expect.stringContaining('OT'),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
         },
@@ -174,7 +173,6 @@ describe('Get Outbound', () => {
 
     await repo(Outbound).save({
       status: OutboundStatus.DRAFT,
-      code: 'test',
       warehouse,
       creator: { id: 1 },
     });
@@ -190,7 +188,7 @@ describe('Get Outbound', () => {
       data: {
         id: 1,
         status: 'draft',
-        code: expect.any(String),
+        code: expect.stringContaining('OT'),
         creator: { id: 1, fullName: 'tester tester' },
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
@@ -216,7 +214,6 @@ describe('Get outbound products', () => {
 
     const outbound = await repo(Outbound).save({
       status: OutboundStatus.DRAFT,
-      code: 'test',
       warehouse,
       creator: { id: 1 },
     });
@@ -276,7 +273,6 @@ describe('Get outbound products', () => {
 
     const outbound = await repo(Outbound).save({
       status: OutboundStatus.DRAFT,
-      code: 'test',
       warehouse,
       creator: { id: 1 },
     });
@@ -319,7 +315,6 @@ describe('Set receiver', () => {
 
     return repo(Outbound).save({
       status: OutboundStatus.DRAFT,
-      code: 'test',
       warehouse,
       creator: { id: 1 },
     });

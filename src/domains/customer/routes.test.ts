@@ -1,7 +1,7 @@
 import AppDataSource from '$src/DataSource';
 import { createTestFastifyApp, TestUser } from '$src/infra/test/utils';
 import { repo } from '$src/infra/utils/repo';
-import { afterEach, beforeEach, expect, it } from '@jest/globals';
+import { afterEach, beforeEach, expect, it, jest } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance } from 'fastify';
 import { Nationality } from './models/Nationality';
@@ -65,6 +65,12 @@ afterEach(async () => {
   await app?.close();
 });
 
+export function getCode(type: string, id: number) {
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const counter = (id % 10000).toString().padStart(4, '0');
+  return `${type}${date}${counter}`;
+}
+
 it('customer flow', async () => {
   assert(app);
   assert(user);
@@ -103,15 +109,15 @@ it('customer flow', async () => {
       payload: { ...customerData, nationalityId: nId },
     });
 
-    expect(response.json()).toMatchObject({
-      data: {
-        ...customerData,
-        nationality: { id: nId },
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-        deletedAt: null,
-      },
-      meta: {},
+    const result = response.json().data;
+
+    expect(result).toMatchObject({
+      ...customerData,
+      code: getCode('CU', result.id),
+      nationality: { id: nId },
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+      deletedAt: null,
     });
     customerId = response.json().data.id;
   }

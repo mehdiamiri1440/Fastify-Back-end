@@ -29,7 +29,6 @@ export default class ProductSeeder extends Seeder {
     });
     await dataSource.getRepository(Product).save({
       name: 'name',
-      code: 'code',
       barcode: 'barcode',
       invoiceSystemCode: 1,
       description: 'description',

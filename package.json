@@ -64,7 +64,7 @@
     "swagger-themes": "^1.2.28",
     "ts-node": "^10.9.1",
     "ts-paths-esm-loader": "^1.4.1",
-    "typeorm": "^0.3.15",
+    "typeorm": "^0.3.16",
     "typeorm-naming-strategies": "^4.1.0",
     "typescript": "^4.9.5"
   },

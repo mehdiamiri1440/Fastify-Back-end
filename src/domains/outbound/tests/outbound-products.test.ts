@@ -82,7 +82,6 @@ describe('Update OutboundProduct', () => {
 
   beforeAll(async () => {
     outbound = await repo(Outbound).save({
-      code: 'code',
       creator: {
         id: 1,
       },
@@ -141,7 +140,6 @@ describe('Supply', () => {
      */
     await withoutForeignKeyCheck(async () => {
       outbound = await repo(Outbound).save({
-        code: 'code',
         creator: {
           id: 1,
         },

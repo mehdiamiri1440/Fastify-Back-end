@@ -173,10 +173,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // POST /products
-  app.route({
-    method: 'POST',
-    url: '/products',
+  app.post('/products', {
     schema: {
       body: InputProduct,
       security: [
@@ -218,7 +215,19 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         ...optionals,
       };
 
-      return await Products.save(product);
+      const { id } = await Products.save(product);
+      return Products.findOneOrFail({
+        where: { id },
+        relations: {
+          taxType: true,
+          color: true,
+          unit: true,
+          category: true,
+          shape: true,
+          size: true,
+          brand: true,
+        },
+      });
     },
   });
 

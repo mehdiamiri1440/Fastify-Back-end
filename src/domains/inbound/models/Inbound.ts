@@ -13,6 +13,7 @@ import {
 import { InboundImage } from './InboundImage';
 import { InboundProduct } from './InboundProduct';
 import { Warehouse } from '$src/domains/warehouse/models/Warehouse';
+import { QrCodeType } from '$src/domains/qrcode/utils';
 
 export enum InboundType {
   NEW = 'new',
@@ -31,8 +32,12 @@ export class Inbound {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ nullable: true, type: 'varchar' })
-  code!: string | null;
+  @Column({
+    type: 'varchar',
+    generatedType: 'STORED',
+    asExpression: `('${QrCodeType.INBOUND}' || immutable_format_date(created_at) || LPAD((id % 10000)::text, 4, '0'))`,
+  })
+  code!: string;
 
   @Column({ type: 'enum', enum: InboundType })
   type!: InboundType;
