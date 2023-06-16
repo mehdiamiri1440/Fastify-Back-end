@@ -16,6 +16,8 @@ import { BinProduct } from '$src/domains/product/models/BinProduct';
 import { Bin } from '$src/domains/warehouse/models/Bin';
 import { Product } from '$src/domains/product/models/Product';
 import { BIN_HAVE_PRODUCT } from '$src/domains/warehouse/errors';
+import { Warehouse } from './models/Warehouse';
+import { WarehouseStaff } from './models/WarehouseStaff';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -520,4 +522,49 @@ it('should not delete bin when we have product in it', async function () {
 
   expect(response).statusCodeToBe(400);
   expect(response.json().code).toBe(BIN_HAVE_PRODUCT().code);
+});
+
+it('GET /my-warehouse should be working', async () => {
+  assert(app);
+  assert(user);
+
+  const warehouse = await repo(Warehouse).save({
+    name: 'warehouse test',
+    description: 'description',
+    addressProvinceCode: 'P43',
+    addressProvinceName: 'TARRAGONA',
+    addressCityCode: 'C07.062',
+    addressCityName: 'SON SERVERA',
+    addressStreetCode: 'S43.001.00104',
+    addressStreetName: 'Alicante  en  ur mas en pares',
+    addressPostalCode: '7820',
+    addressNumber: '9',
+    addressNumberCode: 'N07.046.00097.00009.2965903CD5126N',
+    creator: {
+      id: 1,
+    },
+  });
+
+  await repo(WarehouseStaff).save({
+    name: 'warehouse test',
+    description: 'description',
+    user: {
+      id: user.id,
+    },
+    warehouse,
+    creator: {
+      id: 1,
+    },
+  });
+
+  const response = await user.inject({
+    method: 'GET',
+    url: '/my-warehouse',
+  });
+
+  expect(response).statusCodeToBe(200);
+  expect(response.json().data).toMatchObject({
+    id: warehouse.id,
+    name: warehouse.name,
+  });
 });

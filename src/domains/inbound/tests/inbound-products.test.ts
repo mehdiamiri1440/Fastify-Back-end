@@ -443,7 +443,7 @@ describe('Sorting', () => {
       quantity: 0,
     });
 
-    return { inboundProduct, bin1, bin2 };
+    return { warehouse, inboundProduct, bin1, bin2 };
   };
 
   it('should sort', async () => {
@@ -549,5 +549,28 @@ describe('Sorting', () => {
     });
 
     expect(secondSort.statusCode).toBe(400);
+  });
+
+  it('should throw error on sort, when binId is in different warehouseId', async () => {
+    assert(app);
+    assert(user);
+    const { inboundProduct, bin1 } = await init();
+    const anotherWarehouse = await createSampleWarehouse();
+    const binInAnotherWarehouse = await createSampleBin(anotherWarehouse, {
+      name: 'binInAnotherWarehouse',
+      internalCode: 'binInAnotherWarehouse',
+    });
+
+    const response = await user.inject({
+      method: 'POST',
+      url: `/${inboundProduct.id}/sorts`,
+      payload: {
+        quantity: 10,
+        binId: binInAnotherWarehouse.id,
+      },
+    });
+
+    expect(response).statusCodeToBe(400);
+    expect(response).errorCodeToBe('BIN_FROM_ANOTHER_WAREHOUSE');
   });
 });

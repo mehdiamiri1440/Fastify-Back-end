@@ -44,10 +44,5 @@ export default class SupplierSeeder extends Seeder {
       phoneNumber: 'phoneNumber',
       creator,
     });
-    await dataSource.getRepository(SupplierDocument).save({
-      supplier,
-      fileId: 'fileId',
-      creator,
-    });
   }
 }
