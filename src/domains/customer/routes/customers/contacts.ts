@@ -56,6 +56,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/:id/contacts',
+    config: { possibleErrors: [NEED_NAME_DATA] },
     schema: {
       security: [
         {
@@ -96,6 +97,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
   app.route({
     method: 'PUT',
+    config: { possibleErrors: [NEED_NAME_DATA] },
     url: '/:customerId/contacts/:contactId',
     schema: {
       security: [

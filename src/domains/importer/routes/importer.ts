@@ -6,6 +6,10 @@ import {
   productTemplate,
   ProductUploaded,
 } from '$src/domains/importer/services/product';
+import {
+  NEED_BUSINESS_DATA,
+  NOT_NEED_BUSINESS_DATA,
+} from '$src/domains/customer/errors';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
@@ -104,6 +108,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/customers/insert',
+    config: {
+      possibleErrors: [NEED_BUSINESS_DATA, NOT_NEED_BUSINESS_DATA],
+    },
     schema: {
       security: [
         {
@@ -121,6 +128,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   });
   app.route({
     method: 'POST',
+    config: {
+      possibleErrors: [NEED_BUSINESS_DATA, NOT_NEED_BUSINESS_DATA],
+    },
     url: '/customers/check',
     schema: {
       security: [

@@ -10,6 +10,10 @@ import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { validateCustomerData } from '../../utils';
+import {
+  NEED_BUSINESS_DATA,
+  NOT_NEED_BUSINESS_DATA,
+} from '$src/domains/customer/errors';
 
 const Customers = repo(Customer);
 const Nationalities = repo(Nationality);
@@ -43,6 +47,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   });
 
   app.put('/:id/specification', {
+    config: {
+      possibleErrors: [NEED_BUSINESS_DATA, NOT_NEED_BUSINESS_DATA],
+    },
     schema: {
       security: [
         {
