@@ -190,6 +190,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'DELETE',
     url: '/bins/:id',
+    config: { possibleErrors: [BIN_HAVE_PRODUCT] },
     schema: {
       security: [
         {
