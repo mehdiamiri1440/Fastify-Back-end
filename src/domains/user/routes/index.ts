@@ -53,6 +53,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       switch (req.body.grant_type) {
         case 'password': {
+          req.body.username &&= req.body.username.toLowerCase(); // make username lowercase
           const user = await getActiveUserByEmailAndPassword(
             req.body.username,
             req.body.password,

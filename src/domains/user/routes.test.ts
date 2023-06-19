@@ -458,7 +458,7 @@ it('user flow', async () => {
   {
     // should update user
     const response = await user.inject({
-      method: 'PUT',
+      method: 'PATCH',
       url: '/users/' + userId,
       payload: {
         id: userId,
