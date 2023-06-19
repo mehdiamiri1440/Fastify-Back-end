@@ -22,6 +22,13 @@ import { PaginatedResponse } from '$src/infra/tables/response';
 import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
+import {
+  CYCLE_COUNT_IS_NOT_OPEN,
+  EMPTY_BIN,
+  MISS_BIN,
+  MISS_PRODUCT,
+  NOT_IN_ANY_BIN,
+} from '$src/domains/cyclecount/errors';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
@@ -125,6 +132,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/',
+    config: {
+      possibleErrors: [EMPTY_BIN, MISS_BIN, NOT_IN_ANY_BIN, MISS_PRODUCT],
+    },
     schema: {
       security: [
         {
@@ -176,6 +186,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'PUT',
     url: '/:id/differences/:diffId/',
+    config: { possibleErrors: [CYCLE_COUNT_IS_NOT_OPEN] },
     schema: {
       security: [
         {
@@ -209,6 +220,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/:id/apply',
+    config: { possibleErrors: [CYCLE_COUNT_IS_NOT_OPEN] },
     schema: {
       security: [
         {
@@ -239,6 +251,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/:id/reject',
+    config: { possibleErrors: [CYCLE_COUNT_IS_NOT_OPEN] },
     schema: {
       security: [
         {
