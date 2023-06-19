@@ -50,6 +50,7 @@ export class CycleCountService {
   }
 
   async createWithType(body: Static<typeof bodySchema>) {
+    const productService = new ProductService(this.#dataSource, this.#userId);
     switch (body.cycleCountType) {
       case 'Product': {
         if (!body.product) {
@@ -59,10 +60,7 @@ export class CycleCountService {
           id: body.product,
         });
 
-        const productInbinsCount = await this.BinProductsRepo.count({
-          where: { product: { id: product.id } },
-        });
-        if (productInbinsCount == 0) {
+        if ((await productService.getProductQuantity(product)) <= 0) {
           throw new NOT_IN_ANY_BIN();
         }
 
@@ -79,10 +77,7 @@ export class CycleCountService {
         }
         const bin = await this.BinsRepo.findOneByOrFail({ id: body.bin });
 
-        const productsInbinCount = await this.BinProductsRepo.count({
-          where: { bin: { id: bin.id } },
-        });
-        if (productsInbinCount == 0) {
+        if ((await productService.getBinQuantity(bin)) <= 0) {
           throw new EMPTY_BIN();
         }
 
