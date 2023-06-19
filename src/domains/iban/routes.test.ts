@@ -7,6 +7,7 @@ import { afterEach, beforeEach, expect, it } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance } from 'fastify';
 import routes from './routes';
+import '$src/infra/test/statusCodeExpect';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -48,5 +49,5 @@ it('should not validate iban', async () => {
     url: '/iban/validate/randomshit',
   });
 
-  expect(response.statusCode).toBe(400);
+  expect(response).statusCodeToBe(400);
 });

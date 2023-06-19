@@ -25,6 +25,7 @@ import {
   MISS_PRODUCT,
   NOT_IN_ANY_BIN,
 } from '$src/domains/cyclecount/errors';
+import '$src/infra/test/statusCodeExpect';
 
 let app: FastifyInstance;
 let user: TestUser;
@@ -124,7 +125,7 @@ it('should create cycle count for product and get that by id', async () => {
       },
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const body = response.json();
     expect(body).toMatchObject({
       data: {
@@ -146,7 +147,7 @@ it('should create cycle count for product and get that by id', async () => {
       url: `/cycle-counts/` + cycleCount.id,
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const body = response.json();
     expect(body).toMatchObject({
       data: {
@@ -184,7 +185,7 @@ const cycleCountWithChangedDifferences = async () => {
       },
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     expect(response.json()).toMatchObject({
       data: {
         id: expect.any(Number),
@@ -205,7 +206,7 @@ const cycleCountWithChangedDifferences = async () => {
       url: `/cycle-counts/`,
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     expect(response.json().data).toMatchObject([
       {
         id: cycleCount.id,
@@ -228,7 +229,7 @@ const cycleCountWithChangedDifferences = async () => {
       url: `/cycle-counts/${cycleCount.id}/differences`,
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     const body = response.json();
     expect(body.data).toMatchObject([
       {
@@ -258,7 +259,7 @@ const cycleCountWithChangedDifferences = async () => {
       payload: { difference: -1 },
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
   }
   return cycleCount;
 };
@@ -277,7 +278,7 @@ it('should test the cycle count flow and apply changes', async () => {
       url: `/cycle-counts/${cycleCount.id}/apply`,
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
   }
   {
     // should not apply again
@@ -310,7 +311,7 @@ it('should test the cycle count flow and reject changes', async () => {
       url: `/cycle-counts/${cycleCount.id}/reject`,
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
   }
   {
     // should not reject again
@@ -355,7 +356,7 @@ it('should error on apply/reject when cycle count is not open', async () => {
       url: `/cycle-counts/${rejectedCycleCount.id}/reject`,
     });
 
-    expect(response.statusCode).toBe(400);
+    expect(response).statusCodeToBe(400);
     expect(response.json().code).toBe(CYCLE_COUNT_IS_NOT_OPEN().code);
   }
   {
@@ -365,7 +366,7 @@ it('should error on apply/reject when cycle count is not open', async () => {
       url: `/cycle-counts/${appliedCycleCount.id}/reject`,
     });
 
-    expect(response.statusCode).toBe(400);
+    expect(response).statusCodeToBe(400);
     expect(response.json().code).toBe(CYCLE_COUNT_IS_NOT_OPEN().code);
   }
   {
@@ -375,7 +376,7 @@ it('should error on apply/reject when cycle count is not open', async () => {
       url: `/cycle-counts/${appliedCycleCount.id}/apply`,
     });
 
-    expect(response.statusCode).toBe(400);
+    expect(response).statusCodeToBe(400);
     expect(response.json().code).toBe(CYCLE_COUNT_IS_NOT_OPEN().code);
   }
   {
@@ -385,7 +386,7 @@ it('should error on apply/reject when cycle count is not open', async () => {
       url: `/cycle-counts/${rejectedCycleCount.id}/apply`,
     });
 
-    expect(response.statusCode).toBe(400);
+    expect(response).statusCodeToBe(400);
     expect(response.json().code).toBe(CYCLE_COUNT_IS_NOT_OPEN().code);
   }
 });
@@ -412,7 +413,7 @@ it('should error on report diff when cycle count is not open', async () => {
       payload: { difference: 1 },
     });
 
-    expect(response.statusCode).toBe(400);
+    expect(response).statusCodeToBe(400);
     expect(response.json().code).toBe(CYCLE_COUNT_IS_NOT_OPEN().code);
   }
 });
@@ -426,7 +427,7 @@ it('should error on not sending bin id on creating cycle count for bin', async (
     payload: { cycleCountType: 'Bin', product: null, bin: null },
   });
 
-  expect(response.statusCode).toBe(400);
+  expect(response).statusCodeToBe(400);
   expect(response.json().code).toBe(MISS_BIN().code);
 });
 
@@ -440,7 +441,7 @@ it('should error on not sending product id on creating cycle count for product',
     payload: { cycleCountType: 'Product', product: null, bin: null },
   });
 
-  expect(response.statusCode).toBe(400);
+  expect(response).statusCodeToBe(400);
   expect(response.json().code).toBe(MISS_PRODUCT().code);
 });
 
@@ -466,7 +467,7 @@ it('should error on creating cycle count for bin that empty', async () => {
     payload: { cycleCountType: 'Bin', product: null, bin: bin.id },
   });
 
-  expect(response.statusCode).toBe(400);
+  expect(response).statusCodeToBe(400);
   expect(response.json().code).toBe(EMPTY_BIN().code);
 });
 
@@ -482,6 +483,6 @@ it('should error on creating cycle count for product that not in any bin', async
     payload: { cycleCountType: 'Product', product: product.id, bin: null },
   });
 
-  expect(response.statusCode).toBe(400);
+  expect(response).statusCodeToBe(400);
   expect(response.json().code).toBe(NOT_IN_ANY_BIN().code);
 });
