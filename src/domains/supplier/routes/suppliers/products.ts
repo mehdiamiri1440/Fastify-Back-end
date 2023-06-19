@@ -19,7 +19,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:id/products',
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       security: [
         {
@@ -44,7 +44,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.get('/:id/free-to-add-products', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       querystring: Type.Object({
         search: Type.Optional(Type.String()),

@@ -93,7 +93,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -162,7 +162,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         'description',
       ]),
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -197,7 +197,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {

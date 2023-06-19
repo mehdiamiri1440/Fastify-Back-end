@@ -64,7 +64,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ],
       body: Type.Pick(UnitSchema, ['name']),
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {

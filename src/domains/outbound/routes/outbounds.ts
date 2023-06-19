@@ -73,7 +73,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.get('/:id', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       security: [
         {
@@ -202,7 +202,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.delete('/:id', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       security: [
         {
@@ -226,7 +226,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.post('/:id/set-receiver', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Union([
         Type.Object({
@@ -278,7 +278,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.post('/:id/confirm-current-step', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       security: [
         {
@@ -312,7 +312,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.post('/:id/set-driver', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Object({
         driverId: Nullable(Type.Integer()),
@@ -353,7 +353,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.post('/:id/set-creator-signature', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Object({
         signature: Type.String(),
@@ -379,7 +379,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.post('/:id/set-customer-signature', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Object({
         signature: Type.String(),
@@ -404,7 +404,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.post('/:id/set-driver-signature', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Object({
         signature: Type.String(),

@@ -95,7 +95,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         'permissions',
       ]),
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -126,7 +126,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -144,7 +144,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Pick(RoleSchema, ['isActive']),
     },
@@ -164,7 +164,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -184,7 +184,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       querystring: PaginatedQueryString({
         orderBy: OrderBy(['id', 'createdAt', 'permission']),
@@ -210,7 +210,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Required(RolePermissionsSchema),
     },
@@ -236,7 +236,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
         code: Type.String(),
       }),
     },
@@ -262,7 +262,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
         code: Type.String(),
       }),
     },

@@ -29,7 +29,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -52,7 +52,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Pick(DocumentSchema, ['fileId']),
     },
@@ -87,8 +87,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
-        dId: Type.Number(),
+        id: Type.Integer(),
+        dId: Type.Integer(),
       }),
     },
     async handler(req) {

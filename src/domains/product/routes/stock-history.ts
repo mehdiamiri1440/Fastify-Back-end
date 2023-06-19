@@ -20,7 +20,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.get('/products/:id/history', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       querystring: PaginatedQueryString({
         orderBy: OrderBy(['id', 'sourceType', 'bin.name']),
@@ -71,7 +71,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/bins/:id/history',
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       querystring: PaginatedQueryString({
         orderBy: OrderBy(['id', 'sourceType', 'bin.name']),

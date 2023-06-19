@@ -97,7 +97,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -150,7 +150,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['cycle-count@cycle-count::list'],
         },
       ],
-      params: Type.Object({ id: Type.Number() }),
+      params: Type.Object({ id: Type.Integer() }),
     },
     async handler(req) {
       const differences = await AppDataSource.getRepository(
@@ -183,8 +183,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
-        diffId: Type.Number(),
+        id: Type.Integer(),
+        diffId: Type.Integer(),
       }),
       body: Type.Pick(CycleCountDifferenceSchema, ['difference']),
     },
@@ -216,7 +216,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -246,7 +246,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {

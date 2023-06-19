@@ -171,7 +171,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Pick(CustomerSchema, ['isActive']),
     },
@@ -194,7 +194,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {

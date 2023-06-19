@@ -79,7 +79,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:id',
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       security: [
         {
@@ -150,7 +150,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         'deletedAt',
       ]),
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -173,7 +173,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {

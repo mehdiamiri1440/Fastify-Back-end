@@ -24,8 +24,8 @@ export const PaginatedQueryString = <
     },
   );
 
-export const Page = () => Type.Number({ default: 1 });
-export const PageSize = () => Type.Number({ default: 10 });
+export const Page = () => Type.Integer({ default: 1 });
+export const PageSize = () => Type.Integer({ default: 10 });
 export const Order = () =>
   Type.Unsafe<'asc' | 'desc'>(
     Type.String({

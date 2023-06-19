@@ -1,15 +1,15 @@
 import { Type } from '@sinclair/typebox';
 
 export const BinSchema = Type.Object({
-  id: Type.Number(),
+  id: Type.Integer(),
   name: Type.String({ minLength: 1 }),
-  warehouse: Type.Number(),
-  size: Type.Number(),
-  property: Type.Number(),
+  warehouse: Type.Integer(),
+  size: Type.Integer(),
+  property: Type.Integer(),
   physicalCode: Type.Union([Type.Null(), Type.String()]),
   internalCode: Type.String(),
   description: Type.Union([Type.Null(), Type.String()]),
-  creator: Type.Number(),
+  creator: Type.Integer(),
   createdAt: Type.Union([Type.Date(), Type.String({ format: 'date-time' })]),
   updatedAt: Type.Union([Type.Date(), Type.String({ format: 'date-time' })]),
   deletedAt: Type.Union([

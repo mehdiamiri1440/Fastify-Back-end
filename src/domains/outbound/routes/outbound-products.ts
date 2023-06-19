@@ -66,7 +66,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.patch('/:id', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Object({
         quantity: Type.Optional(Quantity()),
@@ -93,7 +93,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.delete('/:id', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       security: [
         {
@@ -121,7 +121,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.get('/:id/supply-state', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       security: [
         {
@@ -139,11 +139,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.post('/:id/supplies', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Object({
         quantity: Quantity(),
-        binId: Type.Number(),
+        binId: Type.Integer(),
       }),
       security: [
         {
@@ -177,8 +177,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.delete('/:id/supplies/:binId', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
-        binId: Type.Number(),
+        id: Type.Integer(),
+        binId: Type.Integer(),
       }),
       security: [
         {

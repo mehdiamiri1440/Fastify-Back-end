@@ -23,7 +23,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/products/:productId/images',
     schema: {
       params: Type.Object({
-        productId: Type.Number(),
+        productId: Type.Integer(),
       }),
       body: Type.Object({
         fileId: Type.String(),
@@ -50,8 +50,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/products/:productId/images/:imageId',
     schema: {
       params: Type.Object({
-        productId: Type.Number(),
-        imageId: Type.Number(),
+        productId: Type.Integer(),
+        imageId: Type.Integer(),
       }),
       security,
     },
