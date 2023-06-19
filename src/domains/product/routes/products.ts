@@ -95,8 +95,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     schema: {
       querystring: Type.Object({
         q: Type.String(),
-        page: Type.Number({ default: 1 }),
-        pageSize: Type.Number({ default: 10 }),
+        page: Type.Integer({ default: 1 }),
+        pageSize: Type.Integer({ default: 10 }),
       }),
       security: [
         {
@@ -136,7 +136,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/products/:id',
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       security: [
         {
@@ -237,7 +237,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/products/:id',
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Partial(InputProduct),
       security: [
@@ -292,12 +292,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'POST',
     url: '/products/:id/init-bin-products',
     schema: {
-      params: Type.Object({ id: Type.Number() }),
+      params: Type.Object({ id: Type.Integer() }),
       body: Type.Object({
         binProducts: Type.Array(
           Type.Object({
-            binId: Type.Number(),
-            quantity: Type.Number(),
+            binId: Type.Integer(),
+            quantity: Type.Integer(),
           }),
         ),
       }),
@@ -355,12 +355,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     schema: {
       summary: 'move bin quantity from one bin to another',
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Object({
-        sourceBinId: Type.Number(),
-        targetBinId: Type.Number(),
-        quantity: Type.Number(),
+        sourceBinId: Type.Integer(),
+        targetBinId: Type.Integer(),
+        quantity: Type.Integer(),
       }),
       security: [
         {

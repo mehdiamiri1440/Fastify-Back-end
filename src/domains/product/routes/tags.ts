@@ -21,9 +21,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/products/:id/tags',
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
-      body: Type.Object({ tagId: Type.Number() }),
+      body: Type.Object({ tagId: Type.Integer() }),
       security: [
         {
           OAuth2: ['product@product-tags::edit'],
@@ -50,8 +50,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/products/:id/tags/:tagId',
     schema: {
       params: Type.Object({
-        id: Type.Number(),
-        tagId: Type.Number(),
+        id: Type.Integer(),
+        tagId: Type.Integer(),
       }),
       security: [
         {

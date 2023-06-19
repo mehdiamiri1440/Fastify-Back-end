@@ -17,7 +17,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.get('/products/:id/inbounds', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       querystring: PaginatedQueryString({
         orderBy: OrderBy(['id']),

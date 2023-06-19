@@ -25,7 +25,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/products/:id/sale-prices',
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       querystring: PaginatedQueryString({
         orderBy: OrderBy(['id', 'createdAt']),
@@ -53,7 +53,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/products/:id/sale-prices',
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Object({ price: Type.Number() }),
       security: [

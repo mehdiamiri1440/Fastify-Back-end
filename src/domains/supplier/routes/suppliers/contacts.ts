@@ -35,7 +35,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -57,7 +57,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Pick(ContactSchema, [
         'name',
@@ -88,8 +88,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
-        cId: Type.Number(),
+        id: Type.Integer(),
+        cId: Type.Integer(),
       }),
       body: Type.Pick(ContactSchema, [
         'name',
@@ -125,8 +125,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
-        cId: Type.Number(),
+        id: Type.Integer(),
+        cId: Type.Integer(),
       }),
     },
     async handler(req) {

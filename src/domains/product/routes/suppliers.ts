@@ -29,7 +29,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.get('/products/:id/free-to-add-suppliers', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       querystring: Type.Object({
         search: Type.Optional(Type.String()),
@@ -74,10 +74,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.post('/products/:id/suppliers', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Object({
-        supplierId: Type.Number(),
+        supplierId: Type.Integer(),
       }),
       security: [
         {
@@ -121,7 +121,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.delete('/product-suppliers/:id', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       security: [
         {
@@ -143,7 +143,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.put('/product-suppliers/:id', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Object({
         referenceCode: Type.String(),

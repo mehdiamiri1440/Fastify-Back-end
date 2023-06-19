@@ -43,7 +43,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           scope: Type.String(),
         }),
         default: Type.Object({
-          statusCode: Type.Number(),
+          statusCode: Type.Integer(),
           code: Type.String(),
           error: Type.String(),
           message: Type.String(),

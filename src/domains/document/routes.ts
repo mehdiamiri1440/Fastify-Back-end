@@ -43,7 +43,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     schema: {
       tags,
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       security: [
         {
@@ -77,7 +77,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     schema: {
       tags,
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       // security: [
       //   {
@@ -104,7 +104,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     schema: {
       tags,
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       security: [
         {
@@ -134,8 +134,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     schema: {
       tags,
       params: Type.Object({
-        id: Type.Number(),
-        imageId: Type.Number({ minimum: 1 }),
+        id: Type.Integer(),
+        imageId: Type.Integer({ minimum: 1 }),
       }),
       security: [
         {
