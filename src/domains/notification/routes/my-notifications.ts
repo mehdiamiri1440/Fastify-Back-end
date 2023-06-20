@@ -10,7 +10,7 @@ import {
   Searchable,
 } from '$src/infra/tables/PaginatedType';
 import { Type } from '@sinclair/typebox';
-import StringEnum from '$src/infra/utils/StringEnum';
+import { StringEnum } from '$src/infra/TypeboxTypes';
 
 const UserNotifications = repo(UserNotification);
 

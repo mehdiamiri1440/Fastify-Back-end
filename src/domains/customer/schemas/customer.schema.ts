@@ -1,7 +1,7 @@
 import { Type } from '@sinclair/typebox';
-import StringEnum from '$src/infra/utils/StringEnum';
 import { allSubscriberTypes } from '$src/domains/customer/statics/subscriberTypes';
 import { allDocumentTypes } from '$src/domains/customer/statics/documentTypes';
+import { StringEnum } from '$src/infra/TypeboxTypes';
 
 export const subscriberType = StringEnum([...allSubscriberTypes]);
 export const documentType = StringEnum([...allDocumentTypes]);

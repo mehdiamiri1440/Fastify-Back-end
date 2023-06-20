@@ -7,6 +7,7 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { Product } from '../models/Product';
 import { ProductSalePrice } from '../models/ProductSalePrice';
+import { Price } from '$src/infra/TypeboxTypes';
 
 const PRODUCT_NOT_FOUND = createError(
   'PRODUCT_NOT_FOUND',
@@ -55,7 +56,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Integer(),
       }),
-      body: Type.Object({ price: Type.Number() }),
+      body: Type.Object({
+        price: Price(),
+      }),
       security: [
         {
           OAuth2: ['product@product-sale-prices::create'],

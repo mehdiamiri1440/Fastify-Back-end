@@ -1,8 +1,8 @@
 import AppDataSource from '$src/DataSource';
-import { Customer } from '$src/domains/customer/models/Customer';
 import { BinProduct } from '$src/domains/product/models/BinProduct';
 import { User } from '$src/domains/user/models/User';
 import { ResponseShape } from '$src/infra/Response';
+import { Nullable, Quantity, StringEnum } from '$src/infra/TypeboxTypes';
 import {
   Filter,
   OrderBy,
@@ -11,8 +11,6 @@ import {
 } from '$src/infra/tables/PaginatedType';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import * as where from '$src/infra/tables/filter';
-import { Nullable } from '$src/infra/utils/Nullable';
-import StringEnum from '$src/infra/utils/StringEnum';
 import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
@@ -22,7 +20,6 @@ import { Outbound, OutboundStatus, ReceiverType } from '../models/Outbound';
 import { OutboundProduct } from '../models/OutboundProduct';
 import { OutboundService } from '../services/outbound.service';
 import { loadUserWarehouse } from '../utils';
-import { Quantity } from '../types';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   const outboundsRepo = repo(Outbound);

@@ -72,7 +72,7 @@ export class InboundService {
       price,
     }: {
       supplierId?: number;
-      price?: number;
+      price?: string;
       quantity: number;
     },
   ) {

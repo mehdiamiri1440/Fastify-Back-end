@@ -20,7 +20,7 @@ import { SourceType } from '../models/ProductStockHistory';
 import { ProductSchema } from '../schemas/product.schema';
 import { hydrateProductInfo } from '../utils';
 import { toTsQuery } from '../utils/tsquery';
-import { Nullable } from '$src/infra/utils/Nullable';
+import { Nullable } from '$src/infra/TypeboxTypes';
 
 const PRODUCT_NOT_FOUND = createError(
   'PRODUCT_NOT_FOUND',

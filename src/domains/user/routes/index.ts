@@ -3,7 +3,7 @@ import { Type } from '@sinclair/typebox';
 import { User } from '../models/User';
 import { repo } from '$src/infra/utils/repo';
 import permissions from '$src/permissions';
-import StringEnum from '$src/infra/utils/StringEnum';
+import { StringEnum } from '$src/infra/TypeboxTypes';
 import { ACCESS_DENIED } from '$src/domains/user/routes/errors';
 import {
   generateTokensForUser,

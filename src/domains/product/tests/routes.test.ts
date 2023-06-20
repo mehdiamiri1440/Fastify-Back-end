@@ -811,7 +811,7 @@ describe('inbounds', () => {
         supplier,
         product,
         inbound,
-        price: 100,
+        price: '100',
         requestedQuantity: 10,
         actualQuantity: 10,
       },
@@ -819,7 +819,7 @@ describe('inbounds', () => {
         supplier,
         product,
         inbound,
-        price: 200,
+        price: '200',
         requestedQuantity: 20,
         actualQuantity: 21,
       },
@@ -840,7 +840,7 @@ describe('inbounds', () => {
         id: supplier.id,
         name: supplier.name,
       },
-      price: 200,
+      price: '200.00',
       actualQuantity: 21,
     });
   });
@@ -1035,7 +1035,7 @@ describe('Sale Price', () => {
     expect(listResponse.json().data).toMatchObject([
       {
         id: 1,
-        price: 150,
+        price: '150.00',
         createdAt: expect.any(String),
       },
     ]);
