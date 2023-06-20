@@ -21,6 +21,7 @@ import { Outbound, OutboundStatus } from '../models/Outbound';
 import { OutboundProduct } from '../models/OutboundProduct';
 import { OutboundProductSupply } from '../models/OutboundProductSupply';
 import routes from '../routes/outbound-products';
+import '$src/infra/test/statusCodeExpect';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -289,7 +290,7 @@ describe('Supply', () => {
       url: `/${outboundProduct.id}/supply-state`,
     });
 
-    expect(stateResponse.statusCode).toBe(200);
+    expect(stateResponse).statusCodeToBe(200);
     const state = stateResponse.json();
     expect(state).toMatchObject({
       data: {
@@ -339,7 +340,7 @@ describe('Supply', () => {
       url: `/${outboundProduct.id}/supply-state`,
     });
 
-    expect(stateResponse.statusCode).toBe(200);
+    expect(stateResponse).statusCodeToBe(200);
     const state = stateResponse.json();
     expect(state).toMatchObject({
       data: {

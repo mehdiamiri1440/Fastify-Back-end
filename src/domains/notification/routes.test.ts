@@ -11,6 +11,7 @@ import { Notification } from '$src/domains/notification/models/Notification';
 import { UserNotification } from '$src/domains/notification/models/UserNotification';
 import { User } from '$src/domains/user/models/User';
 import { Role } from '$src/domains/user/models/Role';
+import '$src/infra/test/statusCodeExpect';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -75,7 +76,7 @@ const listOfNotifications = async () => {
     method: 'GET',
     url: `/notifications/`,
   });
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
   expect(response.json().data).toMatchObject([
     expect.objectContaining({
       id: newNotif.id,
@@ -99,7 +100,7 @@ it('should delete notification', async () => {
     method: 'DELETE',
     url: `/notifications/${notification.id}/`,
   });
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should get my notifications', async () => {
@@ -110,7 +111,7 @@ it('should get my notifications', async () => {
     method: 'GET',
     url: `/my-notifications/`,
   });
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
   expect(response.json().data).toMatchObject([
     expect.objectContaining({
       id: expect.any(Number),
@@ -138,7 +139,7 @@ it('should mark notification as read and unread', async () => {
       url: `/my-notifications/${myNotification.id}/`,
       payload: { read: true },
     });
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     expect(
       (await repo(UserNotification).findOneByOrFail({ id: myNotification.id }))
         .read,
@@ -151,7 +152,7 @@ it('should mark notification as read and unread', async () => {
       url: `/my-notifications/${myNotification.id}/`,
       payload: { read: false },
     });
-    expect(response.statusCode).toBe(200);
+    expect(response).statusCodeToBe(200);
     expect(
       (await repo(UserNotification).findOneByOrFail({ id: myNotification.id }))
         .read,

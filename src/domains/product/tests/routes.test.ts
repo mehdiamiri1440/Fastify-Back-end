@@ -31,6 +31,7 @@ import {
 import { DeepPartial } from 'typeorm';
 import '$src/infra/test/statusCodeExpect';
 import { Category } from '$src/domains/configuration/models/Category';
+import '$src/infra/test/statusCodeExpect';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -972,7 +973,7 @@ describe('Content', async () => {
       method: 'GET',
       url: `/products/${product.id}/content`,
     });
-    expect(emptyContentResponse.statusCode).toBe(200);
+    expect(emptyContentResponse).statusCodeToBe(200);
     expect(emptyContentResponse.json().data).toMatchObject({
       id: product.id,
       content: null,
@@ -992,7 +993,7 @@ describe('Content', async () => {
       method: 'GET',
       url: `/products/${product.id}/content`,
     });
-    expect(contentResponse.statusCode).toBe(200);
+    expect(contentResponse).statusCodeToBe(200);
     expect(contentResponse.json().data).toMatchObject({
       id: product.id,
       content: 'content',
