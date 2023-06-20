@@ -179,6 +179,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'DELETE',
     url: '/:id',
+    config: { possibleErrors: [SUPPLIER_SUPPLYING_OUR_PRODUCT] },
     schema: {
       security: [
         {

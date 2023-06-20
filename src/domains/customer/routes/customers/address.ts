@@ -17,6 +17,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'GET',
     url: '/:id/address',
+    config: { possibleErrors: [CUSTOMER_HAS_NO_ADDRESS] },
     schema: {
       security: [
         {

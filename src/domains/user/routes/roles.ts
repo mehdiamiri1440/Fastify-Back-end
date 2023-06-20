@@ -51,6 +51,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/',
+    config: { possibleErrors: [INVALID_PERMISSION] },
     schema: {
       security: [
         {
@@ -83,6 +84,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'PUT',
     url: '/:id',
+    config: { possibleErrors: [INVALID_PERMISSION] },
     schema: {
       security: [
         {
@@ -229,6 +231,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/:id/permissions/:code',
+    config: { possibleErrors: [INVALID_PERMISSION] },
     schema: {
       security: [
         {

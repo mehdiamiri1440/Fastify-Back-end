@@ -18,6 +18,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   const Customers = repo(Customer);
   app.get('/:id/bank', {
     schema: {
+      config: { possibleErrors: [CUSTOMER_HAS_NO_BANK] },
       security: [
         {
           OAuth2: ['customer@bank::view'],

@@ -6,6 +6,11 @@ import {
   productTemplate,
   ProductUploaded,
 } from '$src/domains/importer/services/product';
+import {
+  NEED_BUSINESS_DATA,
+  NOT_NEED_BUSINESS_DATA,
+} from '$src/domains/customer/errors';
+import { NOT_VALID } from '$src/domains/importer/errors';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
@@ -18,6 +23,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/suppliers/insert',
+    config: { possibleErrors: [NOT_VALID] },
     schema: {
       security: [
         {
@@ -36,6 +42,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/suppliers/check',
+    config: { possibleErrors: [NOT_VALID] },
     schema: {
       security: [
         {
@@ -61,6 +68,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/products/insert',
+    config: { possibleErrors: [NOT_VALID] },
     schema: {
       security: [
         {
@@ -79,6 +87,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/products/check',
+    config: { possibleErrors: [NOT_VALID] },
     schema: {
       security: [
         {
@@ -104,6 +113,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/customers/insert',
+    config: {
+      possibleErrors: [NOT_VALID, NEED_BUSINESS_DATA, NOT_NEED_BUSINESS_DATA],
+    },
     schema: {
       security: [
         {
@@ -122,6 +134,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/customers/check',
+    config: {
+      possibleErrors: [NOT_VALID, NEED_BUSINESS_DATA, NOT_NEED_BUSINESS_DATA],
+    },
     schema: {
       security: [
         {
