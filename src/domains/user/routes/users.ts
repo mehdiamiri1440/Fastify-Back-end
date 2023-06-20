@@ -40,6 +40,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         filter: Filter({
           firstName: Searchable(),
           lastName: Searchable(),
+          fullName: Searchable(),
           nif: Searchable(),
           email: Searchable(),
           phoneNumber: Searchable(),
