@@ -1,8 +1,8 @@
 import AppDataSource from '$src/DataSource';
-import { Customer } from '$src/domains/customer/models/Customer';
 import { BinProduct } from '$src/domains/product/models/BinProduct';
 import { User } from '$src/domains/user/models/User';
 import { ResponseShape } from '$src/infra/Response';
+import { Nullable, Quantity, StringEnum } from '$src/infra/TypeboxTypes';
 import {
   Filter,
   OrderBy,
@@ -11,8 +11,6 @@ import {
 } from '$src/infra/tables/PaginatedType';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import * as where from '$src/infra/tables/filter';
-import { Nullable } from '$src/infra/utils/Nullable';
-import StringEnum from '$src/infra/utils/StringEnum';
 import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
@@ -22,7 +20,6 @@ import { Outbound, OutboundStatus, ReceiverType } from '../models/Outbound';
 import { OutboundProduct } from '../models/OutboundProduct';
 import { OutboundService } from '../services/outbound.service';
 import { loadUserWarehouse } from '../utils';
-import { Quantity } from '../types';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   const outboundsRepo = repo(Outbound);
@@ -73,7 +70,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.get('/:id', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       security: [
         {
@@ -202,7 +199,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.delete('/:id', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       security: [
         {
@@ -226,7 +223,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.post('/:id/set-receiver', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Union([
         Type.Object({
@@ -278,7 +275,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.post('/:id/confirm-current-step', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       security: [
         {
@@ -312,7 +309,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.post('/:id/set-driver', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Object({
         driverId: Nullable(Type.Integer()),
@@ -353,7 +350,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.post('/:id/set-creator-signature', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Object({
         signature: Type.String(),
@@ -379,7 +376,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.post('/:id/set-customer-signature', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Object({
         signature: Type.String(),
@@ -404,7 +401,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.post('/:id/set-driver-signature', {
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Object({
         signature: Type.String(),

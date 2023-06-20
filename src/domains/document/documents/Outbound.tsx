@@ -2,7 +2,7 @@ import { Outbound } from '$src/domains/outbound/models/Outbound';
 import { repo } from '$src/infra/utils/repo';
 import { capitalCase } from 'case-anything';
 import { Fragment, h } from 'nano-jsx';
-import QRCode from 'qrcode';
+import * as QrCode from 'qrcode';
 import { DocumentBuilder } from '../Builder';
 import { App } from '../components/App';
 import { Footer } from '../components/Footer';
@@ -11,6 +11,7 @@ import { Section } from '../components/Section';
 import { Signature, SignatureContainer } from '../components/Signature';
 import { Table, Td, Th, Tr } from '../components/Table';
 import { formatDate, loadSignature } from '../utils';
+import { getAsLink } from '$src/domains/qrcode/utils';
 
 export class OutboundDocument extends DocumentBuilder {
   outbound!: Outbound;
@@ -47,9 +48,7 @@ export class OutboundDocument extends DocumentBuilder {
       ? await loadSignature(this.outbound.creatorSignature)
       : null;
 
-    this.qrcode = await QRCode.toDataURL(
-      'https://www.google.com/search?q=' + this.outbound.code,
-    );
+    this.qrcode = await QrCode.toDataURL(getAsLink(this.outbound.code));
   }
 
   getPdfName() {

@@ -18,13 +18,14 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   const Customers = repo(Customer);
   app.get('/:id/bank', {
     schema: {
+      config: { possibleErrors: [CUSTOMER_HAS_NO_BANK] },
       security: [
         {
           OAuth2: ['customer@bank::view'],
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -50,7 +51,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Pick(BankSchema, ['iban']),
     },

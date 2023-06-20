@@ -9,6 +9,7 @@ import '$src/infra/test/statusCodeExpect';
 import {
   TestUser,
   createTestFastifyApp,
+  initDataSourceForTest,
   withoutForeignKeyCheck,
 } from '$src/infra/test/utils';
 import { repo } from '$src/infra/utils/repo';
@@ -42,7 +43,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   assert(app);
-  await AppDataSource.synchronize(true);
+  await initDataSourceForTest();
   user = await TestUser.create(app);
 
   await withoutForeignKeyCheck(async () => {
@@ -146,6 +147,7 @@ async function createDraft() {
   // STEP: DRAFT
 
   expect(createResult.status).toBe('draft');
+  expect(createResult.code).toContain('OT');
   const id = createResult.id;
 
   const confirmStep = () =>

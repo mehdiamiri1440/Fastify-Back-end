@@ -12,6 +12,7 @@ import { createReadStream } from 'node:fs';
 import { join } from 'node:path';
 import { File } from './models/File';
 import plugin from './plugin';
+import '$src/infra/test/statusCodeExpect';
 
 async function ensureBucket(client: Client, bucketName: string) {
   // Check if the bucket already exists
@@ -186,7 +187,7 @@ describe('Errors', () => {
       headers: form.getHeaders(),
     });
 
-    expect(response.statusCode).toBe(400);
+    expect(response).statusCodeToBe(400);
     const body = response.json();
     expect(body).toMatchObject({
       code: 'INVALID_MIME_TYPE',

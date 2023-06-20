@@ -91,7 +91,6 @@ const createSampleInbound = async (
   overrides?: DeepPartial<Inbound>,
 ) =>
   repo(Inbound).save({
-    code: 'code',
     type: InboundType.NEW,
     status: InboundStatus.PRE_DELIVERY,
     creator: {
@@ -168,7 +167,7 @@ describe('InboundProduct list', () => {
         supplier,
         product,
         inbound,
-        price: 100,
+        price: '100',
         requestedQuantity: 10,
         actualQuantity: 10,
       }),
@@ -176,7 +175,7 @@ describe('InboundProduct list', () => {
         supplier,
         product,
         inbound,
-        price: 200,
+        price: '200',
         requestedQuantity: 20,
         actualQuantity: 21,
       }),
@@ -240,7 +239,7 @@ describe('Update InboundProduct', () => {
       supplier,
       product,
       inbound,
-      price: 100,
+      price: '100',
       requestedQuantity: 10,
     });
 
@@ -248,7 +247,7 @@ describe('Update InboundProduct', () => {
       method: 'POST',
       url: `/${inboundProduct.id}/set-price`,
       payload: {
-        price: 200,
+        price: '9.99',
       },
     });
 
@@ -267,7 +266,7 @@ describe('Update InboundProduct', () => {
       withDeleted: true,
     });
     expect(entity?.deletedAt).toBeNull();
-    expect(entity?.price).toBe(200);
+    expect(entity?.price).toBe('9.99');
   });
 
   it('should set-actual-quantity when inbound state is LOAD', async () => {
@@ -289,7 +288,7 @@ describe('Update InboundProduct', () => {
       supplier,
       product,
       inbound,
-      price: 100,
+      price: '100',
       requestedQuantity: 10,
     });
 
@@ -330,7 +329,7 @@ describe('Update InboundProduct', () => {
       supplier,
       product,
       inbound,
-      price: 100,
+      price: '100',
       requestedQuantity: 10,
     });
 
@@ -374,7 +373,7 @@ describe('Delete InboundProduct', () => {
       supplier,
       product,
       inbound,
-      price: 100,
+      price: '9.99',
       requestedQuantity: 10,
     });
 
@@ -389,7 +388,7 @@ describe('Delete InboundProduct', () => {
     expect(body).toMatchObject({
       data: {
         id: inboundProduct.id,
-        price: 100,
+        price: '9.99',
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
       },
@@ -427,7 +426,7 @@ describe('Sorting', () => {
       supplier,
       product,
       inbound,
-      price: 100,
+      price: '100',
       requestedQuantity: 30,
       actualQuantity: 30,
     });
@@ -444,7 +443,7 @@ describe('Sorting', () => {
       quantity: 0,
     });
 
-    return { inboundProduct, bin1, bin2 };
+    return { warehouse, inboundProduct, bin1, bin2 };
   };
 
   it('should sort', async () => {
@@ -550,5 +549,28 @@ describe('Sorting', () => {
     });
 
     expect(secondSort.statusCode).toBe(400);
+  });
+
+  it('should throw error on sort, when binId is in different warehouseId', async () => {
+    assert(app);
+    assert(user);
+    const { inboundProduct, bin1 } = await init();
+    const anotherWarehouse = await createSampleWarehouse();
+    const binInAnotherWarehouse = await createSampleBin(anotherWarehouse, {
+      name: 'binInAnotherWarehouse',
+      internalCode: 'binInAnotherWarehouse',
+    });
+
+    const response = await user.inject({
+      method: 'POST',
+      url: `/${inboundProduct.id}/sorts`,
+      payload: {
+        quantity: 10,
+        binId: binInAnotherWarehouse.id,
+      },
+    });
+
+    expect(response).statusCodeToBe(400);
+    expect(response).errorCodeToBe('BIN_FROM_ANOTHER_WAREHOUSE');
   });
 });

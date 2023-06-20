@@ -1,7 +1,7 @@
 import { Type } from '@sinclair/typebox';
 
 export const ProductSchema = Type.Object({
-  id: Type.Number(),
+  id: Type.Integer(),
   name: Type.String({ minLength: 1 }),
   barcode: Type.String(),
   code: Type.Optional(Type.String()),

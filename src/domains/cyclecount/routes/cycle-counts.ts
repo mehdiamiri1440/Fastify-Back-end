@@ -22,6 +22,13 @@ import { PaginatedResponse } from '$src/infra/tables/response';
 import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
+import {
+  CYCLE_COUNT_IS_NOT_OPEN,
+  EMPTY_BIN,
+  MISS_BIN,
+  MISS_PRODUCT,
+  NOT_IN_ANY_BIN,
+} from '$src/domains/cyclecount/errors';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
@@ -97,7 +104,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -125,6 +132,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/',
+    config: {
+      possibleErrors: [EMPTY_BIN, MISS_BIN, NOT_IN_ANY_BIN, MISS_PRODUCT],
+    },
     schema: {
       security: [
         {
@@ -150,7 +160,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['cycle-count@cycle-count::list'],
         },
       ],
-      params: Type.Object({ id: Type.Number() }),
+      params: Type.Object({ id: Type.Integer() }),
     },
     async handler(req) {
       const differences = await AppDataSource.getRepository(
@@ -176,6 +186,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'PUT',
     url: '/:id/differences/:diffId/',
+    config: { possibleErrors: [CYCLE_COUNT_IS_NOT_OPEN] },
     schema: {
       security: [
         {
@@ -183,8 +194,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
-        diffId: Type.Number(),
+        id: Type.Integer(),
+        diffId: Type.Integer(),
       }),
       body: Type.Pick(CycleCountDifferenceSchema, ['difference']),
     },
@@ -209,6 +220,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/:id/apply',
+    config: { possibleErrors: [CYCLE_COUNT_IS_NOT_OPEN] },
     schema: {
       security: [
         {
@@ -216,7 +228,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -239,6 +251,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/:id/reject',
+    config: { possibleErrors: [CYCLE_COUNT_IS_NOT_OPEN] },
     schema: {
       security: [
         {
@@ -246,7 +259,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {

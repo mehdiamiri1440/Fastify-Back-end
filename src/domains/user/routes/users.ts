@@ -40,6 +40,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         filter: Filter({
           firstName: Searchable(),
           lastName: Searchable(),
+          fullName: Searchable(),
           nif: Searchable(),
           email: Searchable(),
           phoneNumber: Searchable(),
@@ -72,8 +73,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ]),
     },
     async handler(req) {
-      // validating role
-      const role = await Roles.findOneByOrFail({ id: req.body.role });
+      const role = await Roles.findOneByOrFail({ id: req.body.role }); // validating role
+
+      req.body.email &&= req.body.email.toLowerCase(); // make email lowercase
 
       return await Users.save({
         ...req.body,
@@ -84,7 +86,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
   app.route({
-    method: 'PUT',
+    method: 'PATCH',
     url: '/:id',
     schema: {
       security: [
@@ -92,32 +94,42 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           OAuth2: ['user@user::update'],
         },
       ],
-      body: Type.Pick(UserSchema, [
-        'firstName',
-        'lastName',
-        'role',
-        'nif',
-        'email',
-        'phoneNumber',
-        'password',
-        'position',
-        'isActive',
-      ]),
+      body: Type.Partial(
+        Type.Pick(UserSchema, [
+          'firstName',
+          'lastName',
+          'role',
+          'nif',
+          'email',
+          'phoneNumber',
+          'password',
+          'position',
+          'isActive',
+        ]),
+      ),
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
-      // validating role
-      const role = await Roles.findOneByOrFail({ id: req.body.role });
+      const { id } = await Users.findOneByOrFail({ id: req.params.id }); // validating user
 
-      const { id } = await Users.findOneByOrFail({ id: req.params.id });
+      const role =
+        req.body.role && (await Roles.findOneByOrFail({ id: req.body.role })); // validating role
+
+      const password =
+        req.body.password && (await bcrypt.hash(req.body.password, 10)); // hashing password
+
+      req.body.email &&= req.body.email.toLowerCase(); // make email lowercase
+
+      // updating user
       await Users.update(
         { id },
         {
           ...req.body,
-          role,
-          password: await bcrypt.hash(req.body.password, 10),
+          role: {},
+          ...(role && { role }),
+          ...(password && { password }),
         },
       );
     },
@@ -132,7 +144,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -152,7 +164,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -170,7 +182,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Pick(UserSchema, ['isActive']),
     },

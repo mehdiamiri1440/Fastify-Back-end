@@ -1,23 +1,13 @@
-import {
-  DataSource,
-  DeepPartial,
-  Driver,
-  EntityManager,
-  Repository,
-} from 'typeorm';
-import { Inbound, InboundStatus, InboundType } from '../models/Inbound';
 import { DocumentService } from '$src/domains/document/service';
-import { Warehouse } from '$src/domains/warehouse/models/Warehouse';
 import { Product } from '$src/domains/product/models/Product';
-import { InboundProduct } from '../models/InboundProduct';
 import { Supplier } from '$src/domains/supplier/models/Supplier';
 import { User } from '$src/domains/user/models/User';
-
-function getCode(id: number) {
-  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const counter = (id % 10000).toString().padStart(4, '0');
-  return `ASN${date}${counter}`;
-}
+import { Warehouse } from '$src/domains/warehouse/models/Warehouse';
+import { DataSource, DeepPartial, EntityManager, Repository } from 'typeorm';
+import { Inbound, InboundStatus, InboundType } from '../models/Inbound';
+import { InboundProduct } from '../models/InboundProduct';
+import AppDataSource from '$src/DataSource';
+import { repo } from '$src/infra/utils/repo';
 
 export class InboundService {
   private inboundsRepo: Repository<Inbound>;
@@ -39,8 +29,9 @@ export class InboundService {
   }
 
   async #saveInbound(entity: DeepPartial<Inbound>) {
-    const inbound = await this.inboundsRepo.save(entity);
-    inbound.code = getCode(inbound.id);
+    const { id } = await this.inboundsRepo.save(entity);
+    // we should reload the entity to get the new code generated
+    const inbound = await this.inboundsRepo.findOneByOrFail({ id });
 
     const document = await this.documentService.create({
       type: 'inbound',
@@ -48,7 +39,7 @@ export class InboundService {
     });
     inbound.docId = document.id;
 
-    await this.inboundsRepo.update(inbound.id, inbound);
+    await this.inboundsRepo.save(inbound);
     return inbound;
   }
 
@@ -81,7 +72,7 @@ export class InboundService {
       price,
     }: {
       supplierId?: number;
-      price?: number;
+      price?: string;
       quantity: number;
     },
   ) {

@@ -66,6 +66,7 @@ const app: FastifyPluginAsync<Options> = async (
   await fastify.register(import('$src/infra/RouteValidator'));
 
   await fastify.register(import('$src/infra/autoTag'));
+  await fastify.register(import('$src/infra/routes-config/possibleErrors'));
 
   fastify.register(import('@fastify/formbody'));
 
@@ -131,6 +132,7 @@ const app: FastifyPluginAsync<Options> = async (
       await fastify.register(import('./domains/iban/routes'));
       await fastify.register(import('./domains/cyclecount/routes'));
       await fastify.register(import('./domains/notification/routes'));
+      await fastify.register(import('./domains/qrcode/routes'));
       await fastify.register(import('./domains/statistic/routes'));
     },
     {

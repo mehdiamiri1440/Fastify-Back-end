@@ -35,8 +35,8 @@ export class InboundProduct {
   @Column({ default: false })
   sorted!: boolean;
 
-  @Column({ nullable: true })
-  price!: number;
+  @Column('decimal', { precision: 18, scale: 2, nullable: true })
+  price!: string;
 
   @ManyToOne(() => Product)
   product!: Relation<Product>;

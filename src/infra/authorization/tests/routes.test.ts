@@ -5,6 +5,7 @@ import { afterEach, beforeEach, expect, it } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance } from 'fastify';
 import routes from './routes';
+import '$src/infra/test/statusCodeExpect';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -52,7 +53,7 @@ it('should call route need token and permission with token and permission', asyn
       Authorization: `Bearer ${tokenWithPermission}`,
     },
   });
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should not call route need token and permission without permission', async () => {
@@ -65,7 +66,7 @@ it('should not call route need token and permission without permission', async (
       Authorization: `Bearer ${tokenWithoutPermission}`,
     },
   });
-  expect(response.statusCode).toBe(403);
+  expect(response).statusCodeToBe(403);
 });
 
 it('should call route need token with token', async () => {
@@ -78,7 +79,7 @@ it('should call route need token with token', async () => {
       Authorization: `Bearer ${tokenWithoutPermission}`,
     },
   });
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });
 
 it('should not call route need token without token', async () => {
@@ -88,7 +89,7 @@ it('should not call route need token without token', async () => {
     method: 'GET',
     url: '/needToken',
   });
-  expect(response.statusCode).toBe(401);
+  expect(response).statusCodeToBe(401);
 });
 
 it('should call route need nothing without anything', async () => {
@@ -98,5 +99,5 @@ it('should call route need nothing without anything', async () => {
     method: 'GET',
     url: '/needNothing',
   });
-  expect(response.statusCode).toBe(200);
+  expect(response).statusCodeToBe(200);
 });

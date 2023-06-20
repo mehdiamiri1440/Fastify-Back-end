@@ -19,7 +19,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
   app.route({
     method: 'GET',
-    url: '/',
+    url: '/:id/staffs',
     schema: {
       security: [
         {
@@ -29,23 +29,28 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       querystring: PaginatedQueryString({
         orderBy: OrderBy(['warehouse.id', 'user.id']),
       }),
+      params: Type.Object({ id: Type.Integer() }),
     },
     async handler(req) {
       return new TableQueryBuilder(WarehouseStaffs, req)
         .relation({ user: true, warehouse: true, creator: true })
+        .where({ warehouse: { id: req.params.id } })
         .exec();
     },
   });
 
   app.route({
     method: 'GET',
-    url: '/available',
+    url: '/:id/staffs/available',
     schema: {
       security: [
         {
           OAuth2: ['warehouse@warehouse::update'],
         },
       ],
+      params: Type.Object({
+        id: Type.Integer(),
+      }),
     },
     async handler(req) {
       return await Users.find({
@@ -57,14 +62,15 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
   app.route({
     method: 'POST',
-    url: '/',
+    url: '/:id/staffs',
     schema: {
       security: [
         {
           OAuth2: ['warehouse@warehouse::update'],
         },
       ],
-      body: Type.Pick(WarehouseStaffSchema, ['warehouse', 'user']),
+      params: Type.Object({ id: Type.Integer() }),
+      body: Type.Object({ user: Type.Integer() }),
     },
     async handler(req) {
       // validating references
@@ -73,7 +79,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         staffWarehouses: { id: IsNull() },
       });
       const warehouse = await Warehouses.findOneByOrFail({
-        id: req.body.warehouse,
+        id: req.params.id,
       });
 
       return await WarehouseStaffs.save({
@@ -86,7 +92,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
   app.route({
     method: 'DELETE',
-    url: '/:id',
+    url: '/:wId/staffs/:uId',
     schema: {
       security: [
         {
@@ -94,12 +100,14 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        wId: Type.Integer({ description: 'id of warehouse' }),
+        uId: Type.Integer({ description: 'id of staff (user)' }),
       }),
     },
     async handler(req) {
       const ws = await WarehouseStaffs.findOneByOrFail({
-        id: req.params.id,
+        warehouse: { id: req.params.wId },
+        user: { id: req.params.uId },
       });
       await WarehouseStaffs.softRemove(ws);
     },

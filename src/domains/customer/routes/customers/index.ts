@@ -16,6 +16,10 @@ import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { validateCustomerData } from '../../utils';
+import {
+  NEED_BUSINESS_DATA,
+  NOT_NEED_BUSINESS_DATA,
+} from '$src/domains/customer/errors';
 
 const Customers = repo(Customer);
 const Nationalities = repo(Nationality);
@@ -100,6 +104,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/',
+    config: {
+      possibleErrors: [NEED_BUSINESS_DATA, NOT_NEED_BUSINESS_DATA],
+    },
     schema: {
       security: [
         {
@@ -142,7 +149,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         subscriberType,
       });
 
-      return await Customers.save({
+      const { id } = await Customers.save({
         ...restBody,
         contactName,
         contactFiscalId,
@@ -150,6 +157,15 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         subscriberType,
         nationality,
         creator: { id: req.user.id },
+      });
+
+      // we should load the customer again to get the generated code
+      return Customers.findOneOrFail({
+        where: { id },
+        relations: {
+          nationality: true,
+          creator: true,
+        },
       });
     },
   });
@@ -162,7 +178,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Pick(CustomerSchema, ['isActive']),
     },
@@ -185,7 +201,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {

@@ -138,7 +138,7 @@ it('Inbound Flow', async () => {
           productId: product.id,
           supplierId: supplier.id,
           quantity: 5,
-          price: 100,
+          price: '100',
         },
       ],
     },
@@ -160,7 +160,7 @@ it('Inbound Flow', async () => {
         product: { id: product.id },
         supplier: { id: supplier.id },
         requestedQuantity: 5,
-        price: 100,
+        price: '100.00',
       },
     ],
   });

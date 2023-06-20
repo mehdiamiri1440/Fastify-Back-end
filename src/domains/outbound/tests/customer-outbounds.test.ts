@@ -99,7 +99,6 @@ describe('Get Outbound of single customer', () => {
     await repo(Outbound).insert([
       {
         status: OutboundStatus.DRAFT,
-        code: 'test',
         warehouse,
         creator: { id: 1 },
         receiverType: ReceiverType.CUSTOMER,
@@ -107,7 +106,6 @@ describe('Get Outbound of single customer', () => {
       },
       {
         status: OutboundStatus.DRAFT,
-        code: 'test2',
         warehouse,
         creator: { id: 1 },
         receiverType: ReceiverType.CUSTOMER,
@@ -126,7 +124,7 @@ describe('Get Outbound of single customer', () => {
       data: [
         {
           status: 'draft',
-          code: expect.any(String),
+          code: expect.stringContaining('OT'),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
         },

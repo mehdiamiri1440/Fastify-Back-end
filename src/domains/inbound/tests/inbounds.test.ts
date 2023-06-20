@@ -3,6 +3,7 @@ import '$src/infra/test/statusCodeExpect';
 import {
   TestUser,
   createTestFastifyApp,
+  initDataSourceForTest,
   withoutForeignKeyCheck,
 } from '$src/infra/test/utils';
 import { repo } from '$src/infra/utils/repo';
@@ -26,7 +27,7 @@ let warehouse: Warehouse | undefined;
 
 beforeAll(async () => {
   app = await createTestFastifyApp();
-  await AppDataSource.synchronize();
+  await initDataSourceForTest();
   await app.register(routes);
   await app.ready();
   user = await TestUser.create(app);
@@ -114,7 +115,7 @@ describe('Create Inbound', () => {
       data: {
         type: 'new',
         status: 'pre_delivery',
-        code: expect.any(String),
+        code: expect.stringContaining('IN'),
         docId: expect.any(Number),
         description: null,
         deletedAt: null,
@@ -152,7 +153,7 @@ describe('Create Inbound', () => {
       data: {
         type: 'returned',
         status: 'pre_delivery',
-        code: expect.any(String),
+        code: expect.stringContaining('IN'),
         docId: expect.any(Number),
         description: null,
         deletedAt: null,
@@ -182,7 +183,7 @@ describe('Get Inbound', () => {
           type: 'returned',
           status: 'pre_delivery',
           creator: { fullName: 'tester tester' },
-          code: expect.any(String),
+          code: expect.stringContaining('IN'),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
         },
@@ -190,7 +191,7 @@ describe('Get Inbound', () => {
           type: 'new',
           status: 'pre_delivery',
           creator: { fullName: 'tester tester' },
-          code: expect.any(String),
+          code: expect.stringContaining('IN'),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
         },
@@ -213,12 +214,12 @@ describe('Get Inbound', () => {
       data: {
         type: 'new',
         status: 'pre_delivery',
-        code: expect.any(String),
+        code: expect.stringContaining('IN'),
         products: [
           {
             actualQuantity: null,
             id: 1,
-            price: 100,
+            price: '100.00',
             requestedQuantity: 5,
             product: {
               id: 1,
@@ -257,7 +258,7 @@ describe('Delete Inbound', () => {
       data: {
         type: 'new',
         status: 'pre_delivery',
-        code: expect.any(String),
+        code: expect.stringContaining('IN'),
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
       },

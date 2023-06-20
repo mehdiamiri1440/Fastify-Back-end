@@ -3,17 +3,17 @@ import { Type, Static } from '@sinclair/typebox';
 export const nifRegex = /^(?![0-9]{2})[a-zA-Z0-9]*[a-zA-Z0-9]$/gm;
 
 export const UserSchema = Type.Object({
-  id: Type.Number(),
+  id: Type.Integer(),
   firstName: Type.String({ minLength: 1 }),
   lastName: Type.String({ minLength: 1 }),
-  role: Type.Number(),
+  role: Type.Integer(),
   nif: Type.RegEx(nifRegex),
   email: Type.String({ format: 'email' }),
   phoneNumber: Type.Optional(Type.Union([Type.Null(), Type.String()])),
   password: Type.String(),
   position: Type.Optional(Type.Union([Type.Null(), Type.String()])),
   isActive: Type.Boolean(),
-  creator: Type.Number(),
+  creator: Type.Integer(),
   createdAt: Type.Union([Type.Date(), Type.String({ format: 'date' })]),
   updatedAt: Type.Union([Type.Date(), Type.String({ format: 'date' })]),
   deletedAt: Type.Optional(

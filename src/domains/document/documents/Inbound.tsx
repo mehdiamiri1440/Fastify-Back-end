@@ -1,8 +1,9 @@
 import { Inbound } from '$src/domains/inbound/models/Inbound';
+import { getAsLink } from '$src/domains/qrcode/utils';
 import { repo } from '$src/infra/utils/repo';
 import { capitalCase } from 'case-anything';
 import { Fragment, h } from 'nano-jsx';
-import QRCode from 'qrcode';
+import * as QrCode from 'qrcode';
 import { DocumentBuilder } from '../Builder';
 import { App } from '../components/App';
 import { Footer } from '../components/Footer';
@@ -43,9 +44,7 @@ export class InboundDocument extends DocumentBuilder {
       ? await loadSignature(this.inbound.driverSignature)
       : null;
 
-    this.qrcode = await QRCode.toDataURL(
-      'https://www.google.com/search?q=' + this.inbound.code,
-    );
+    this.qrcode = await QrCode.toDataURL(getAsLink(this.inbound.code));
   }
 
   getPdfName() {

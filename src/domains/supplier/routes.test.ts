@@ -64,7 +64,6 @@ it('supplier flow', async () => {
     return (
       await AppDataSource.getRepository(Product).save({
         name: 'name',
-        code: 'code',
         barcode: 'barcode',
         invoiceSystemCode: 1,
         description: 'description',

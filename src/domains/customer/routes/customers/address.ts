@@ -17,6 +17,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'GET',
     url: '/:id/address',
+    config: { possibleErrors: [CUSTOMER_HAS_NO_ADDRESS] },
     schema: {
       security: [
         {
@@ -24,7 +25,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -50,7 +51,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Omit(AddressSchema, ['formatted']),
     },

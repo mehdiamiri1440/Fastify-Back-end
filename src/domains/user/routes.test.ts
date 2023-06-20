@@ -14,6 +14,7 @@ import { RefreshToken } from '$src/domains/user/models/RefreshToken';
 import * as util from 'util';
 import { FastifyJWT } from '@fastify/jwt';
 import { RefreshTokenPayload } from '$src/infra/authorization';
+import '$src/infra/test/statusCodeExpect';
 
 let app: FastifyInstance | undefined;
 let user: TestUser;
@@ -211,7 +212,7 @@ it('user flow', async () => {
       method: 'POST',
       url: '/roles/' + roleId + '/permissions/random',
     });
-    expect(response.statusCode).toBe(400);
+    expect(response).statusCodeToBe(400);
   }
   {
     // should return all permissions after adding new
@@ -401,7 +402,7 @@ it('user flow', async () => {
       payload: requestBody,
     });
 
-    expect(createResponse.statusCode).toBe(200);
+    expect(createResponse).statusCodeToBe(200);
 
     expect(
       await repo(User).findOneBy({ email: requestBody.email }),
@@ -414,7 +415,7 @@ it('user flow', async () => {
       url: '/users/' + createResponse.json().data.id,
       payload: requestBody,
     });
-    expect(deleteResponse.statusCode).toBe(200);
+    expect(deleteResponse).statusCodeToBe(200);
   }
   {
     // should return all users
@@ -458,7 +459,7 @@ it('user flow', async () => {
   {
     // should update user
     const response = await user.inject({
-      method: 'PUT',
+      method: 'PATCH',
       url: '/users/' + userId,
       payload: {
         id: userId,

@@ -35,7 +35,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         orderBy: OrderBy(['id', 'createdAt']),
       }),
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -56,6 +56,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'POST',
     url: '/:id/contacts',
+    config: { possibleErrors: [NEED_NAME_DATA] },
     schema: {
       security: [
         {
@@ -70,7 +71,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         'phoneNumber',
       ]),
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -96,6 +97,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
   app.route({
     method: 'PUT',
+    config: { possibleErrors: [NEED_NAME_DATA] },
     url: '/:customerId/contacts/:contactId',
     schema: {
       security: [
@@ -104,8 +106,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        customerId: Type.Number(),
-        contactId: Type.Number(),
+        customerId: Type.Integer(),
+        contactId: Type.Integer(),
       }),
       body: Type.Pick(ContactSchema, [
         'position',
@@ -154,8 +156,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        customerId: Type.Number(),
-        contactId: Type.Number(),
+        customerId: Type.Integer(),
+        contactId: Type.Integer(),
       }),
     },
     async handler(req) {

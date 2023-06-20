@@ -1,7 +1,6 @@
 import AppDataSource from '$src/DataSource';
 import { User } from '$src/domains/user/models/User';
 import { ResponseShape } from '$src/infra/Response';
-import StringEnum from '$src/infra/utils/StringEnum';
 import {
   Filter,
   OrderBy,
@@ -10,7 +9,6 @@ import {
 } from '$src/infra/tables/PaginatedType';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
 import * as where from '$src/infra/tables/filter';
-import { Nullable } from '$src/infra/utils/Nullable';
 import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
@@ -25,7 +23,7 @@ import {
   INCOMPLETE_SORTING,
   INVALID_STATUS,
 } from '../errors';
-import { Quantity } from '../types';
+import { Nullable, Price, Quantity, StringEnum } from '$src/infra/TypeboxTypes';
 
 const sum = (array: number[]) => array.reduce((a, b) => a + b, 0);
 
@@ -84,7 +82,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:id',
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       security: [
         {
@@ -138,12 +136,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.post('/new', {
     schema: {
       body: Type.Object({
-        driverId: Type.Optional(Nullable(Type.Number())),
+        driverId: Type.Optional(Nullable(Type.Integer())),
         products: Type.Array(
           Type.Object({
-            productId: Type.Number(),
-            supplierId: Type.Number(),
-            price: Type.Number(),
+            productId: Type.Integer(),
+            supplierId: Type.Integer(),
+            price: Price(),
             quantity: Quantity(),
           }),
         ),
@@ -194,10 +192,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.post('/returned', {
     schema: {
       body: Type.Object({
-        driverId: Type.Optional(Type.Number()),
+        driverId: Type.Optional(Type.Integer()),
         products: Type.Array(
           Type.Object({
-            productId: Type.Number(),
+            productId: Type.Integer(),
             quantity: Quantity(),
           }),
         ),
@@ -249,7 +247,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:id',
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Partial(
         Type.Object({
@@ -278,7 +276,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:id',
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       security: [
         {
@@ -320,7 +318,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:id/images',
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       security: [
         {
@@ -347,7 +345,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:id/images',
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Object({
         fileId: Type.String(),
@@ -379,7 +377,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:id/confirm-delivery',
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -405,7 +403,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:id/confirm-load',
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -446,7 +444,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:id/confirm-sort',
     schema: {
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {

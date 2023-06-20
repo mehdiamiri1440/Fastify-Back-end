@@ -1,3 +1,6 @@
+import AppDataSource from '$src/DataSource';
+import { ProductService } from '$src/domains/product/ProductService';
+import { BIN_HAVE_PRODUCT } from '$src/domains/warehouse/errors';
 import { BinProperty } from '$src/domains/warehouse/models/BinProperty';
 import { BinSize } from '$src/domains/warehouse/models/BinSize';
 import { ResponseShape } from '$src/infra/Response';
@@ -8,28 +11,28 @@ import {
   Searchable,
 } from '$src/infra/tables/PaginatedType';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
+import * as where from '$src/infra/tables/filter';
 import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { Bin } from '../models/Bin';
 import { Warehouse } from '../models/Warehouse';
 import { BinSchema } from '../schemas/bin.schema';
-import { BinProduct } from '$src/domains/product/models/BinProduct';
-import { BIN_HAVE_PRODUCT } from '$src/domains/warehouse/errors';
-import { ProductService } from '$src/domains/product/ProductService';
-import AppDataSource from '$src/DataSource';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
-
   const Bins = repo(Bin);
   const Warehouses = repo(Warehouse);
   const BinSizes = repo(BinSize);
   const BinProperties = repo(BinProperty);
 
-  app.route({
-    method: 'GET',
-    url: '/',
+  const listRelations = {
+    size: true,
+    property: true,
+    warehouse: true,
+  } as const;
+
+  app.get('/bins', {
     schema: {
       security: [
         {
@@ -45,14 +48,44 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
+      return new TableQueryBuilder(Bins, req).relation(listRelations).exec();
+    },
+  });
+
+  app.get('/warehouses/:warehouseId/bins', {
+    schema: {
+      security: [
+        {
+          OAuth2: ['warehouse@bin::list'],
+        },
+      ],
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id', 'name', 'createdAt']),
+        filter: Filter({
+          name: Searchable(),
+        }),
+      }),
+      params: Type.Object({
+        warehouseId: Type.Integer(),
+      }),
+      tags: ['Warehouses', 'Bins'],
+    },
+    async handler(req) {
       return new TableQueryBuilder(Bins, req)
-        .relation({ size: true, property: true, warehouse: true })
+        .where(
+          where.merge([
+            where.from(req),
+            {
+              warehouse: { id: req.params.warehouseId },
+            },
+          ]),
+        )
+        .relation(listRelations)
         .exec();
     },
   });
-  app.route({
-    method: 'GET',
-    url: '/:id',
+
+  app.get('/bins/:id', {
     schema: {
       security: [
         {
@@ -60,7 +93,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -73,7 +106,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
   app.route({
     method: 'POST',
-    url: '/',
+    url: '/bins',
     schema: {
       security: [
         {
@@ -112,7 +145,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
   app.route({
     method: 'PUT',
-    url: '/:id',
+    url: '/bins/:id',
     schema: {
       security: [
         {
@@ -129,7 +162,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         'description',
       ]),
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {
@@ -156,7 +189,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   });
   app.route({
     method: 'DELETE',
-    url: '/:id',
+    url: '/bins/:id',
+    config: { possibleErrors: [BIN_HAVE_PRODUCT] },
     schema: {
       security: [
         {
@@ -164,7 +198,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
     },
     async handler(req) {

@@ -12,8 +12,7 @@ export class WarehouseService {
   async findWarehouseOfUser(userId: number) {
     const warehouse = await this.#warehouseRepo.findOne({
       select: {
-        id: true,
-        name: true,
+        warehouseStaffs: {},
       },
       relations: {
         warehouseStaffs: {

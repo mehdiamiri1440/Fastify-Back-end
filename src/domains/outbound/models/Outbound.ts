@@ -1,3 +1,4 @@
+import { QrCodeType } from '$src/domains/qrcode/utils';
 import { User } from '$src/domains/user/models/User';
 import { Warehouse } from '$src/domains/warehouse/models/Warehouse';
 import type { Relation } from 'typeorm';
@@ -12,7 +13,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { OutboundProduct } from './OutboundProduct';
-import { Customer } from '$src/domains/customer/models/Customer';
 
 export enum OutboundStatus {
   DRAFT = 'draft',
@@ -33,8 +33,12 @@ export class Outbound {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ nullable: true, type: 'varchar' })
-  code!: string | null;
+  @Column({
+    type: 'varchar',
+    generatedType: 'STORED',
+    asExpression: `('${QrCodeType.OUTBOUND}' || immutable_format_date(created_at) || LPAD((id % 10000)::text, 4, '0'))`,
+  })
+  code!: string;
 
   @Column({
     type: 'enum',

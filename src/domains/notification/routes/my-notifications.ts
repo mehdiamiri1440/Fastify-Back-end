@@ -10,7 +10,7 @@ import {
   Searchable,
 } from '$src/infra/tables/PaginatedType';
 import { Type } from '@sinclair/typebox';
-import StringEnum from '$src/infra/utils/StringEnum';
+import { StringEnum } from '$src/infra/TypeboxTypes';
 
 const UserNotifications = repo(UserNotification);
 
@@ -19,6 +19,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/',
     schema: {
+      description:
+        'with this api can get notifications related to that user getting this',
       security: [
         {
           OAuth2: [],
@@ -46,7 +48,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ],
       params: Type.Object({
-        id: Type.Number(),
+        id: Type.Integer(),
       }),
       body: Type.Object({ read: Type.Boolean() }),
     },
