@@ -87,8 +87,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         relations: {
           creator: true,
           driver: true,
+          warehouse: true,
         },
-        loadRelationIds: false,
       });
 
       return {

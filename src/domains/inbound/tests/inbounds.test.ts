@@ -202,6 +202,7 @@ describe('Get Inbound', () => {
   it('should get inbound by id', async () => {
     assert(app);
     assert(user);
+    assert(warehouse);
 
     const response = await user.inject({
       method: 'GET',
@@ -232,6 +233,9 @@ describe('Get Inbound', () => {
             createdAt: expect.any(String),
           },
         ],
+        warehouse: {
+          id: warehouse.id,
+        },
         creator: { id: 1, fullName: 'tester tester' },
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
