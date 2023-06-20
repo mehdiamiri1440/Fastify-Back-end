@@ -2,6 +2,7 @@ import { User } from '$src/domains/user/models/User';
 import { WarehouseStaffSchema } from '$src/domains/warehouse/schemas/warehouse-staff';
 import { Static, Type } from '@sinclair/typebox';
 import {
+  Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
@@ -12,6 +13,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Warehouse } from './Warehouse';
+import { StringEnum } from '$src/infra/TypeboxTypes';
+import { allDocumentTypes } from '$src/domains/customer/statics/documentTypes';
 
 const WarehouseStaffSchemaWithoutRelations = Type.Omit(WarehouseStaffSchema, [
   'user',
@@ -32,6 +35,9 @@ export class WarehouseStaff
 
   @ManyToOne(() => Warehouse, { nullable: false })
   warehouse!: Relation<Warehouse>;
+
+  @Column({ nullable: false, type: 'enum', enum: ['clerk', 'supervisor'] })
+  type!: 'clerk' | 'supervisor';
 
   @ManyToOne(() => User, { nullable: false })
   creator!: Relation<User>;

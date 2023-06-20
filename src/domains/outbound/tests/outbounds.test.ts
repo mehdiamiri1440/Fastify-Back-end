@@ -60,6 +60,7 @@ const createSampleWarehouse = async () => {
       description: 'description',
       user: user?.user,
       warehouse,
+      type: 'clerk',
       creator: {
         id: 1,
       },

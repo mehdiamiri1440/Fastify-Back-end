@@ -67,6 +67,7 @@ beforeEach(async () => {
       warehouse,
       user: { id: userId },
       creator: { id: 1 },
+      type: 'clerk',
     }); // this if for that in product cycle count we just want to cycle count that bins is in user's warehouse
     await repo(Bin).save([
       {

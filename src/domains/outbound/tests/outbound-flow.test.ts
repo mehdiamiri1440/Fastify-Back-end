@@ -92,6 +92,7 @@ beforeEach(async () => {
         id: 1,
       },
       warehouse,
+      type: 'clerk',
       creator: {
         id: 1,
       },

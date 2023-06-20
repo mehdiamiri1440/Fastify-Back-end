@@ -63,6 +63,7 @@ beforeAll(async () => {
       user: {
         id: 1,
       },
+      type: 'clerk',
       warehouse,
       creator: {
         id: 1,
