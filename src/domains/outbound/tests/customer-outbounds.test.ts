@@ -49,6 +49,7 @@ const createSampleWarehouse = async () => {
       creator: {
         id: 1,
       },
+      type: 'clerk',
     });
     return warehouse;
   });

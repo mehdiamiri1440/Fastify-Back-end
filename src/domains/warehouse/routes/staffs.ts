@@ -34,7 +34,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       return new TableQueryBuilder(WarehouseStaffs, req)
         .relation({ user: true, warehouse: true, creator: true })
-        .where({ warehouse: { id: req.params.id } })
+        .where({ warehouse: { id: req.params.id }, type: 'clerk' })
         .exec();
     },
   });
@@ -86,6 +86,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         user,
         warehouse,
         creator: { id: req.user.id },
+        type: 'clerk',
       });
     },
   });
@@ -108,6 +109,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const ws = await WarehouseStaffs.findOneByOrFail({
         warehouse: { id: req.params.wId },
         user: { id: req.params.uId },
+        type: 'clerk',
       });
       await WarehouseStaffs.softRemove(ws);
     },

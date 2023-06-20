@@ -127,6 +127,7 @@ const createSampleWarehouse = async (overrides?: DeepPartial<Warehouse>) => {
       id: user.id,
     },
     warehouse,
+    type: 'clerk',
     creator: {
       id: 1,
     },
