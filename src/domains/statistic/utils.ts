@@ -3,7 +3,7 @@ import { Customer } from '$src/domains/customer/models/Customer';
 import { Inbound } from '$src/domains/inbound/models/Inbound';
 import { Outbound } from '$src/domains/outbound/models/Outbound';
 import { Product } from '$src/domains/product/models/Product';
-import StringEnum from '$src/infra/utils/StringEnum';
+import { StringEnum } from '$src/infra/TypeboxTypes';
 import { Static } from '@sinclair/typebox';
 
 export const stringEntitySchema = StringEnum([

@@ -1,7 +1,7 @@
 import { Type } from '@sinclair/typebox';
 import { cycleCountTypes } from '$src/domains/cyclecount/statics/cycleCountTypes';
 import { cycleCountStates } from '$src/domains/cyclecount/statics/cycleCountStates';
-import StringEnum from '$src/infra/utils/StringEnum';
+import { StringEnum } from '$src/infra/TypeboxTypes';
 
 export const cycleCountType = StringEnum([...cycleCountTypes]);
 export const cycleCountState = StringEnum([...cycleCountStates]);

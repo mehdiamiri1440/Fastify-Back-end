@@ -9,7 +9,7 @@ import {
   Searchable,
 } from '$src/infra/tables/PaginatedType';
 import { Type } from '@sinclair/typebox';
-import StringEnum from '$src/infra/utils/StringEnum';
+import { StringEnum } from '$src/infra/TypeboxTypes';
 import { Notification } from '$src/domains/notification/models/Notification';
 import { notificationSchema } from '$src/domains/notification/schemas/notification.schema';
 import AppDataSource from '$src/DataSource';

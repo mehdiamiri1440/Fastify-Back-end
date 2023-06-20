@@ -167,7 +167,7 @@ describe('InboundProduct list', () => {
         supplier,
         product,
         inbound,
-        price: 100,
+        price: '100',
         requestedQuantity: 10,
         actualQuantity: 10,
       }),
@@ -175,7 +175,7 @@ describe('InboundProduct list', () => {
         supplier,
         product,
         inbound,
-        price: 200,
+        price: '200',
         requestedQuantity: 20,
         actualQuantity: 21,
       }),
@@ -239,7 +239,7 @@ describe('Update InboundProduct', () => {
       supplier,
       product,
       inbound,
-      price: 100,
+      price: '100',
       requestedQuantity: 10,
     });
 
@@ -247,7 +247,7 @@ describe('Update InboundProduct', () => {
       method: 'POST',
       url: `/${inboundProduct.id}/set-price`,
       payload: {
-        price: 200,
+        price: '9.99',
       },
     });
 
@@ -266,7 +266,7 @@ describe('Update InboundProduct', () => {
       withDeleted: true,
     });
     expect(entity?.deletedAt).toBeNull();
-    expect(entity?.price).toBe(200);
+    expect(entity?.price).toBe('9.99');
   });
 
   it('should set-actual-quantity when inbound state is LOAD', async () => {
@@ -288,7 +288,7 @@ describe('Update InboundProduct', () => {
       supplier,
       product,
       inbound,
-      price: 100,
+      price: '100',
       requestedQuantity: 10,
     });
 
@@ -329,7 +329,7 @@ describe('Update InboundProduct', () => {
       supplier,
       product,
       inbound,
-      price: 100,
+      price: '100',
       requestedQuantity: 10,
     });
 
@@ -373,7 +373,7 @@ describe('Delete InboundProduct', () => {
       supplier,
       product,
       inbound,
-      price: 100,
+      price: '9.99',
       requestedQuantity: 10,
     });
 
@@ -388,7 +388,7 @@ describe('Delete InboundProduct', () => {
     expect(body).toMatchObject({
       data: {
         id: inboundProduct.id,
-        price: 100,
+        price: '9.99',
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
       },
@@ -426,7 +426,7 @@ describe('Sorting', () => {
       supplier,
       product,
       inbound,
-      price: 100,
+      price: '100',
       requestedQuantity: 30,
       actualQuantity: 30,
     });

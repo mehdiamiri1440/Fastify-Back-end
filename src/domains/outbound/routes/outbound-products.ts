@@ -8,7 +8,7 @@ import { OutboundProductManager } from '../OutboundProduct.manager';
 import { OutboundStatus } from '../models/Outbound';
 import { OutboundProduct } from '../models/OutboundProduct';
 import { INVALID_STATUS } from '../errors';
-import { Quantity } from '../types';
+import { Quantity } from '$src/infra/TypeboxTypes';
 
 const outboundProductsRepo = repo(OutboundProduct);
 

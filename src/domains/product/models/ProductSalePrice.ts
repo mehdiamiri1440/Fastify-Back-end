@@ -19,8 +19,8 @@ export class ProductSalePrice {
   @ManyToOne(() => Product, (product) => product.salePrices)
   product!: Relation<Product>;
 
-  @Column()
-  price!: number;
+  @Column('decimal', { precision: 18, scale: 2, nullable: false })
+  price!: string;
 
   @ManyToOne(() => User)
   creator!: User;

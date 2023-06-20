@@ -25,7 +25,7 @@ import { InboundStatus } from '../models/Inbound';
 import { InboundProduct } from '../models/InboundProduct';
 import { InboundProductSort } from '../models/InboundProductSort';
 import { loadUserWarehouse } from '../utils';
-import { Quantity } from '../types';
+import { Price, Quantity } from '$src/infra/TypeboxTypes';
 
 const sum = (array: number[]) => array.reduce((a, b) => a + b, 0);
 
@@ -161,7 +161,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         id: Type.Integer(),
       }),
       body: Type.Object({
-        price: Type.Optional(Type.Number()),
+        price: Type.Optional(Price()),
       }),
       security: [
         {
