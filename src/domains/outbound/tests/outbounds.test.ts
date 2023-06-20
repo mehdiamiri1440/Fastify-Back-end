@@ -192,6 +192,9 @@ describe('Get Outbound', () => {
         creator: { id: 1, fullName: 'tester tester' },
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
+        warehouse: {
+          id: warehouse.id,
+        },
       },
     });
   });

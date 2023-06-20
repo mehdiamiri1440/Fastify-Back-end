@@ -76,10 +76,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // GET /{id}
-  app.route({
-    method: 'GET',
-    url: '/:id',
+  app.get('/:id', {
     schema: {
       params: Type.Object({
         id: Type.Integer(),
@@ -126,6 +123,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             product: true,
             supplier: true,
           },
+          warehouse: true,
         },
         loadRelationIds: false,
       });
