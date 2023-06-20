@@ -386,6 +386,20 @@ it('warehouse flow', async () => {
 
     expect(response).statusCodeToBe(200);
   }
+  const staffUserData = {
+    ...userData,
+    firstName: 'available',
+    lastName: 'user',
+    email: 'available@us.er',
+    phoneNumber: '25341235234',
+  };
+  const staffUser = await repo(User).save(
+    structuredClone({
+      ...staffUserData,
+      role: await repo(Role).save({ title: 'avuserrole', isActive: true }),
+    }),
+  );
+
   {
     // check that our user is available for staff
     const response = await user.inject({
@@ -393,7 +407,7 @@ it('warehouse flow', async () => {
       url: `/warehouses/${warehouseId}/staffs/available`,
     });
     expect(response.json().data).toMatchObject(
-      expect.arrayContaining([expect.objectContaining(userData)]),
+      expect.arrayContaining([expect.objectContaining(staffUserData)]),
     );
   }
   {
@@ -402,12 +416,12 @@ it('warehouse flow', async () => {
       method: 'POST',
       url: `/warehouses/${warehouseId}/staffs`,
       payload: {
-        user: userId,
+        user: staffUser.id,
       },
     });
     expect(response.json()).toMatchObject({
       data: {
-        user: { ...userData },
+        user: { ...staffUserData },
         warehouse: { ...warehouseData, name: 'edited' },
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
@@ -423,7 +437,7 @@ it('warehouse flow', async () => {
       method: 'POST',
       url: `/warehouses/${warehouseId}/staffs`,
       payload: {
-        user: userId,
+        user: staffUser.id,
       },
     });
     expect(response.statusCode).not.toBe(200);
@@ -447,7 +461,7 @@ it('warehouse flow', async () => {
     expect(response.json().data).toMatchObject([
       {
         id: staffId,
-        user: { ...userData },
+        user: { ...staffUserData },
         warehouse: { ...warehouseData, name: 'edited' },
         creator: {},
         createdAt: expect.any(String),
@@ -457,10 +471,10 @@ it('warehouse flow', async () => {
     ]);
   }
   {
-    // should delete a bin
+    // should delete staff of warehouse
     const response = await user.inject({
       method: 'DELETE',
-      url: `/warehouses/${warehouseId}/staffs/${userId}`,
+      url: `/warehouses/${warehouseId}/staffs/${staffUser.id}`,
     });
 
     expect(response).statusCodeToBe(200);
@@ -550,6 +564,7 @@ it('GET /my-warehouse should be working', async () => {
       id: user.id,
     },
     warehouse,
+    type: 'clerk',
     creator: {
       id: 1,
     },
