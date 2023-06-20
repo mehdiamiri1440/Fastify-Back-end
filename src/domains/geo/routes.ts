@@ -28,6 +28,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         filter: Filter({
           code: Searchable(),
           name: Searchable(),
+          formattedName: Searchable(),
         }),
       }),
     },
@@ -48,6 +49,16 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
       if (typeof filter?.name === 'object' && '$like' in filter.name) {
         filters.push({ key: 'name', value: filter.name.$like });
+      }
+
+      if (
+        typeof filter?.formattedName === 'object' &&
+        '$like' in filter.formattedName
+      ) {
+        filters.push({
+          key: 'formated_name',
+          value: filter.formattedName.$like,
+        });
       }
 
       const filterHub = getLikeFilter(filters);
@@ -71,6 +82,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         filter: Filter({
           code: Searchable(),
           name: Searchable(),
+          formattedName: Searchable(),
           provinceCode: Searchable(),
         }),
       }),
@@ -92,6 +104,16 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
       if (typeof filter?.name === 'object' && '$like' in filter.name) {
         filters.push({ key: 'name', value: filter.name.$like });
+      }
+
+      if (
+        typeof filter?.formattedName === 'object' &&
+        '$like' in filter.formattedName
+      ) {
+        filters.push({
+          key: 'formated_name',
+          value: filter.formattedName.$like,
+        });
       }
 
       if (
@@ -125,6 +147,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         filter: Filter({
           code: Searchable(),
           name: Searchable(),
+          formattedName: Searchable(),
           cityCode: Searchable(),
         }),
       }),
@@ -147,6 +170,16 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
       if (typeof filter?.name === 'object' && '$like' in filter.name) {
         filters.push({ key: 'name', value: filter.name.$like });
+      }
+
+      if (
+        typeof filter?.formattedName === 'object' &&
+        '$like' in filter.formattedName
+      ) {
+        filters.push({
+          key: 'formated_name',
+          value: filter.formattedName.$like,
+        });
       }
 
       if (typeof filter?.cityCode === 'object' && 'like' in filter.cityCode) {
@@ -206,6 +239,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         filter: Filter({
           code: Searchable(),
           name: Searchable(),
+          formattedName: Searchable(),
           number: Searchable(),
           streetCode: Searchable(),
         }),
@@ -229,6 +263,16 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
       if (typeof filter?.name === 'object' && '$like' in filter.name) {
         filters.push({ key: 'name', value: filter.name.$like });
+      }
+
+      if (
+        typeof filter?.formattedName === 'object' &&
+        '$like' in filter.formattedName
+      ) {
+        filters.push({
+          key: 'formated_name',
+          value: filter.formattedName.$like,
+        });
       }
 
       if (
