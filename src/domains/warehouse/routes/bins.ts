@@ -45,7 +45,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           name: Searchable(),
           physicalCode: Searchable(),
           internalCode: Searchable(),
-          warehouse: Type.Object({ id: Type.Integer(), name: Searchable() }),
+          warehouse: Type.Partial(
+            Type.Object({ id: Type.Integer(), name: Searchable() }),
+          ),
           property: Type.Object({ title: Searchable() }),
           size: Type.Object({ title: Searchable() }),
         }),
