@@ -1,4 +1,5 @@
 import { BrandSchema } from '$src/domains/configuration/schemas/brand.schema';
+import { File } from '$src/domains/files/models/File';
 import { User } from '$src/domains/user/models/User';
 import { Static, Type } from '@sinclair/typebox';
 import {
@@ -12,15 +13,18 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-const BrandSchemaWithoutRelations = Type.Omit(BrandSchema, ['creator']);
+const BrandSchemaWithoutRelations = Type.Omit(BrandSchema, [
+  'creator',
+  'logoId',
+]);
 
 @Entity()
 export class Brand implements Static<typeof BrandSchemaWithoutRelations> {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'varchar', nullable: true })
-  logoFileId!: string | null;
+  @ManyToOne(() => File, { nullable: true })
+  logo!: File | null;
 
   @Column({ nullable: false, unique: true })
   name!: string;
