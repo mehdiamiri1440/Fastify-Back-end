@@ -25,6 +25,7 @@
   "license": "ISC",
   "dependencies": {
     "@danielsoheil/csv-parse-typebox": "^0.2.13",
+    "@danielsoheil/typeorm-better-factory": "^1.2.1",
     "@erfanium/fetch-typebox": "^0.2.2",
     "@faker-js/faker": "^8.0.2",
     "@fastify/cors": "^8.2.1",

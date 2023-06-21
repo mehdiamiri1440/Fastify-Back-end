@@ -11,12 +11,12 @@ import { Notification } from '$src/domains/notification/models/Notification';
 import { UserNotification } from '$src/domains/notification/models/UserNotification';
 import { User } from '$src/domains/user/models/User';
 import { Role } from '$src/domains/user/models/Role';
-import { NormalUserFactory } from '$src/domains/user/factories/user.factory';
+import { UserFactory } from '$src/domains/user/factories/user.factory';
 import '$src/infra/test/statusCodeExpect';
 
-let userFactory: NormalUserFactory | undefined;
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
+let userFactory: UserFactory | undefined;
 
 beforeEach(async () => {
   app = await createTestFastifyApp();
@@ -24,7 +24,7 @@ beforeEach(async () => {
   await app.register(routes);
   await app.ready();
   user = await TestUser.create(app);
-  userFactory = new NormalUserFactory(AppDataSource);
+  userFactory = new UserFactory(AppDataSource);
 });
 
 afterEach(async () => {
