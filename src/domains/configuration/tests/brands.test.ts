@@ -6,6 +6,8 @@ import assert from 'assert';
 import { FastifyInstance } from 'fastify';
 import routes from '../routes/brands';
 import '$src/infra/test/statusCodeExpect';
+import { File } from '$src/domains/files/models/File';
+import { repo } from '$src/infra/utils/repo';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -30,15 +32,27 @@ it('should create/get/update a brand', async () => {
 
   {
     // create
+
+    await repo(File).save({
+      id: 'file.jpg',
+      bucketName: 'bucketName',
+      mimetype: 'text/plain',
+      originalName: 'original.txt',
+      size: 100,
+    });
+
     const response = await user.inject({
       method: 'POST',
       url: '/',
-      payload: { name: 'test', logoFileId: 'file.jpg' },
+      payload: { name: 'test', logoId: 'file.jpg' },
     });
     expect(response.json()).toMatchObject({
       data: {
         name: 'test',
-        logoFileId: 'file.jpg',
+        logo: {
+          id: 'file.jpg',
+          bucketName: 'bucketName',
+        },
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         deletedAt: null,
@@ -53,25 +67,26 @@ it('should create/get/update a brand', async () => {
       method: 'GET',
       url: '/',
     });
-    expect(response.json().data).toMatchObject(
-      expect.arrayContaining([
-        expect.objectContaining({
-          id: brandId,
-          name: 'test',
-          logoFileId: 'file.jpg',
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
-          deletedAt: null,
-        }),
-      ]),
-    );
+    expect(response.json().data).toMatchObject([
+      {
+        id: brandId,
+        name: 'test',
+        logo: {
+          id: 'file.jpg',
+          bucketName: 'bucketName',
+        },
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        deletedAt: null,
+      },
+    ]);
   }
   {
     // update
     const response = await user.inject({
       method: 'PUT',
       url: '/' + brandId,
-      payload: { name: 'edit', logoFileId: 'file.jpg' },
+      payload: { name: 'edit', fileId: 'file.jpg' },
     });
 
     expect(response).statusCodeToBe(200);
