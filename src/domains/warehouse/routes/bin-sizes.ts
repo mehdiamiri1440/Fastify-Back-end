@@ -29,6 +29,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         orderBy: OrderBy(['id', 'createdAt', 'title']),
         filter: Filter({
           title: Searchable(),
+          width: Type.Number(),
+          height: Type.Number(),
+          depth: Type.Number(),
         }),
       }),
     },

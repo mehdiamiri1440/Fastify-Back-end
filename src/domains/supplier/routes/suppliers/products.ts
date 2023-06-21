@@ -4,7 +4,15 @@ import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { ProductSupplier } from '$src/domains/product/models/ProductSupplier';
+import * as where from '$src/infra/tables/filter';
 import { Supplier } from '$src/domains/supplier/models/Supplier';
+import {
+  Filter,
+  OrderBy,
+  PaginatedQueryString,
+  Searchable,
+} from '$src/infra/tables/PaginatedType';
+import { TableQueryBuilder } from '$src/infra/tables/Table';
 
 const ProductSuppliers = repo(ProductSupplier);
 const Suppliers = repo(Supplier);
@@ -18,6 +26,18 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'GET',
     url: '/:id/products',
     schema: {
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id', 'name', 'createdAt']),
+        filter: Filter({
+          product: Type.Partial(
+            Type.Object({
+              id: Type.Integer(),
+              name: Searchable(),
+              code: Searchable(),
+            }),
+          ),
+        }),
+      }),
       params: Type.Object({
         id: Type.Integer(),
       }),
@@ -30,14 +50,15 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     async handler(req) {
       const { id } = await Suppliers.findOneByOrFail({ id: req.params.id });
 
-      return ProductSuppliers.find({
-        where: {
-          supplier: { id },
-        },
-        relations: {
+      return new TableQueryBuilder(ProductSuppliers, req)
+        .relation({
           product: true,
-        },
-      });
+        })
+        .where({
+          ...where.from(req),
+          supplier: { id },
+        })
+        .exec();
     },
   });
 
