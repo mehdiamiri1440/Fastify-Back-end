@@ -31,7 +31,6 @@ import {
 import { DeepPartial } from 'typeorm';
 import '$src/infra/test/statusCodeExpect';
 import { Category } from '$src/domains/configuration/models/Category';
-import '$src/infra/test/statusCodeExpect';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -44,8 +43,23 @@ beforeEach(async () => {
   await app.ready();
   user = await TestUser.create(app);
 
-  await withoutForeignKeyCheck(async () => {
-    warehouse = await repo(Warehouse).save({
+  warehouse = await createSampleWarehouse();
+});
+
+afterEach(async () => {
+  await app?.close();
+});
+
+export function getCode(type: string, id: number) {
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const counter = (id % 10000).toString().padStart(4, '0');
+  return `${type}${date}${counter}`;
+}
+
+const createSampleWarehouse = async () => {
+  assert(user);
+  const { warehouse } = await withoutForeignKeyCheck(async () => {
+    const warehouse = await repo(Warehouse).save({
       name: 'warehouse test',
       description: 'description',
       addressProvinceCode: 'P43',
@@ -61,18 +75,12 @@ beforeEach(async () => {
         id: 1,
       },
     });
+
+    return { warehouse };
   });
-});
 
-afterEach(async () => {
-  await app?.close();
-});
-
-export function getCode(type: string, id: number) {
-  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const counter = (id % 10000).toString().padStart(4, '0');
-  return `${type}${date}${counter}`;
-}
+  return warehouse;
+};
 
 const createSampleProduct = async (overrides?: DeepPartial<Product>) =>
   await withoutForeignKeyCheck(
@@ -1039,5 +1047,76 @@ describe('Sale Price', () => {
         createdAt: expect.any(String),
       },
     ]);
+  });
+});
+
+describe('Quantity', () => {
+  it('GET /warehouses/:warehouseId/products/:productId/quantity should be working', async () => {
+    assert(user);
+    const product = await createSampleProduct();
+
+    const warehouseA = await createSampleWarehouse();
+    const warehouseB = await createSampleWarehouse();
+
+    await withoutForeignKeyCheck(async () => {
+      const binA = await repo(Bin).save({
+        name: 'abin1',
+        warehouse: warehouseA,
+        internalCode: 'ahey1',
+        size: { id: 1 },
+        property: { id: 1 },
+        creator: { id: 1 },
+      });
+
+      const binB = await repo(Bin).save({
+        name: 'bin2',
+        warehouse: warehouseA,
+        internalCode: 'hey2',
+        size: { id: 1 },
+        property: { id: 1 },
+        creator: { id: 1 },
+      });
+
+      await repo(BinProduct).save({
+        bin: binA,
+        product,
+        quantity: 10,
+        creator: { id: 1 },
+      });
+
+      await repo(BinProduct).save({
+        bin: binB,
+        product,
+        quantity: 30,
+        creator: { id: 1 },
+      });
+
+      const binC = await repo(Bin).save({
+        name: 'bin3',
+        warehouse: warehouseB,
+        internalCode: 'hey3',
+        size: { id: 1 },
+        property: { id: 1 },
+        creator: { id: 1 },
+      });
+
+      await repo(BinProduct).save({
+        bin: binC,
+        product,
+        quantity: 50,
+        creator: { id: 1 },
+      });
+    });
+
+    const response = await user.inject({
+      method: 'GET',
+      url: `/warehouses/${warehouseA.id}/products/${product.id}/quantity`,
+    });
+
+    expect(response).statusCodeToBe(200);
+
+    expect(response.json().data).toMatchObject({
+      quantity: 40,
+    });
   });
 });

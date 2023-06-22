@@ -35,3 +35,9 @@ export const BIN_FROM_ANOTHER_WAREHOUSE = createError(
   'The selected bin is not in your warehouse',
   400,
 );
+
+export const DUPLICATED_PRODUCT_ID = createError(
+  'DUPLICATED_PRODUCT_ID',
+  'you can not submit the same product twice',
+  400,
+);

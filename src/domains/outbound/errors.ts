@@ -16,3 +16,9 @@ export const NOT_IN_WAREHOUSE = createError(
   'You are not a warehouse staff',
   403,
 );
+
+export const DUPLICATED_PRODUCT_ID = createError(
+  'DUPLICATED_PRODUCT_ID',
+  'you can not submit the same product twice',
+  400,
+);

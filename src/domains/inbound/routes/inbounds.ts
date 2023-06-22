@@ -19,6 +19,7 @@ import { InboundProduct } from '../models/InboundProduct';
 import { InboundService } from '../services/Inbound.service';
 import { loadUserWarehouse } from '../utils';
 import {
+  DUPLICATED_PRODUCT_ID,
   INCOMPLETE_LOADING,
   INCOMPLETE_SORTING,
   INVALID_STATUS,
@@ -142,6 +143,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             price: Price(),
             quantity: Quantity(),
           }),
+          {
+            minItems: 1,
+          },
         ),
       }),
       security: [
@@ -151,8 +155,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ],
     },
     handler: async (req) => {
+      const { user, body } = req;
+      assertProductIdUniqueness(body.products);
+
       const inbound = await AppDataSource.transaction(async (manager) => {
-        const { user, body } = req;
         const inboundService = new InboundService(manager, user.id);
 
         const warehouse = await loadUserWarehouse(user.id);
@@ -196,6 +202,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             productId: Type.Integer(),
             quantity: Quantity(),
           }),
+          {
+            minItems: 1,
+          },
         ),
       }),
       security: [
@@ -206,6 +215,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     handler: async (req) => {
       const { user, body } = req;
+      assertProductIdUniqueness(body.products);
 
       const inbound = await AppDataSource.transaction(async (manager) => {
         const inboundService = new InboundService(manager, user.id);
@@ -479,5 +489,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 };
+
+function assertProductIdUniqueness(body: { productId: number }[]) {
+  const ids = body.map((b) => b.productId);
+  if (new Set(ids).size !== ids.length) {
+    throw new DUPLICATED_PRODUCT_ID();
+  }
+}
 
 export default plugin;
