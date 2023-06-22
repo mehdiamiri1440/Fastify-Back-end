@@ -3,6 +3,7 @@ import {
   Filter,
   OrderBy,
   PaginatedQueryString,
+  Range,
   Searchable,
 } from '$src/infra/tables/PaginatedType';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
@@ -80,6 +81,14 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           bin: Type.Object({
             name: Searchable(),
           }),
+          product: Type.Object({
+            name: Searchable(),
+          }),
+          creator: Type.Object({
+            fullName: Searchable(),
+          }),
+          createdAt: Range(Type.String({ format: 'date-time' })),
+          quantity: Type.Integer(),
         }),
       }),
       security: [
