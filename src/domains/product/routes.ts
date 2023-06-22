@@ -11,6 +11,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   await app.register(import('./routes/sizes'));
   await app.register(import('./routes/inbounds'));
   await app.register(import('./routes/content'));
+  await app.register(import('./routes/quantity'));
 };
 
 export default plugin;

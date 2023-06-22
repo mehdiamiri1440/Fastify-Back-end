@@ -7,6 +7,7 @@ import {
   Filter,
   OrderBy,
   PaginatedQueryString,
+  Range,
   Searchable,
 } from '$src/infra/tables/PaginatedType';
 import { TableQueryBuilder } from '$src/infra/tables/Table';
@@ -15,7 +16,7 @@ import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { loadReceiver, validateReceiver } from '../Receiver';
-import { INVALID_STATUS } from '../errors';
+import { DUPLICATED_PRODUCT_ID, INVALID_STATUS } from '../errors';
 import { Outbound, OutboundStatus, ReceiverType } from '../models/Outbound';
 import { OutboundProduct } from '../models/OutboundProduct';
 import { OutboundService } from '../services/outbound.service';
@@ -38,6 +39,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           creator: Type.Object({
             fullName: Searchable(),
           }),
+          createdAt: Range(Type.String({ format: 'date-time' })),
         }),
       }),
       security: [
@@ -168,12 +170,17 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             productId: Type.Integer(),
             quantity: Quantity(),
           }),
+          {
+            minItems: 1,
+          },
         ),
       }),
     },
 
     handler: async (request) => {
       const { body, user } = request;
+      assertProductIdUniqueness(body.products);
+
       const warehouse = await loadUserWarehouse(user.id);
 
       const outbound = await AppDataSource.transaction(async (manager) => {
@@ -423,5 +430,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 };
+
+function assertProductIdUniqueness(body: { productId: number }[]) {
+  const ids = body.map((b) => b.productId);
+  if (new Set(ids).size !== ids.length) {
+    throw new DUPLICATED_PRODUCT_ID();
+  }
+}
 
 export default plugin;
