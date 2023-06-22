@@ -15,9 +15,12 @@ import * as util from 'util';
 import { FastifyJWT } from '@fastify/jwt';
 import { RefreshTokenPayload } from '$src/infra/authorization';
 import '$src/infra/test/statusCodeExpect';
+import { RoleFactory } from '$src/domains/user/factories/role.factory';
+import { RolePermission } from '$src/domains/user/models/RolePermission';
 
 let app: FastifyInstance | undefined;
 let user: TestUser;
+let roleFactory: RoleFactory | undefined;
 
 const userData = {
   firstName: 'Daniel',
@@ -40,6 +43,7 @@ beforeAll(async () => {
   await app.register(routes);
   await app.ready();
   user = await TestUser.create(app);
+  roleFactory = new RoleFactory(AppDataSource);
 });
 
 afterAll(async () => {
@@ -645,4 +649,28 @@ it('should not get access_token with random refresh_token or random user/pass', 
 
     expect(response).not.statusCodeToBe(200);
   }
+});
+
+it('should update permissions of role', async () => {
+  assert(roleFactory);
+  const role = await roleFactory.create();
+  const response = await user.inject({
+    method: 'PUT',
+    url: `/roles/${role.id}/permissions`,
+    payload: {
+      permissions: ['user@user::create', 'user@user::list'],
+    },
+  });
+
+  expect(response).statusCodeToBe(200);
+  expect(
+    await repo(RolePermission).find({ where: { role: { id: role.id } } }),
+  ).toMatchObject([
+    {
+      permission: 'user@user::create',
+    },
+    {
+      permission: 'user@user::list',
+    },
+  ]);
 });

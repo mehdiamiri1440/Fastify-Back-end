@@ -288,3 +288,69 @@ it('should get csv template for product', async () => {
     'name,barcode,invoiceSystemCode,description,weight,content',
   );
 });
+
+it('should not parse suppliers data', async () => {
+  assert(app);
+  assert(user);
+  assert(minio, 'Storage is not enable. missing env');
+
+  await repo(Language).save({ id: 1, title: 'en' });
+  await minio.putObject(
+    'importer',
+    'invalid_suppliers.csv',
+    createReadStream(join(__dirname, `./test_invalid_data/suppliers.csv`)),
+  );
+
+  const response = await user.inject({
+    method: 'POST',
+    url: '/importer/suppliers/check',
+    payload: { fileId: 'invalid_suppliers.csv' },
+  });
+
+  expect(response).statusCodeToBe(400);
+  expect(response).errorCodeToBe('NOT_VALID');
+});
+
+it('should not parse products data', async () => {
+  assert(app);
+  assert(user);
+  assert(minio, 'Storage is not enable. missing env');
+
+  await repo(Language).save({ id: 1, title: 'en' });
+  await minio.putObject(
+    'importer',
+    'invalid_products.csv',
+    createReadStream(join(__dirname, `./test_invalid_data/products.csv`)),
+  );
+
+  const response = await user.inject({
+    method: 'POST',
+    url: '/importer/products/check',
+    payload: { fileId: 'invalid_products.csv' },
+  });
+
+  expect(response).statusCodeToBe(400);
+  expect(response).errorCodeToBe('NOT_VALID');
+});
+
+it('should not parse customers data', async () => {
+  assert(app);
+  assert(user);
+  assert(minio, 'Storage is not enable. missing env');
+
+  await repo(Language).save({ id: 1, title: 'en' });
+  await minio.putObject(
+    'importer',
+    'invalid_customers.csv',
+    createReadStream(join(__dirname, `./test_invalid_data/customers.csv`)),
+  );
+
+  const response = await user.inject({
+    method: 'POST',
+    url: '/importer/customers/check',
+    payload: { fileId: 'invalid_customers.csv' },
+  });
+
+  expect(response).statusCodeToBe(400);
+  expect(response).errorCodeToBe('NOT_VALID');
+});
