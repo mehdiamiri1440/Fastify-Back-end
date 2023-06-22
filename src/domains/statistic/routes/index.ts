@@ -76,7 +76,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
               return offsQuery
                 .subQuery()
                 .select(
-                  `generate_series(1, (:end ::date - :start ::date))`,
+                  `generate_series(0, (:end ::date - :start ::date) - 1)`,
                   'offs',
                 )
                 .fromDummy();
