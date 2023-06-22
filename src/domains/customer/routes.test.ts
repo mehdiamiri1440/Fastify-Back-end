@@ -466,3 +466,29 @@ it('should deactive customer', async () => {
   const newCustomer = await repo(Customer).findOneByOrFail({ id });
   expect(newCustomer.isActive).toBe(false);
 });
+
+it('should get subscriber types', async () => {
+  assert(user);
+  const response = await user.inject({
+    method: 'GET',
+    url: '/subscriber-types',
+  });
+  expect(response).statusCodeToBe(200);
+  expect(response.json()).toMatchObject({
+    data: expect.arrayContaining([expect.any(String)]),
+    meta: {},
+  });
+});
+
+it('should get document types', async () => {
+  assert(user);
+  const response = await user.inject({
+    method: 'GET',
+    url: '/document-types',
+  });
+  expect(response).statusCodeToBe(200);
+  expect(response.json()).toMatchObject({
+    data: expect.arrayContaining([expect.any(String)]),
+    meta: {},
+  });
+});
