@@ -29,10 +29,6 @@ export class RoleService {
     const { id } = await this.roleRepo.findOneByOrFail({ id: roleId });
     await this.roleRepo.update({ id }, newRole);
   }
-  async updateActivityRole(roleId: number, isActive: boolean) {
-    const { id } = await this.roleRepo.findOneByOrFail({ id: roleId });
-    await this.roleRepo.update({ id }, { isActive });
-  }
   async updatePermissionsOfRole(roleId: number, permissions: string[]) {
     // create list that new permissions assigned to role
     const newRolePermissions: DeepPartial<RolePermission>[] = [];
