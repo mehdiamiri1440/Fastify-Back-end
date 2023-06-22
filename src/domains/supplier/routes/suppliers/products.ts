@@ -29,6 +29,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       querystring: PaginatedQueryString({
         orderBy: OrderBy(['id', 'name', 'createdAt']),
         filter: Filter({
+          referenceCode: Searchable(),
           product: Type.Partial(
             Type.Object({
               id: Type.Integer(),
