@@ -10,10 +10,15 @@ import {
   getLoginAndActiveUserByRefreshToken,
   getActiveUserByEmailAndPassword,
 } from '$src/domains/user/utils';
+import Docs from '$src/infra/docs';
+import { join } from 'node:path';
 
 const Users = repo(User);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
+  await app.register(Docs, {
+    path: join(__dirname, './docs.md'),
+  });
   app.route({
     method: 'POST',
     url: '/token',
