@@ -18,6 +18,9 @@ import { Product } from '$src/domains/product/models/Product';
 import { BIN_HAVE_PRODUCT } from '$src/domains/warehouse/errors';
 import { Warehouse } from './models/Warehouse';
 import { WarehouseStaff } from './models/WarehouseStaff';
+import { WarehouseFactory } from '$src/domains/warehouse/factories/warehouse.factory';
+import qs from 'qs';
+import { BinFactory } from '$src/domains/warehouse/factories/bin.factory';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -580,4 +583,111 @@ it('GET /my-warehouse should be working', async () => {
     id: warehouse.id,
     name: warehouse.name,
   });
+});
+
+it('should get warehouses and filter warehouses by street name', async () => {
+  assert(user);
+  const warehouseOne = await new WarehouseFactory(AppDataSource).create();
+  const warehouseTwo = await new WarehouseFactory(AppDataSource).create();
+  {
+    const url =
+      '/warehouses?' +
+      new URLSearchParams(
+        qs.stringify({
+          filter: {
+            streetName: { $like: `%${warehouseOne.address.streetName}%` },
+          },
+        }),
+      );
+    const response = await user.inject({
+      method: 'GET',
+      url,
+    });
+    expect(response).statusCodeToBe(200);
+    const data = response.json().data;
+    expect(data).toMatchObject(
+      expect.arrayContaining([
+        expect.objectContaining({ id: warehouseOne.id }),
+      ]),
+    );
+    expect(data).not.toMatchObject(
+      expect.arrayContaining([
+        expect.objectContaining({ id: warehouseTwo.id }),
+      ]),
+    );
+  }
+  {
+    const url =
+      '/warehouses?' +
+      new URLSearchParams(
+        qs.stringify({
+          filter: {
+            streetName: { $like: `%${warehouseTwo.address.streetName}%` },
+          },
+        }),
+      );
+    const response = await user.inject({
+      method: 'GET',
+      url,
+    });
+    expect(response).statusCodeToBe(200);
+    const data = response.json().data;
+    expect(data).toMatchObject(
+      expect.arrayContaining([
+        expect.objectContaining({ id: warehouseTwo.id }),
+      ]),
+    );
+    expect(data).not.toMatchObject(
+      expect.arrayContaining([
+        expect.objectContaining({ id: warehouseOne.id }),
+      ]),
+    );
+  }
+});
+it('should get bins inside warehouse', async () => {
+  assert(user);
+  const warehouseOne = await new WarehouseFactory(AppDataSource).create();
+  const warehouseTwo = await new WarehouseFactory(AppDataSource).create();
+  const binInWarehouseOne = await new BinFactory(AppDataSource).create({
+    warehouse: warehouseOne,
+  });
+  const binInWarehouseTwo = await new BinFactory(AppDataSource).create({
+    warehouse: warehouseTwo,
+  });
+  {
+    const response = await user.inject({
+      method: 'GET',
+      url: `/warehouses/${warehouseOne.id}/bins`,
+    });
+    expect(response).statusCodeToBe(200);
+    const data = response.json().data;
+    expect(data).toMatchObject(
+      expect.arrayContaining([
+        expect.objectContaining({ id: binInWarehouseOne.id }),
+      ]),
+    );
+    expect(data).not.toMatchObject(
+      expect.arrayContaining([
+        expect.objectContaining({ id: binInWarehouseTwo.id }),
+      ]),
+    );
+  }
+  {
+    const response = await user.inject({
+      method: 'GET',
+      url: `/warehouses/${binInWarehouseTwo.id}/bins`,
+    });
+    expect(response).statusCodeToBe(200);
+    const data = response.json().data;
+    expect(data).toMatchObject(
+      expect.arrayContaining([
+        expect.objectContaining({ id: binInWarehouseTwo.id }),
+      ]),
+    );
+    expect(data).not.toMatchObject(
+      expect.arrayContaining([
+        expect.objectContaining({ id: binInWarehouseOne.id }),
+      ]),
+    );
+  }
 });
