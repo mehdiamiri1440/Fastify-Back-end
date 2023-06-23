@@ -132,22 +132,32 @@ describe('Upload, download', () => {
   });
 
   it('GET /:filename', async () => {
+    {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/test.txt`,
+      });
+
+      expect(response).statusCodeToBe(404);
+      expect(response).errorCodeToBe('FILE_NOT_FOUND');
+    }
     await minio.putObject(
       bucketName,
       'test.txt',
       createReadStream(join(__dirname, `./test_data/test.txt`)),
     );
+    {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/test.txt`,
+      });
 
-    const response = await app.inject({
-      method: 'GET',
-      url: `/test.txt`,
-    });
-
-    expect(response).statusCodeToBe(200);
-    expect(response.headers['content-disposition']).toBe(
-      `attachment; filename="test.txt"`,
-    );
-    expect(response.body).toBe('hety');
+      expect(response).statusCodeToBe(200);
+      expect(response.headers['content-disposition']).toBe(
+        `attachment; filename="test.txt"`,
+      );
+      expect(response.body).toBe('hety');
+    }
   });
 });
 
