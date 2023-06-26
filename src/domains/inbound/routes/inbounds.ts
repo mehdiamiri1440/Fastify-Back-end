@@ -1,6 +1,7 @@
 import AppDataSource from '$src/DataSource';
 import { User } from '$src/domains/user/models/User';
 import { ResponseShape } from '$src/infra/Response';
+import { Nullable, Price, Quantity, StringEnum } from '$src/infra/TypeboxTypes';
 import {
   Filter,
   OrderBy,
@@ -13,21 +14,24 @@ import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { IsNull } from 'typeorm';
+import {
+  DUPLICATED_PRODUCT_ID,
+  INCOMPLETE_LOADING,
+  INVALID_STATUS,
+} from '../errors';
 import { Inbound, InboundStatus, InboundType } from '../models/Inbound';
 import { InboundImage } from '../models/InboundImage';
 import { InboundProduct } from '../models/InboundProduct';
 import { InboundService } from '../services/Inbound.service';
 import { loadUserWarehouse } from '../utils';
-import {
-  DUPLICATED_PRODUCT_ID,
-  INCOMPLETE_LOADING,
-  INCOMPLETE_SORTING,
-  INVALID_STATUS,
-} from '../errors';
-import { Nullable, Price, Quantity, StringEnum } from '$src/infra/TypeboxTypes';
 
-const sum = (array: number[]) => array.reduce((a, b) => a + b, 0);
+const deletableStates: InboundStatus[] = [
+  InboundStatus.PRE_DELIVERY,
+  InboundStatus.LOAD,
+  InboundStatus.SORTING,
+];
 
+const listFmt = new Intl.ListFormat();
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
 
@@ -278,10 +282,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
   });
 
-  // DELETE /{id}
-  app.route({
-    method: 'DELETE',
-    url: '/:id',
+  app.delete('/:id', {
     schema: {
       params: Type.Object({
         id: Type.Integer(),
@@ -304,8 +305,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       });
 
-      if (inbound.status !== InboundStatus.PRE_DELIVERY) {
-        throw new INVALID_STATUS(`only pre-delivery inbounds can be deleted`);
+      if (!deletableStates.includes(inbound.status)) {
+        throw new INVALID_STATUS(
+          `only inbounds with ${listFmt.format(
+            deletableStates,
+          )} can be deleted`,
+        );
       }
 
       await AppDataSource.transaction(async (manager) => {
