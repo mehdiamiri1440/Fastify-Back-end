@@ -22,3 +22,21 @@ export const DUPLICATED_PRODUCT_ID = createError(
   'you can not submit the same product twice',
   400,
 );
+
+export const ALREADY_SUPPLIED = createError(
+  'ALREADY_SUPPLIED',
+  'Product is already supplied',
+  400,
+);
+
+export const INCOMPLETE_SUPPLY = createError(
+  'INCOMPLETE_SUPPLY',
+  'not all outbound products are supplied',
+  400,
+);
+
+export const INCOMPLETE_PRODUCT_SUPPLY = createError(
+  'INCOMPLETE_PRODUCT_SUPPLY',
+  'not all product quantities are supplied from bins',
+  400,
+);

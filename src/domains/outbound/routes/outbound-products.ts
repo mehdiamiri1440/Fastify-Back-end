@@ -6,7 +6,7 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { OutboundProductManager } from '../OutboundProduct.manager';
 import { OutboundStatus } from '../models/Outbound';
-import { OutboundProduct } from '../models/OutboundProduct';
+import { OutboundProduct, ProductSupplyState } from '../models/OutboundProduct';
 import { INVALID_STATUS } from '../errors';
 import { Quantity } from '$src/infra/TypeboxTypes';
 
@@ -30,10 +30,13 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     const manager = new OutboundProductManager(AppDataSource, id, userId);
     await manager.load();
     return {
-      supplied: manager.supplied,
+      state: manager.state,
+      supplied:
+        manager.state === ProductSupplyState.SUBMITTED ||
+        manager.state === ProductSupplyState.APPLIED,
       suppliedQuantity: manager.suppliedQuantity,
       freeQuantity: manager.freeQuantity,
-      expectedQuantity: manager.entity.quantity,
+      expectedQuantity: manager.expectedQuantity,
       bins: manager.supplyState,
     };
   }
@@ -167,7 +170,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           req.user.id,
         );
         await manager.load();
-        await manager.supply({ bin, quantity });
+        await manager.addDraftSupply({ bin, quantity });
       });
 
       return getSupplyState(req.params.id, req.user.id);
@@ -202,7 +205,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           req.user.id,
         );
         await manager.load();
-        await manager.deleteSupply(bin);
+        await manager.deleteDraftSupply(bin);
       });
 
       return getSupplyState(req.params.id, req.user.id);

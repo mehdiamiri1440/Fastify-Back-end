@@ -1,27 +1,21 @@
-import {
-  DataSource,
-  DeepPartial,
-  Driver,
-  EntityManager,
-  Repository,
-} from 'typeorm';
-import { Bin } from '$src/domains/warehouse/models/Bin';
-import { BinProduct } from '$src/domains/product/models/BinProduct';
-import { Product } from '$src/domains/product/models/Product';
-import { loadUserWarehouse } from '../utils';
-import { ProductService } from '$src/domains/product/ProductService';
-import { SourceType } from '$src/domains/product/models/ProductStockHistory';
 import { CycleCount } from '$src/domains/cyclecount/models/CycleCount';
 import { CycleCountDifference } from '$src/domains/cyclecount/models/Difference';
-import { Static, Type } from '@sinclair/typebox';
 import { CycleCountSchema } from '$src/domains/cyclecount/schemas/cyclecount.schema';
+import { ProductService } from '$src/domains/product/ProductService';
+import { BinProduct } from '$src/domains/product/models/BinProduct';
+import { Product } from '$src/domains/product/models/Product';
+import { SourceType } from '$src/domains/product/models/ProductStockHistory';
+import { Bin } from '$src/domains/warehouse/models/Bin';
+import { Static, Type } from '@sinclair/typebox';
+import { DataSource, DeepPartial, EntityManager, Repository } from 'typeorm';
 import {
+  CYCLE_COUNT_IS_NOT_OPEN,
   EMPTY_BIN,
-  NOT_IN_ANY_BIN,
   MISS_BIN,
   MISS_PRODUCT,
-  CYCLE_COUNT_IS_NOT_OPEN,
+  NOT_IN_ANY_BIN,
 } from '../errors';
+import { loadUserWarehouse } from '../utils';
 
 const bodySchema = Type.Pick(CycleCountSchema, [
   'cycleCountType',
@@ -197,8 +191,8 @@ export class CycleCountService {
     for (const difference of differences) {
       if (difference.difference !== 0) {
         await service.addProductToBin({
-          product: difference.binProduct.product,
-          bin: difference.binProduct.bin,
+          productId: difference.binProduct.product.id,
+          binId: difference.binProduct.bin.id,
           quantity: difference.difference,
           sourceType: SourceType.CYCLE_COUNT,
           sourceId: difference.cycleCount.id,

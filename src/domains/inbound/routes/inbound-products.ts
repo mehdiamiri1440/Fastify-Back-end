@@ -378,8 +378,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         }
 
         await productsService.addProductToBin({
-          product: inboundProduct.product,
-          bin,
+          productId: inboundProduct.product.id,
+          binId: bin.id,
           quantity,
           sourceType: SourceType.INBOUND,
           sourceId: inboundProduct.inbound.id,
@@ -451,8 +451,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         });
 
         await productsService.subtractProductFromBin({
-          product: inboundProduct.product,
-          bin: sort.bin,
+          productId: inboundProduct.product.id,
+          binId: sort.bin.id,
           quantity: sort.quantity,
           sourceType: SourceType.INBOUND,
           sourceId: inboundProduct.inbound.id,

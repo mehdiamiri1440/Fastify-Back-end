@@ -18,10 +18,9 @@ import { Product } from '../../product/models/Product';
 import { Warehouse } from '../../warehouse/models/Warehouse';
 import { WarehouseStaff } from '../../warehouse/models/WarehouseStaff';
 import { Outbound, OutboundStatus } from '../models/Outbound';
-import { OutboundProduct } from '../models/OutboundProduct';
+import { OutboundProduct, ProductSupplyState } from '../models/OutboundProduct';
 import { OutboundProductSupply } from '../models/OutboundProductSupply';
 import routes from '../routes/outbound-products';
-import '$src/infra/test/statusCodeExpect';
 
 let app: FastifyInstance | undefined;
 let user: TestUser | undefined;
@@ -243,7 +242,7 @@ describe('Supply', () => {
     expect(body).toMatchObject({
       data: {
         supplied: false,
-        freeQuantity: 40,
+        freeQuantity: 30,
         suppliedQuantity: 10,
         expectedQuantity: 20,
         bins: [
@@ -262,7 +261,7 @@ describe('Supply', () => {
           {
             binId: bin3.id,
             binName: 'bin3',
-            freeQuantity: 10,
+            freeQuantity: 0,
             suppliedQuantity: 10,
           },
         ],
@@ -296,7 +295,7 @@ describe('Supply', () => {
     expect(state).toMatchObject({
       data: {
         supplied: true,
-        freeQuantity: 30,
+        freeQuantity: 20,
         suppliedQuantity: 20,
         expectedQuantity: 20,
         bins: [
@@ -315,7 +314,7 @@ describe('Supply', () => {
           {
             binId: bin3.id,
             binName: 'bin3',
-            freeQuantity: 10,
+            freeQuantity: 0,
             suppliedQuantity: 10,
           },
         ],
@@ -324,7 +323,7 @@ describe('Supply', () => {
     expect(result).toMatchObject(state);
   });
 
-  it('should supply a free bin', async () => {
+  it('should delete supply', async () => {
     assert(app);
     assert(user);
 
@@ -346,7 +345,7 @@ describe('Supply', () => {
     expect(state).toMatchObject({
       data: {
         supplied: false,
-        freeQuantity: 40,
+        freeQuantity: 30,
         suppliedQuantity: 10,
         expectedQuantity: 20,
         bins: [
@@ -365,7 +364,7 @@ describe('Supply', () => {
           {
             binId: bin3.id,
             binName: 'bin3',
-            freeQuantity: 10,
+            freeQuantity: 0,
             suppliedQuantity: 10,
           },
         ],

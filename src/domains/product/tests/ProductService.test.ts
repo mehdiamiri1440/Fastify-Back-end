@@ -72,8 +72,8 @@ describe('addProductToBin', () => {
     });
 
     await productService.addProductToBin({
-      product,
-      bin,
+      productId: product.id,
+      binId: bin.id,
       quantity: 10,
       sourceType: SourceType.INBOUND,
       sourceId: 155,
@@ -148,8 +148,8 @@ describe('addProductToBin', () => {
     });
 
     await productService.addProductToBin({
-      product,
-      bin,
+      productId: product.id,
+      binId: bin.id,
       quantity: 10,
       sourceType: SourceType.INBOUND,
       sourceId: 155,
@@ -229,8 +229,8 @@ describe('subtractProductFromBin', () => {
     // Attempt to subtract 10 units of the product from the bin, but only 5 are available
     await expect(
       productService.subtractProductFromBin({
-        product,
-        bin,
+        productId: product.id,
+        binId: bin.id,
         quantity: 10,
         sourceType: SourceType.OUTBOUND,
         sourceId: 155,
@@ -410,16 +410,16 @@ it('should get quantity of bin', async () => {
   expect(await productService.getBinQuantity(bin1)).toBe(0);
 
   await productService.addProductToBin({
-    bin: bin1,
-    product: product1,
+    binId: bin1.id,
+    productId: product1.id,
     quantity: 1,
     sourceType: SourceType.INIT,
     sourceId: 1,
     description: '1',
   });
   await productService.addProductToBin({
-    bin: bin1,
-    product: product2,
+    binId: bin1.id,
+    productId: product2.id,
     quantity: 2,
     sourceType: SourceType.INIT,
     sourceId: 2,
@@ -428,8 +428,8 @@ it('should get quantity of bin', async () => {
   expect(await productService.getBinQuantity(bin1)).toBe(3);
   expect(await productService.getBinQuantity(bin2)).toBe(0);
   await productService.addProductToBin({
-    bin: bin2,
-    product: product1,
+    binId: bin2.id,
+    productId: product1.id,
     quantity: 1,
     sourceType: SourceType.INIT,
     sourceId: 1,
@@ -437,8 +437,8 @@ it('should get quantity of bin', async () => {
   });
   expect(await productService.getBinQuantity(bin2)).toBe(1);
   await productService.addProductToBin({
-    bin: bin2,
-    product: product2,
+    binId: bin2.id,
+    productId: product2.id,
     quantity: 1,
     sourceType: SourceType.INIT,
     sourceId: 1,
@@ -490,16 +490,16 @@ it('should get quantity of product', async () => {
   expect(await productService.getProductQuantity(product2)).toBe(0);
 
   await productService.addProductToBin({
-    bin: bin1,
-    product: product1,
+    binId: bin1.id,
+    productId: product1.id,
     quantity: 1,
     sourceType: SourceType.INIT,
     sourceId: 1,
     description: '1',
   });
   await productService.addProductToBin({
-    bin: bin1,
-    product: product2,
+    binId: bin1.id,
+    productId: product2.id,
     quantity: 2,
     sourceType: SourceType.INIT,
     sourceId: 2,
@@ -508,8 +508,8 @@ it('should get quantity of product', async () => {
   expect(await productService.getProductQuantity(product1)).toBe(1);
   expect(await productService.getProductQuantity(product2)).toBe(2);
   await productService.addProductToBin({
-    bin: bin1,
-    product: product1,
+    binId: bin1.id,
+    productId: product1.id,
     quantity: 1,
     sourceType: SourceType.INIT,
     sourceId: 1,
@@ -517,8 +517,8 @@ it('should get quantity of product', async () => {
   });
   expect(await productService.getProductQuantity(product1)).toBe(2);
   await productService.addProductToBin({
-    bin: bin2,
-    product: product1,
+    binId: bin2.id,
+    productId: product1.id,
     quantity: 1,
     sourceType: SourceType.INIT,
     sourceId: 1,

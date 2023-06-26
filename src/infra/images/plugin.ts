@@ -63,7 +63,8 @@ const plugin: FastifyPluginAsync<Options> = async (
 
       const url = urlBuilder.generateUrl(`/${bucketName}/${filename}`);
 
-      const response = await fetch(url);
+      // TODO(erfan): fix Response type
+      const response = (await fetch(url)) as any;
 
       if (!response.ok) {
         const message = await response.text();
