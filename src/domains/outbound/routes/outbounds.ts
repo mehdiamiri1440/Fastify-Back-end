@@ -22,6 +22,13 @@ import { OutboundProduct } from '../models/OutboundProduct';
 import { OutboundService } from '../services/outbound.service';
 import { loadUserWarehouse } from '../utils';
 
+const deletableStates: OutboundStatus[] = [
+  OutboundStatus.DRAFT,
+  OutboundStatus.NEW_ORDER,
+];
+
+const listFmt = new Intl.ListFormat();
+
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   const outboundsRepo = repo(Outbound);
   const outboundProductsRepo = repo(OutboundProduct);
@@ -218,8 +225,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const { id } = req.params;
       const outbound = await outboundsRepo.findOneByOrFail({ id });
 
-      if (outbound.status !== OutboundStatus.DRAFT) {
-        throw new INVALID_STATUS(`only draft outbounds can be deleted`);
+      if (!deletableStates.includes(outbound.status)) {
+        throw new INVALID_STATUS(
+          `only ${listFmt.format(deletableStates)} outbounds can be deleted`,
+        );
       }
 
       await outboundsRepo.softDelete(id);

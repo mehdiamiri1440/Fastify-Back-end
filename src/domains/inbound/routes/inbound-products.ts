@@ -1,8 +1,7 @@
 import AppDataSource from '$src/DataSource';
-import { ProductService } from '$src/domains/product/ProductService';
-import { SourceType } from '$src/domains/product/models/ProductStockHistory';
 import { Bin } from '$src/domains/warehouse/models/Bin';
 import { ResponseShape } from '$src/infra/Response';
+import { Price, Quantity } from '$src/infra/TypeboxTypes';
 import {
   Filter,
   OrderBy,
@@ -15,6 +14,7 @@ import * as where from '$src/infra/tables/filter';
 import { repo } from '$src/infra/utils/repo';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
+import { InboundProductManager } from '../InboundProduct.manager';
 import {
   BIN_ALREADY_SORTED,
   BIN_FROM_ANOTHER_WAREHOUSE,
@@ -23,12 +23,7 @@ import {
 } from '../errors';
 import { InboundStatus } from '../models/Inbound';
 import { InboundProduct } from '../models/InboundProduct';
-import { InboundProductSort } from '../models/InboundProductSort';
 import { loadUserWarehouse } from '../utils';
-import { Price, Quantity } from '$src/infra/TypeboxTypes';
-import { InboundProductManager } from '../InboundProduct.manager';
-
-const sum = (array: number[]) => array.reduce((a, b) => a + b, 0);
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
