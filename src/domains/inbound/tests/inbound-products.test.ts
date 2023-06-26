@@ -466,7 +466,7 @@ describe('Sorting', () => {
     expect(
       await repo(InboundProduct).findOneByOrFail({ id: inboundProduct.id }),
     ).toMatchObject({
-      sorted: false,
+      sortState: 'pending',
     });
 
     const response2 = await user.inject({
@@ -483,7 +483,7 @@ describe('Sorting', () => {
     expect(
       await repo(InboundProduct).findOneByOrFail({ id: inboundProduct.id }),
     ).toMatchObject({
-      sorted: true,
+      sortState: 'submitted',
     });
   });
 
@@ -502,17 +502,16 @@ describe('Sorting', () => {
     });
 
     expect(sortResponse).statusCodeToBe(200);
-    const sort = sortResponse.json().data;
 
     expect(
       await repo(InboundProduct).findOneByOrFail({ id: inboundProduct.id }),
     ).toMatchObject({
-      sorted: true,
+      sortState: 'submitted',
     });
 
     const deleteSort = await user.inject({
       method: 'DELETE',
-      url: `/${inboundProduct.id}/sorts/${sort.id}`,
+      url: `/${inboundProduct.id}/sorts/${bin1.id}`,
     });
 
     expect(deleteSort).statusCodeToBe(200);
@@ -520,7 +519,7 @@ describe('Sorting', () => {
     expect(
       await repo(InboundProduct).findOneByOrFail({ id: inboundProduct.id }),
     ).toMatchObject({
-      sorted: false,
+      sortState: 'pending',
     });
   });
 

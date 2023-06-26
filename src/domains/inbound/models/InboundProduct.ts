@@ -15,6 +15,12 @@ import { Inbound } from './Inbound';
 import { InboundProductSort } from './InboundProductSort';
 import type { Relation } from 'typeorm';
 
+export enum ProductSortState {
+  PENDING = 'pending',
+  SUBMITTED = 'submitted',
+  APPLIED = 'applied',
+}
+
 @Entity()
 export class InboundProduct {
   @PrimaryGeneratedColumn()
@@ -32,8 +38,12 @@ export class InboundProduct {
   @Column({ type: 'integer', nullable: true })
   actualQuantity!: number | number;
 
-  @Column({ default: false })
-  sorted!: boolean;
+  @Column({
+    type: 'enum',
+    enum: ProductSortState,
+    default: ProductSortState.PENDING,
+  })
+  sortState!: 'pending' | 'submitted' | 'applied';
 
   @Column('decimal', { precision: 18, scale: 2, nullable: true })
   price!: string;
