@@ -14,6 +14,12 @@ import {
 import { Outbound } from './Outbound';
 import { OutboundProductSupply } from './OutboundProductSupply';
 
+export enum ProductSupplyState {
+  PENDING = 'pending',
+  SUBMITTED = 'submitted',
+  APPLIED = 'applied',
+}
+
 @Entity()
 export class OutboundProduct {
   @PrimaryGeneratedColumn()
@@ -28,8 +34,12 @@ export class OutboundProduct {
   @ManyToOne(() => Product)
   product!: Relation<Product>;
 
-  @Column({ default: false })
-  supplied!: boolean;
+  @Column({
+    type: 'enum',
+    enum: ProductSupplyState,
+    default: ProductSupplyState.PENDING,
+  })
+  supplyState!: 'pending' | 'submitted' | 'applied';
 
   @ManyToOne(() => User)
   creator!: User;

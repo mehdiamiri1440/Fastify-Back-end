@@ -1,23 +1,20 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { repo } from '$src/infra/utils/repo';
-import createError from '@fastify/error';
 import assert from 'assert';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { ProductService } from '../product/ProductService';
 import { SourceType } from '../product/models/ProductStockHistory';
 import { Bin } from '../warehouse/models/Bin';
-import { INVALID_STATUS } from './errors';
+import {
+  ALREADY_SUPPLIED,
+  INCOMPLETE_PRODUCT_SUPPLY,
+  INVALID_STATUS,
+} from './errors';
 import { OutboundStatus } from './models/Outbound';
-import { OutboundProduct } from './models/OutboundProduct';
+import { OutboundProduct, ProductSupplyState } from './models/OutboundProduct';
 import { OutboundProductSupply } from './models/OutboundProductSupply';
 
 const sum = (arr: number[]): number => arr.reduce((a, b) => a + b, 0);
-
-const ALREADY_SUPPLIED = createError(
-  'ALREADY_SUPPLIED',
-  'Product is already supplied',
-  400,
-);
 
 export interface BinSupplyState {
   binId: number;
@@ -53,8 +50,12 @@ export class OutboundProductManager {
     return sum(this.#supplyState!.map((s) => s.freeQuantity));
   }
 
-  get supplied() {
-    return this.entity.supplied;
+  get expectedQuantity() {
+    return this.entity.quantity;
+  }
+
+  get state() {
+    return this.entity.supplyState;
   }
 
   constructor(
@@ -92,25 +93,38 @@ export class OutboundProductManager {
       }, 'suppliedQuantity')
       .addSelect((subQuery) => {
         return subQuery
-          .select('SUM(bin_product.quantity)', 'freeQuantity')
+          .select('SUM(bin_product.quantity)', 'availableQuantityInBin')
           .from('BinProduct', 'bin_product')
           .where('bin_product.bin_id = bin.id')
           .andWhere('bin_product.product_id = :productId', {
             productId: this.entity.product.id,
           });
-      }, 'freeQuantity')
+      }, 'availableQuantityInBin')
 
       .where('bin.warehouse_id = :warehouseId', {
         warehouseId: this.warehouseId,
       })
       .getRawMany();
 
+    const freeQuantity = (row: any) => {
+      const availableQuantityInBin =
+        parseInt(row.availableQuantityInBin, 10) || 0;
+
+      // if the supply is already applied, we don't need to subtract the reserved quantity
+      if (this.state === ProductSupplyState.APPLIED) {
+        return availableQuantityInBin;
+      }
+
+      // subtract the reserved quantity from the available quantity
+      return availableQuantityInBin - row.suppliedQuantity;
+    };
+
     const data: BinSupplyState[] = rawData
       .map((row) => ({
         binId: row.binId,
         binName: row.binName,
         suppliedQuantity: parseInt(row.suppliedQuantity, 10) || 0,
-        freeQuantity: parseInt(row.freeQuantity, 10) || 0,
+        freeQuantity: freeQuantity(row),
       }))
       // remove useless states
       .filter((r) => r.freeQuantity > 0 || r.suppliedQuantity > 0);
@@ -119,16 +133,19 @@ export class OutboundProductManager {
   }
 
   async #refreshSuppliedState() {
-    const currentState = this.entity.supplied;
-    const newState = this.entity.quantity === this.suppliedQuantity;
+    const currentState = this.entity.supplyState;
+    const newState =
+      this.entity.quantity === this.suppliedQuantity
+        ? ProductSupplyState.SUBMITTED
+        : ProductSupplyState.PENDING;
 
     if (currentState === newState) return;
 
     await this.outboundProductsRepo.update(this.entity.id, {
-      supplied: newState,
+      supplyState: newState,
     });
 
-    this.entity.supplied = newState;
+    this.entity.supplyState = newState;
   }
 
   #assertNewOrder() {
@@ -137,13 +154,12 @@ export class OutboundProductManager {
     }
   }
 
-  async supply({ bin, quantity }: { bin: Bin; quantity: number }) {
+  async addDraftSupply({ bin, quantity }: { bin: Bin; quantity: number }) {
     this.#assertNewOrder();
 
-    if (this.supplied) {
+    if (this.state !== ProductSupplyState.PENDING) {
       throw new ALREADY_SUPPLIED();
     }
-
     const binState = this.#supplyState.find((s) => s.binId === bin.id);
     assert(binState, `Bin ${bin.id} doesn't have this product to supply`);
 
@@ -158,20 +174,21 @@ export class OutboundProductManager {
       outboundProduct: this.entity,
       bin,
       quantity,
+      applied: false,
       creator: this.creator,
     });
 
-    await this.productService.subtractProductFromBin({
-      product: this.entity.product,
-      bin,
-      quantity,
-      sourceType: SourceType.OUTBOUND,
-      sourceId: this.entity.outbound.id,
-      description: `Supplied ${quantity} ${this.entity.product.name} by outbound id:${this.entity.outbound.id}`,
-    });
+    // await this.productService.subtractProductFromBin({
+    //   product: this.entity.product,
+    //   bin,
+    //   quantity,
+    //   sourceType: SourceType.OUTBOUND,
+    //   sourceId: this.entity.outbound.id,
+    //   description: `Supplied ${quantity} ${this.entity.product.name} by outbound id:${this.entity.outbound.id}`,
+    // });
   }
 
-  async deleteSupply(bin: Bin) {
+  async deleteDraftSupply(bin: Bin) {
     this.#assertNewOrder();
 
     const binState = this.#supplyState.find((s) => s.binId === bin.id);
@@ -186,18 +203,50 @@ export class OutboundProductManager {
         },
       });
 
-    const quantity = outboundProductSupply.quantity;
+    await this.outboundProductSuppliesRepo.delete(outboundProductSupply.id);
+  }
 
-    await this.outboundProductSuppliesRepo.softDelete(outboundProductSupply.id);
+  async applySupplies() {
+    this.#assertNewOrder();
+    if (this.state === ProductSupplyState.APPLIED) {
+      throw new ALREADY_SUPPLIED();
+    }
 
-    await this.productService.addProductToBin({
-      product: this.entity.product,
-      bin,
-      quantity,
-      sourceType: SourceType.OUTBOUND,
-      sourceId: this.entity.outbound.id,
-      description: `Revert: supply ${quantity} ${this.entity.product.name} by outbound id:${this.entity.outbound.id}`,
+    if (this.state === ProductSupplyState.PENDING) {
+      throw new INCOMPLETE_PRODUCT_SUPPLY();
+    }
+
+    if (this.suppliedQuantity !== this.expectedQuantity) {
+      throw new INCOMPLETE_PRODUCT_SUPPLY();
+    }
+
+    // const toApplySupplies = this.#supplyState.filter(
+    //   (s) => s.suppliedQuantity > 0,
+    // );
+    const supplies = await this.outboundProductSuppliesRepo.find({
+      where: {
+        outboundProduct: {
+          id: this.id,
+        },
+      },
+      loadRelationIds: {
+        disableMixedMap: true,
+      },
     });
+
+    for (const supply of supplies) {
+      await this.productService.subtractProductFromBin({
+        productId: this.entity.product.id,
+        binId: supply.bin.id,
+        quantity: supply.quantity,
+        sourceType: SourceType.OUTBOUND,
+        sourceId: this.entity.outbound.id,
+        description: `Supplied ${supply.quantity} ${this.entity.product.name} by outbound id:${this.entity.outbound.id}`,
+      });
+    }
+
+    this.entity.supplyState = ProductSupplyState.APPLIED;
+    await this.outboundProductsRepo.save(this.entity);
   }
 
   async load() {

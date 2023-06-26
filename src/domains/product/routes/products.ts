@@ -334,8 +334,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
           assert(quantity);
           await productService.addProductToBin({
-            product,
-            bin,
+            productId: product.id,
+            binId: bin.id,
             quantity,
             description: `init product ${product.name} in bin ${bin.name}`,
             sourceType: SourceType.INIT,

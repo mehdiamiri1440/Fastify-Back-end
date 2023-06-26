@@ -1,17 +1,15 @@
-import { Product } from '$src/domains/product/models/Product';
 import { User } from '$src/domains/user/models/User';
+import { Bin } from '$src/domains/warehouse/models/Bin';
 import type { Relation } from 'typeorm';
 import {
   Column,
   CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { OutboundProduct } from './OutboundProduct';
-import { Bin } from '$src/domains/warehouse/models/Bin';
 
 @Entity()
 export class OutboundProductSupply {
@@ -35,7 +33,4 @@ export class OutboundProductSupply {
 
   @UpdateDateColumn()
   updatedAt!: Date;
-
-  @DeleteDateColumn()
-  deletedAt!: Date;
 }

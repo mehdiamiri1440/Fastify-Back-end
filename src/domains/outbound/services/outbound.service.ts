@@ -3,15 +3,10 @@ import { Product } from '$src/domains/product/models/Product';
 import { Warehouse } from '$src/domains/warehouse/models/Warehouse';
 import createError from '@fastify/error';
 import { DataSource, DeepPartial, EntityManager, Repository } from 'typeorm';
-import { INVALID_STATUS } from '../errors';
+import { INCOMPLETE_SUPPLY, INVALID_STATUS } from '../errors';
 import { Outbound, OutboundStatus } from '../models/Outbound';
-import { OutboundProduct } from '../models/OutboundProduct';
-
-const INCOMPLETE_SUPPLY = createError(
-  'INCOMPLETE_SUPPLY',
-  'not all outbound products are supplied',
-  400,
-);
+import { OutboundProduct, ProductSupplyState } from '../models/OutboundProduct';
+import { OutboundProductManager } from '../OutboundProduct.manager';
 
 const MISSING_SIGNATURE = createError('MISSING_SIGNATURE', '%s', 400);
 
@@ -22,8 +17,10 @@ export class OutboundService {
 
   private documentService: DocumentService;
   #userId: number;
+  #dataSource: DataSource | EntityManager;
 
   constructor(dataSource: DataSource | EntityManager, userId: number) {
+    this.#dataSource = dataSource;
     this.outboundsRepo = dataSource.getRepository(Outbound);
     this.outboundProductsRepo = dataSource.getRepository(OutboundProduct);
     this.productsRepo = dataSource.getRepository(Product);
@@ -107,15 +104,30 @@ export class OutboundService {
       throw new INVALID_STATUS(`only new order outbounds can be confirmed`);
     }
 
-    const unSuppliedProduct = await this.outboundProductsRepo.find({
+    const outboundProducts = await this.outboundProductsRepo.find({
       where: {
         outbound: { id: outbound.id },
-        supplied: false,
       },
     });
 
-    if (unSuppliedProduct.length > 0) {
+    if (
+      outboundProducts.filter(
+        (outboundProducts) =>
+          outboundProducts.supplyState === ProductSupplyState.PENDING,
+      ).length > 0
+    ) {
       throw new INCOMPLETE_SUPPLY();
+    }
+
+    for (const outboundProduct of outboundProducts) {
+      const manager = new OutboundProductManager(
+        this.#dataSource,
+        outboundProduct.id,
+        this.#userId,
+      );
+
+      await manager.load();
+      await manager.applySupplies();
     }
 
     await this.outboundsRepo.update(outbound.id, {

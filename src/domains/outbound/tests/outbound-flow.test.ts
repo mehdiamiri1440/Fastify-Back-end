@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import AppDataSource from '$src/DataSource';
 import { Unit } from '$src/domains/configuration/models/Unit';
 import { BinProduct } from '$src/domains/product/models/BinProduct';
 import { Role } from '$src/domains/user/models/Role';
@@ -13,14 +12,7 @@ import {
   withoutForeignKeyCheck,
 } from '$src/infra/test/utils';
 import { repo } from '$src/infra/utils/repo';
-import {
-  afterAll,
-  beforeAll,
-  afterEach,
-  beforeEach,
-  expect,
-  it,
-} from '@jest/globals';
+import { afterAll, beforeAll, beforeEach, expect, it } from '@jest/globals';
 import assert from 'assert';
 import { FastifyInstance, InjectOptions } from 'fastify';
 import { Product } from '../../product/models/Product';
@@ -313,6 +305,7 @@ it('Outbound Flow - Without Driver', async () => {
     });
 
     expect(beforeSupplyState).toMatchObject({
+      state: 'pending',
       supplied: false,
       freeQuantity: 10,
       suppliedQuantity: 0,
@@ -334,6 +327,7 @@ it('Outbound Flow - Without Driver', async () => {
     });
     expect(afterSupplyState.supplied).toBe(true);
     expect(afterSupplyState).toMatchObject({
+      state: 'submitted',
       supplied: true,
       freeQuantity: 5,
       suppliedQuantity: 5,

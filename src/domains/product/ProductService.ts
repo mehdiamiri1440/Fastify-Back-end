@@ -36,15 +36,15 @@ export class ProductService {
   }
 
   async addProductToBin({
-    product,
-    bin,
+    productId,
+    binId,
     quantity,
     sourceType,
     sourceId,
     description,
   }: {
-    product: Product;
-    bin: Bin;
+    productId: number;
+    binId: number;
     quantity: number;
     sourceType: SourceType;
     sourceId: number | null;
@@ -55,18 +55,22 @@ export class ProductService {
     let binProduct = await binProductsRepo.findOne({
       where: {
         bin: {
-          id: bin.id,
+          id: binId,
         },
         product: {
-          id: product.id,
+          id: productId,
         },
       },
     });
 
     if (!binProduct) {
       binProduct = binProductsRepo.create({
-        bin,
-        product,
+        bin: {
+          id: binId,
+        },
+        product: {
+          id: productId,
+        },
       });
     }
 
@@ -75,11 +79,15 @@ export class ProductService {
     await binProductsRepo.save(binProduct);
 
     await productStockHistoriesRepo.save({
-      product,
+      product: {
+        id: productId,
+      },
       sourceId,
       sourceType,
       description,
-      bin,
+      bin: {
+        id: binId,
+      },
       quantity,
       creator: {
         id: this.#userId,
@@ -88,15 +96,15 @@ export class ProductService {
   }
 
   async subtractProductFromBin({
-    product,
-    bin,
+    productId,
+    binId,
     quantity,
     sourceType,
     sourceId,
     description,
   }: {
-    product: Product;
-    bin: Bin;
+    productId: number;
+    binId: number;
     quantity: number;
     sourceType: SourceType;
     sourceId: number;
@@ -107,10 +115,10 @@ export class ProductService {
     const binProduct = await binProductsRepo.findOne({
       where: {
         bin: {
-          id: bin.id,
+          id: binId,
         },
         product: {
-          id: product.id,
+          id: productId,
         },
       },
     });
@@ -126,8 +134,12 @@ export class ProductService {
     await binProductsRepo.save(binProduct);
 
     await productStockHistoriesRepo.save({
-      product,
-      bin,
+      product: {
+        id: productId,
+      },
+      bin: {
+        id: binId,
+      },
       sourceType,
       sourceId,
       description,
@@ -147,8 +159,8 @@ export class ProductService {
     const description = `Move ${product.name} from ${sourceBin.name} to ${targetBin.name}`;
 
     await this.subtractProductFromBin({
-      product,
-      bin: sourceBin,
+      productId: product.id,
+      binId: sourceBin.id,
       quantity,
       sourceId: targetBin.id,
       sourceType: SourceType.MOVE,
@@ -156,8 +168,8 @@ export class ProductService {
     });
 
     await this.addProductToBin({
-      product,
-      bin: targetBin,
+      productId: product.id,
+      binId: targetBin.id,
       quantity,
       sourceType: SourceType.MOVE,
       sourceId: sourceBin.id,
