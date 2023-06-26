@@ -5,9 +5,11 @@ import { User } from '$src/domains/user/models/User';
 import { Warehouse } from '$src/domains/warehouse/models/Warehouse';
 import { DataSource, DeepPartial, EntityManager, Repository } from 'typeorm';
 import { Inbound, InboundStatus, InboundType } from '../models/Inbound';
-import { InboundProduct } from '../models/InboundProduct';
+import { InboundProduct, ProductSortState } from '../models/InboundProduct';
 import AppDataSource from '$src/DataSource';
 import { repo } from '$src/infra/utils/repo';
+import { INCOMPLETE_SORTING, INVALID_STATUS } from '../errors';
+import { InboundProductManager } from '../InboundProduct.manager';
 
 export class InboundService {
   private inboundsRepo: Repository<Inbound>;
@@ -17,6 +19,7 @@ export class InboundService {
 
   private documentService: DocumentService;
   #userId: number;
+  #dataSource: DataSource | EntityManager;
 
   constructor(dataSource: DataSource | EntityManager, userId: number) {
     this.inboundsRepo = dataSource.getRepository(Inbound);
@@ -26,6 +29,7 @@ export class InboundService {
 
     this.documentService = new DocumentService(dataSource, userId);
     this.#userId = userId;
+    this.#dataSource = dataSource;
   }
 
   async #saveInbound(entity: DeepPartial<Inbound>) {
@@ -89,6 +93,42 @@ export class InboundService {
       price,
       requestedQuantity: quantity,
       creator: { id: this.#userId },
+    });
+  }
+
+  async confirmSorting(inbound: Inbound) {
+    if (inbound.status !== InboundStatus.SORTING) {
+      throw new INVALID_STATUS(`only sorting inbounds can be confirmed`);
+    }
+
+    const inboundProducts = await this.inboundProductsRepo.find({
+      where: {
+        inbound: { id: inbound.id },
+      },
+    });
+
+    if (
+      inboundProducts.filter(
+        (inboundProduct) =>
+          inboundProduct.sortState === ProductSortState.PENDING,
+      ).length > 0
+    ) {
+      throw new INCOMPLETE_SORTING();
+    }
+
+    for (const inboundProduct of inboundProducts) {
+      const manager = new InboundProductManager(
+        this.#dataSource,
+        inboundProduct.id,
+        this.#userId,
+      );
+
+      await manager.load();
+      await manager.applySorts();
+    }
+
+    await this.inboundsRepo.update(inbound.id, {
+      status: InboundStatus.SORTED,
     });
   }
 }

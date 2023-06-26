@@ -106,7 +106,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             requestedQuantity: true,
             actualQuantity: true,
             createdAt: true,
-            sorted: true,
+            sortState: true,
             product: {
               id: true,
               name: true,
@@ -387,6 +387,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Integer(),
       }),
+      security: [
+        {
+          OAuth2: [],
+        },
+      ],
     },
     async handler(req) {
       const { id } = req.params;
@@ -413,7 +418,13 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Integer(),
       }),
+      security: [
+        {
+          OAuth2: [],
+        },
+      ],
     },
+
     async handler(req) {
       const { id } = req.params;
 
@@ -454,35 +465,19 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       params: Type.Object({
         id: Type.Integer(),
       }),
+      security: [
+        {
+          OAuth2: [],
+        },
+      ],
     },
     async handler(req) {
       const { id } = req.params;
-
       const inbound = await Inbounds.findOneByOrFail({ id });
 
-      if (inbound.status !== InboundStatus.SORTING) {
-        throw new INVALID_STATUS(`only sorting inbounds can be confirmed`);
-      }
-
-      // ensure all product sorts are done
-      const products = await InboundProducts.find({
-        where: {
-          inbound: {
-            id: inbound.id,
-          },
-        },
-        relations: {
-          sorts: true,
-        },
-      });
-
-      for (const { actualQuantity, sorts } of products) {
-        const sortedQuantity = sum(sorts.map((s) => s.quantity));
-        if (actualQuantity !== sortedQuantity) throw new INCOMPLETE_SORTING();
-      }
-
-      await Inbounds.update(inbound.id, {
-        status: InboundStatus.SORTED,
+      await AppDataSource.transaction(async (dataSource) => {
+        const service = new InboundService(dataSource, req.user.id);
+        await service.confirmSorting(inbound);
       });
 
       return Inbounds.findOneByOrFail({ id });

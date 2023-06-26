@@ -18,6 +18,12 @@ export const INVALID_QUANTITY_AMOUNT = createError(
   400,
 );
 
+export const PRODUCT_ALREADY_SORTED = createError(
+  'PRODUCT_ALREADY_SORTED',
+  'InboundProduct already sorted',
+  400,
+);
+
 export const BIN_ALREADY_SORTED = createError(
   'BIN_ALREADY_SORTED',
   'Bin already sorted',

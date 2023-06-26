@@ -191,19 +191,12 @@ export class OutboundProductManager {
   async deleteDraftSupply(bin: Bin) {
     this.#assertNewOrder();
 
-    const binState = this.#supplyState.find((s) => s.binId === bin.id);
-    assert(binState, `Bin ${bin.id} doesn't have this product to supply`);
+    const supply = this.entity.supplies.find(
+      (supply) => supply.bin.id === bin.id,
+    );
+    assert(supply, `Bin ${bin.id} doesn't have this product to supply`);
 
-    const outboundProductSupply =
-      await this.outboundProductSuppliesRepo.findOneOrFail({
-        where: {
-          bin: {
-            id: bin.id,
-          },
-        },
-      });
-
-    await this.outboundProductSuppliesRepo.delete(outboundProductSupply.id);
+    await this.outboundProductSuppliesRepo.delete(supply.id);
   }
 
   async applySupplies() {
@@ -220,21 +213,7 @@ export class OutboundProductManager {
       throw new INCOMPLETE_PRODUCT_SUPPLY();
     }
 
-    // const toApplySupplies = this.#supplyState.filter(
-    //   (s) => s.suppliedQuantity > 0,
-    // );
-    const supplies = await this.outboundProductSuppliesRepo.find({
-      where: {
-        outboundProduct: {
-          id: this.id,
-        },
-      },
-      loadRelationIds: {
-        disableMixedMap: true,
-      },
-    });
-
-    for (const supply of supplies) {
+    for (const supply of this.entity.supplies) {
       await this.productService.subtractProductFromBin({
         productId: this.entity.product.id,
         binId: supply.bin.id,
@@ -256,6 +235,9 @@ export class OutboundProductManager {
       },
       relations: {
         product: true,
+        supplies: {
+          bin: true,
+        },
         outbound: {
           warehouse: true,
         },

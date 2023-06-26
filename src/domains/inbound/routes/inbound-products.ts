@@ -26,6 +26,7 @@ import { InboundProduct } from '../models/InboundProduct';
 import { InboundProductSort } from '../models/InboundProductSort';
 import { loadUserWarehouse } from '../utils';
 import { Price, Quantity } from '$src/infra/TypeboxTypes';
+import { InboundProductManager } from '../InboundProduct.manager';
 
 const sum = (array: number[]) => array.reduce((a, b) => a + b, 0);
 
@@ -301,54 +302,18 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ],
     },
     handler: (req) =>
-      AppDataSource.transaction(async (manager) => {
-        const productsService = new ProductService(manager, req.user.id);
-        const inboundProductsRepo = manager.getRepository(InboundProduct);
-        const inboundProductSortsRepo =
-          manager.getRepository(InboundProductSort);
-
-        const Bins = manager.getRepository(Bin);
-
+      AppDataSource.transaction(async (dataSource) => {
         const { id } = req.params;
         const { binId, quantity } = req.body;
 
-        const inboundProduct = await inboundProductsRepo.findOneOrFail({
-          where: {
-            id,
-          },
-          relations: {
-            inbound: {
-              warehouse: true,
-            },
-            product: true,
-            sorts: {
-              bin: true,
-            },
-          },
-        });
+        const manager = new InboundProductManager(dataSource, id, req.user.id);
+        const binsRepo = dataSource.getRepository(Bin);
 
-        const { inbound } = inboundProduct;
+        await manager.load();
 
-        const currentSorted = sum(inboundProduct.sorts.map((e) => e.quantity));
-        const currentUnsorted = inboundProduct.actualQuantity - currentSorted;
+        const { inbound } = manager.entity;
 
-        if (inboundProduct.inbound.status !== InboundStatus.SORTING) {
-          throw new INVALID_STATUS(
-            'Only inbounds with sorting state are allowed to sort',
-          );
-        }
-
-        if (inboundProduct.sorts.find((sort) => sort.bin.id === binId)) {
-          throw new BIN_ALREADY_SORTED();
-        }
-
-        if (quantity > currentUnsorted) {
-          throw new INVALID_QUANTITY_AMOUNT(
-            `Current unsorted quantity: ${currentUnsorted}. Can not sort amount: ${quantity}`,
-          );
-        }
-
-        const bin = await Bins.findOneOrFail({
+        const bin = await binsRepo.findOneOrFail({
           where: {
             id: binId,
           },
@@ -361,40 +326,17 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           throw new BIN_FROM_ANOTHER_WAREHOUSE();
         }
 
-        const sort = await inboundProductSortsRepo.save({
-          inboundProduct,
-          bin,
-          quantity,
-          creator: {
-            id: req.user.id,
-          },
-        });
-
-        const productSortComplete = currentUnsorted === quantity;
-        if (productSortComplete) {
-          inboundProductsRepo.update(inboundProduct.id, {
-            sorted: true,
-          });
-        }
-
-        await productsService.addProductToBin({
-          productId: inboundProduct.product.id,
-          binId: bin.id,
-          quantity,
-          sourceType: SourceType.INBOUND,
-          sourceId: inboundProduct.inbound.id,
-          description: `Sorted ${quantity} ${inboundProduct.product.name} from inbound id: ${inboundProduct.inbound.id}`,
-        });
+        const sort = await manager.addDraftSort({ bin, quantity });
 
         return sort;
       }),
   });
 
-  app.delete('/:id/sorts/:sortId', {
+  app.delete('/:id/sorts/:binId', {
     schema: {
       params: Type.Object({
         id: Type.Integer(),
-        sortId: Type.Integer(),
+        binId: Type.Integer(),
       }),
       security: [
         {
@@ -403,61 +345,24 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       ],
     },
     handler: (req) =>
-      AppDataSource.transaction(async (manager) => {
-        const productsService = new ProductService(manager, req.user.id);
+      AppDataSource.transaction(async (dataSource) => {
+        const { id, binId } = req.params;
 
-        const InboundProducts = manager.getRepository(InboundProduct);
-        const InboundProductSorts = manager.getRepository(InboundProductSort);
+        const manager = new InboundProductManager(dataSource, id, req.user.id);
+        const binsRepo = dataSource.getRepository(Bin);
 
-        const { id, sortId } = req.params;
-
-        const inboundProduct = await InboundProducts.findOneOrFail({
+        const bin = await binsRepo.findOneOrFail({
           where: {
-            id,
+            id: binId,
           },
-          relations: {
-            inbound: true,
-            product: true,
-            sorts: {
-              bin: true,
-            },
+          loadRelationIds: {
+            disableMixedMap: true,
           },
         });
 
-        const sort = await InboundProductSorts.findOneOrFail({
-          where: {
-            id: sortId,
-            inboundProduct: {
-              id,
-            },
-          },
-          relations: {
-            bin: true,
-          },
-        });
-
-        if (inboundProduct.inbound.status !== InboundStatus.SORTING) {
-          throw new INVALID_STATUS(
-            'Only inbounds with sorting state are allowed to unsort',
-          );
-        }
-
-        await InboundProductSorts.delete({
-          id: sortId,
-        });
-
-        await InboundProducts.update(inboundProduct.id, {
-          sorted: false,
-        });
-
-        await productsService.subtractProductFromBin({
-          productId: inboundProduct.product.id,
-          binId: sort.bin.id,
-          quantity: sort.quantity,
-          sourceType: SourceType.INBOUND,
-          sourceId: inboundProduct.inbound.id,
-          description: `Revert: sorted ${sort.quantity} ${inboundProduct.product.name} from inbound id: ${inboundProduct.inbound.id}`,
-        });
+        await manager.load();
+        const sort = await manager.deleteDraftSort(bin);
+        return sort;
       }),
   });
 };
