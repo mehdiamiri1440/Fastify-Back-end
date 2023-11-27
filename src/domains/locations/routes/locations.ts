@@ -19,9 +19,18 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
   app.route({
     method: 'GET',
-    url: '/',
+    url: '/:zipCode',
+    schema: {
+      params: Type.Object({
+        zipCode: Type.Integer(),
+      }),
+      querystring: PaginatedQueryString({
+        orderBy: OrderBy(['id', 'createdAt']),
+      }),
+    },
     async handler(req) {
-      return new TableQueryBuilder(Locations, req).exec();
+      const { zipCode } = req.params as { zipCode?: number };
+      return new TableQueryBuilder(Locations, req).where({ zipCode }).exec();
     },
   });
 };
