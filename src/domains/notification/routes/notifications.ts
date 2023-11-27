@@ -15,6 +15,8 @@ import { notificationSchema } from '$src/domains/notification/schemas/notificati
 import AppDataSource from '$src/DataSource';
 import { User } from '$src/domains/user/models/User';
 import { UserNotification } from '$src/domains/notification/models/UserNotification';
+import ExcelJS from 'exceljs';
+import path from 'path';
 
 const Notifications = repo(Notification);
 
@@ -22,18 +24,46 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.route({
     method: 'GET',
     url: '/',
+    // schema: {
+    //   security: [
+    //     {
+    //       OAuth2: ['notification@all::list'],
+    //     },
+    //   ],
+    //   querystring: PaginatedQueryString({
+    //     orderBy: OrderBy(['createdAt']),
+    //   }),
+    // },
+    async handler(req) {
+      // return new TableQueryBuilder(Notifications, req).exec();
+
+      var workbook = new ExcelJS.Workbook();
+      const read = await workbook.xlsx.readFile(
+        path.join(process.cwd(), 'raap.xlsx'),
+      );
+      var worksheet = workbook.getWorksheet('UX');
+      // return JSON.stringify(worksheet?.getRow(4).values);
+      const cell = worksheet?.getCell('C4');
+      cell.value = '108';
+      return workbook.xlsx.writeFile('raap.xlsx');
+    },
+  });
+  app.post('/', {
     schema: {
-      security: [
-        {
-          OAuth2: ['notification@all::list'],
-        },
-      ],
-      querystring: PaginatedQueryString({
-        orderBy: OrderBy(['createdAt']),
-      }),
+      body: Type.Pick(Type.Object({ rooms: Type.Integer() }), ['rooms']),
     },
     async handler(req) {
-      return new TableQueryBuilder(Notifications, req).exec();
+      // return new TableQueryBuilder(Notifications, req).exec();
+      console.log('rooms------------------------------->>>>>', req.body);
+      var workbook = new ExcelJS.Workbook();
+      const read = await workbook.xlsx.readFile(
+        path.join(process.cwd(), 'raap.xlsx'),
+      );
+      var worksheet = workbook.getWorksheet('UX');
+      // return JSON.stringify(worksheet?.getRow(4).values);
+      const cell = worksheet?.getCell('C4');
+      cell.value = req.body.rooms;
+      return workbook.xlsx.writeFile('raap.xlsx');
     },
   });
 

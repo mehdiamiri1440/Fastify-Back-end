@@ -28,6 +28,8 @@ const app: FastifyPluginAsync<Options> = async (
 
   await fastify.register(import('@fastify/cors'), {
     origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Define the allowed HTTP methods
+    allowedHeaders: ['Content-Type', 'Authorization'],
     optionsSuccessStatus: 200,
     maxAge: 3600, // cache for 1 hour
     exposedHeaders: ['Content-Disposition'],
@@ -80,7 +82,7 @@ const app: FastifyPluginAsync<Options> = async (
           validatorUrl: SWAGGER_UI_VALIDATOR_URL || null,
         },
         theme: {
-          title: `Inventory API v${appVersion}`,
+          title: `Raap API v${appVersion}`,
           css: [
             {
               filename: 'theme.css',
@@ -103,11 +105,6 @@ const app: FastifyPluginAsync<Options> = async (
 
       await fastify.register(import('./domains/user/routes'));
 
-      await fastify.register(import('./domains/customer/routes'));
-      await fastify.register(import('./domains/hub-customers/routes'));
-
-      await fastify.register(import('./domains/configuration/routes'));
-
       await fastify.register(import('./domains/importer/routes'));
 
       await fastify.register(import('./domains/geo/routes'), {
@@ -118,22 +115,11 @@ const app: FastifyPluginAsync<Options> = async (
         prefix: '/documents',
       });
 
-      await fastify.register(import('./domains/inbound/routes'));
-      await fastify.register(import('./domains/outbound/routes'));
-
       await fastify.register(import('./domains/files/routes'), {
         prefix: '/files',
       });
 
-      await fastify.register(import('./domains/warehouse/routes'));
-      await fastify.register(import('./domains/supplier/routes'));
-      await fastify.register(import('./domains/product/routes'));
-      await fastify.register(import('./domains/support/routes'));
-      await fastify.register(import('./domains/iban/routes'));
-      await fastify.register(import('./domains/cyclecount/routes'));
       await fastify.register(import('./domains/notification/routes'));
-      await fastify.register(import('./domains/qrcode/routes'));
-      await fastify.register(import('./domains/statistic/routes'));
     },
     {
       prefix: '/api/v1',

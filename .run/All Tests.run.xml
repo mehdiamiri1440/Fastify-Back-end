@@ -6,7 +6,7 @@
     <working-dir value="$PROJECT_DIR$" />
     <jest-options value="--runInBand" />
     <envs>
-      <env name="DOTENV_CONFIG_PATH" value=".env.test" />
+      <env name="DOTENV_CONFIG_PATH" value="/.env" />
     </envs>
     <scope-kind value="ALL" />
     <method v="2" />

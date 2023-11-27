@@ -1,2 +1,0 @@
-name,businessName,subscriberType,documentType,businessDocumentType,fiscalId,businessFiscalId,contactFamily1,contactFamily2,nationalityId,isActive
-goodcustomer,goodbusiness,empresa,dni,passaporte,goodfiscalid,goodbuisnessid,contactfamilyone,contactfamilytwo,1,true

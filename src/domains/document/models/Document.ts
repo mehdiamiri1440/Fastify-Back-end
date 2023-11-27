@@ -18,9 +18,6 @@ export class Document {
   id!: number;
 
   @Column()
-  type!: 'inbound' | 'outbound';
-
-  @Column()
   typeId!: number;
 
   @ManyToOne(() => User)

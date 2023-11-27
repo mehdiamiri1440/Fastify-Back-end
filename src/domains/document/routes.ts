@@ -4,10 +4,8 @@ import { Type } from '@sinclair/typebox';
 import contentDisposition from 'content-disposition';
 import { Repository } from 'typeorm';
 import { DocumentBuilder } from './Builder';
-import { InboundDocument } from './documents/Inbound';
 import { Document } from './models/Document';
 import createError from '@fastify/error';
-import { OutboundDocument } from './documents/Outbound';
 
 const Documents = repo(Document);
 
@@ -16,10 +14,7 @@ const tags = ['Document'];
 const TypeBuilderMap: Record<
   Document['type'],
   { new (repo: Repository<Document>, document: Document): DocumentBuilder }
-> = {
-  inbound: InboundDocument,
-  outbound: OutboundDocument,
-};
+> = {};
 
 async function getBuilder(docId: number) {
   const document = await Documents.findOneOrFail({
