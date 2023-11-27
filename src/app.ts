@@ -105,8 +105,6 @@ const app: FastifyPluginAsync<Options> = async (
 
       await fastify.register(import('./domains/user/routes'));
 
-      await fastify.register(import('./domains/importer/routes'));
-
       await fastify.register(import('./domains/geo/routes'), {
         prefix: '/geo',
       });
@@ -118,8 +116,6 @@ const app: FastifyPluginAsync<Options> = async (
       await fastify.register(import('./domains/files/routes'), {
         prefix: '/files',
       });
-
-      await fastify.register(import('./domains/notification/routes'));
     },
     {
       prefix: '/api/v1',
