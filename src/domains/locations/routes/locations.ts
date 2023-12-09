@@ -20,7 +20,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
   app.route({
     method: 'GET',
-    url: '/:zipCode',
+    url: '/:zipCode?',
     schema: {
       params: Type.Object({
         zipCode: Type.Integer(),
@@ -30,12 +30,14 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      const { zipCode } = req.params as { zipCode?: number };
-      return new TableQueryBuilder(Locations, req)
-        .where({
-          zipCode: zipCode ? Like(`%${zipCode}%`) : undefined,
-        })
-        .exec();
+      const { zipCode } = req.params as { zipCode?: number | undefined };
+      if (zipCode !== undefined)
+        return new TableQueryBuilder(Locations, req)
+          .where({
+            zipCode: Like(`%${zipCode}%`),
+          })
+          .exec();
+      return new TableQueryBuilder(Locations, req).exec();
     },
   });
 };
