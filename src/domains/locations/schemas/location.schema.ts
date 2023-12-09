@@ -2,7 +2,7 @@ import { Type } from '@sinclair/typebox';
 
 export const LocationSchema = Type.Object({
   id: Type.Integer(),
-  zipCode: Type.Integer(),
+  zipCode: Type.String(),
   city: Type.String(),
   state: Type.String(),
   creator: Type.Integer(),

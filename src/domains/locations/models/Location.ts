@@ -14,8 +14,8 @@ export class Location {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ nullable: true })
-  zipCode!: number;
+  @Column({ type: 'varchar', nullable: true })
+  zipCode?: string | null;
 
   @Column({ type: 'varchar', nullable: true })
   city?: string | null;
