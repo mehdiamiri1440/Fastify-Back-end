@@ -12,7 +12,7 @@ const AppDataSource = new DataSource({
   url: DB_URL,
   synchronize: false,
   logging: DB_ENABLE_LOGGING === 'true',
-  dropSchema: DB_DROP_SCHEMA === 'true',
+  // dropSchema: DB_DROP_SCHEMA === 'true',
   entities: models,
   subscribers: [],
   ssl: {
