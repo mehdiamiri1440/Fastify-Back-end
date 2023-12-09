@@ -1,0 +1,4 @@
+ci/cd: github actions....
+
+
+github actions always deploy dev env and as soon as you accept the changes you'll promote to it to production  (with adding a tag)
