@@ -6,7 +6,7 @@ export const EstimationSchema = Type.Object({
   costPerKey: Type.Integer(),
   costPerSqFt: Type.Integer(),
   buildTime: Type.Integer(),
-  zipCode: Type.Integer(),
+  zipCode: Type.String(),
   rooms: Type.Integer(),
   creator: Type.Integer(),
   createdAt: Type.Union([Type.Date(), Type.String({ format: 'date' })]),

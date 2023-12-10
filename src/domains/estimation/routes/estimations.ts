@@ -19,14 +19,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'POST',
     url: '/generic',
     schema: {
-      body: Type.Pick(EstimationSchema, [
-        'totalProjectCost',
-        'costPerKey',
-        'costPerSqFt',
-        'buildTime',
-        'zipCode',
-        'rooms',
-      ]),
+      body: Type.Pick(EstimationSchema, ['zipCode', 'rooms']),
     },
     async handler(req) {
       const { rooms, zipCode } = req.body;
