@@ -13,7 +13,6 @@ import { Type } from '@sinclair/typebox';
 import { Like } from 'typeorm';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
-  const Locations = repo(Location);
   app.register(ResponseShape);
 
   app.route({
