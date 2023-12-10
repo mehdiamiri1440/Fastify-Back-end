@@ -31,6 +31,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     async handler(req) {
       const { rooms, zipCode } = req.body;
+      return { rooms, zipCode };
     },
   });
 };

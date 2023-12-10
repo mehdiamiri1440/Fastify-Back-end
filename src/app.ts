@@ -120,6 +120,13 @@ const app: FastifyPluginAsync<Options> = async (
       await fastify.register(import('./domains/locations/routes/locations'), {
         prefix: '/locations',
       });
+
+      await fastify.register(
+        import('./domains/estimation/routes/estimations'),
+        {
+          prefix: '/estimation',
+        },
+      );
     },
     {
       prefix: '/api/v1',
