@@ -23,7 +23,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     url: '/:zipCode?',
     schema: {
       params: Type.Object({
-        zipCode: Type.Integer(),
+        zipCode: Type.Optional(Type.Integer()),
       }),
       querystring: PaginatedQueryString({
         orderBy: OrderBy(['id', 'createdAt']),
