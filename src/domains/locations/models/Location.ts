@@ -17,7 +17,7 @@ export class Location {
   @Column({ type: 'varchar', nullable: true })
   zipCode?: string | null;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   city?: string | null;
 
   @Column({ type: 'varchar', nullable: true })
