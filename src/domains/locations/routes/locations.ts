@@ -12,7 +12,7 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import bcrypt from 'bcrypt';
 import { Location } from '../models/Location';
-import { Like } from 'typeorm';
+import { Equal, FindOperator, ILike, Like } from 'typeorm';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   const Locations = repo(Location);
@@ -30,13 +30,14 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       }),
     },
     async handler(req) {
-      const { zipCode } = req.params as { zipCode?: number | undefined };
-      if (zipCode !== undefined)
+      const { zipCode } = req.params as { zipCode?: string | undefined };
+      if (zipCode !== undefined) {
         return new TableQueryBuilder(Locations, req)
           .where({
             zipCode: Like(`%${zipCode}%`),
           })
           .exec();
+      }
       return new TableQueryBuilder(Locations, req).exec();
     },
   });
