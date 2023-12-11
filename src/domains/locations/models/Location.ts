@@ -17,11 +17,14 @@ export class Location {
   @Column({ type: 'varchar', nullable: true })
   zipCode?: string | null;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'float', nullable: true })
   city?: string | null;
 
   @Column({ type: 'varchar', nullable: true })
   state?: string | null;
+
+  @Column({ type: 'double precision', nullable: true })
+  factor?: number | null;
 
   @ManyToOne(() => User, { nullable: true })
   creator!: User;
