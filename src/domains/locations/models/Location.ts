@@ -20,9 +20,6 @@ export class Location {
   @Column({ type: 'varchar', nullable: true })
   city?: string | null;
 
-  @Column({ type: 'varchar', nullable: true })
-  state?: string | null;
-
   @Column({ type: 'double precision', nullable: false })
   factor: number;
 

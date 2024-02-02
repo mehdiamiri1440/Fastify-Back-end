@@ -36,6 +36,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
       if (!factor) factor = 1;
 
+      factor = factor / 100;
+
       const concrete = (226849 + 1521 * rooms) * factor;
       const masonry = (24124 + 885 * rooms) * factor;
       const metal = (23809 + 1073 * rooms) * factor;
@@ -44,17 +46,17 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       const openings = (156429 + 5587 * rooms) * factor;
       const finishes = (390178 + 14040 * rooms) * factor;
       const specialites = (0 + 1872 * rooms) * factor;
-      const equipment = (14000 + 1 * rooms) * factor;
+      const equipment = 14000 * factor;
       const furnishing = (50000 + 4522 * rooms) * factor;
-      const specialConstruction = (36460 + 1 * rooms) * factor;
-      const conveyingEquipment = (248468 + 1 * rooms) * factor;
+      const specialConstruction = 36460 * factor;
+      const conveyingEquipment = 248468 * factor;
       const fire = (70156 + 1865 * rooms) * factor;
       const plumbing = (173031 + 10637 * rooms) * factor;
       const HVAC = (333066 + 3500 * rooms) * factor;
       const electrical = (253168 + 9530 * rooms) * factor;
       const earthWork = (378261 + 152 * rooms) * factor;
-      const exteriorImprovements = (537776 + 1 * rooms) * factor;
-      const utilities = (548407 + 1 * rooms) * factor;
+      const exteriorImprovements = 537776 * factor;
+      const utilities = 548407 * factor;
       const generalRequirements =
         (0.064 +
           (concrete +
