@@ -13,6 +13,39 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { Like } from 'typeorm';
 
+interface BuildingFactors {
+  concrete: number;
+  masonry: number;
+  metal: number;
+  'wood and plastic': number;
+  'thermal and moisture': number;
+  openings: number;
+  finishes: number;
+  specialites: number;
+  furnishing: number;
+  HVAC: number;
+  electrical: number;
+  plumbing: number;
+  fire: number;
+  'conveying equipment': number;
+  'special construction': number;
+  equipment: number;
+  buildingCost?: number; // Add the new property
+}
+
+interface SiteWorkFactors {
+  siteWorkCost?: number;
+  'earth work': number;
+  'exterior improvements': number;
+  utilities: number;
+}
+
+interface GeneralFactors {
+  'general requirements': number;
+  'soft charges and fees': number;
+  generalFactorsCost?: number;
+}
+
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   const Locations = repo(Location);
   app.register(ResponseShape);
@@ -104,7 +137,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
             generalRequirements) *
             rooms) *
         factor;
-      const buildingFactors = {
+      const buildingFactors: BuildingFactors = {
         concrete,
         masonry,
         metal,
@@ -123,17 +156,41 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         equipment,
       };
 
+      const sumForBuilding = Object.values(buildingFactors).reduce(
+        (acc, currentValue) => acc + currentValue,
+        0,
+      );
+
+      buildingFactors.buildingCost = sumForBuilding;
+
+      const siteWorkFactors: SiteWorkFactors = {
+        'earth work': earthWork,
+        'exterior improvements': exteriorImprovements,
+        utilities,
+      };
+
+      const sumForSiteWork = Object.values(siteWorkFactors).reduce(
+        (acc, currentValue) => acc + currentValue,
+        0,
+      );
+
+      siteWorkFactors.siteWorkCost = sumForSiteWork;
+
+      const generalFactors: GeneralFactors = {
+        'general requirements': generalRequirements,
+        'soft charges and fees': softChargesAndFees,
+      };
+      const sumForGeneralFactors = Object.values(generalFactors).reduce(
+        (acc, currentValue) => acc + currentValue,
+        0,
+      );
+
+      generalFactors.generalFactorsCost = sumForGeneralFactors;
+
       return {
         buildingFactors,
-        siteWorkFactors: {
-          'earth work': earthWork,
-          'exterior improvements': exteriorImprovements,
-          utilities,
-        },
-        generalFactors: {
-          'general requirements': generalRequirements,
-          'soft charges and fees': softChargesAndFees,
-        },
+        siteWorkFactors,
+        generalFactors,
       };
     },
   });
