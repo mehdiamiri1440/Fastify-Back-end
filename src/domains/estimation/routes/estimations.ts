@@ -41,8 +41,7 @@ interface SiteWorkFactors {
 }
 
 interface GeneralFactors {
-  'general requirements': number;
-  'soft charges and fees': number;
+  'GC Charges': number;
   generalFactorsCost?: number;
 }
 
@@ -67,7 +66,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         })
       )?.factor;
 
-      if (!factor) factor = 1;
+      if (!factor) factor = 100;
 
       factor = factor / 100;
 
@@ -156,7 +155,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         equipment,
       };
 
-      const sumForBuilding = Object.values(buildingFactors).reduce(
+      const sumForBuilding: number = Object.values(buildingFactors).reduce(
         (acc, currentValue) => acc + currentValue,
         0,
       );
@@ -169,7 +168,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         utilities,
       };
 
-      const sumForSiteWork = Object.values(siteWorkFactors).reduce(
+      const sumForSiteWork: number = Object.values(siteWorkFactors).reduce(
         (acc, currentValue) => acc + currentValue,
         0,
       );
@@ -177,20 +176,34 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       siteWorkFactors.siteWorkCost = sumForSiteWork;
 
       const generalFactors: GeneralFactors = {
-        'general requirements': generalRequirements,
-        'soft charges and fees': softChargesAndFees,
+        'GC Charges': generalRequirements,
       };
       const sumForGeneralFactors = Object.values(generalFactors).reduce(
         (acc, currentValue) => acc + currentValue,
         0,
       );
 
-      generalFactors.generalFactorsCost = sumForGeneralFactors;
+      generalFactors.generalFactorsCost =
+        (buildingFactors?.buildingCost + siteWorkFactors?.siteWorkCost) *
+        0.18841;
+
+      const totalProjectCost =
+        generalFactors.generalFactorsCost +
+        siteWorkFactors.siteWorkCost +
+        buildingFactors.buildingCost;
+
+      const projectFactors = [
+        { id: 1, name: 'Total Project Cost', cost: totalProjectCost },
+        { id: 2, name: 'Cost Per Key', cost: '$121,776' },
+        { id: 3, name: 'Cost Per Square Foot', cost: '$262' },
+        { id: 4, name: 'Build Time', cost: '14_Months' },
+      ];
 
       return {
         buildingFactors,
         siteWorkFactors,
         generalFactors,
+        projectFactors,
       };
     },
   });
