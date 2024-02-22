@@ -74,12 +74,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         kingOneQuantity = 5,
         doubleQueenQuantity = 20,
         adaQuantity = 9,
-        floors = 0,
+        floors = 4,
         storyHeight = 10,
-        primeter,
       } = req.body;
 
-      let { totalSqFt } = req.body;
+      let { totalSqFt, primeter } = req.body;
 
       let factor = (
         await Locations.findOne({
@@ -247,6 +246,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
           cost: Math.trunc(totalProjectCost),
         },
       ];
+
+      if (!primeter) primeter = (totalSqFt / floors) * 0.0428;
 
       return {
         buildingFactors,
