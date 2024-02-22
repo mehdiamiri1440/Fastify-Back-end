@@ -35,8 +35,8 @@ interface BuildingFactors {
 
 interface SiteWorkFactors {
   siteWorkCost?: number;
-  'earth work': number;
-  'exterior improvements': number;
+  Earthwork: number;
+  'Exterior Improvements': number;
   utilities: number;
 }
 
@@ -53,10 +53,33 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     method: 'POST',
     url: '/generic',
     schema: {
-      body: Type.Pick(EstimationSchema, ['zipCode', 'rooms']),
+      body: Type.Pick(EstimationSchema, [
+        'zipCode',
+        'rooms',
+        'kingStudioQuantity',
+        'kingOneQuantity',
+        'doubleQueenQuantity',
+        'adaQuantity',
+        'floors',
+        'storyHeight',
+        'primeter',
+        'totalSqFt',
+      ]),
     },
     async handler(req) {
-      const { rooms, zipCode } = req.body;
+      const {
+        rooms,
+        zipCode,
+        kingStudioQuantity = 125,
+        kingOneQuantity = 5,
+        doubleQueenQuantity = 20,
+        adaQuantity = 9,
+        floors = 0,
+        storyHeight = 10,
+        primeter,
+      } = req.body;
+
+      let { totalSqFt } = req.body;
 
       let factor = (
         await Locations.findOne({
@@ -163,8 +186,8 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       buildingFactors.buildingCost = sumForBuilding;
 
       const siteWorkFactors: SiteWorkFactors = {
-        'earth work': earthWork,
-        'exterior improvements': exteriorImprovements,
+        Earthwork: earthWork,
+        'Exterior Improvements': exteriorImprovements,
         utilities,
       };
 
@@ -176,7 +199,9 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       siteWorkFactors.siteWorkCost = sumForSiteWork;
 
       const generalFactors: GeneralFactors = {
-        'GC Charges': generalRequirements,
+        'GC Charges':
+          (buildingFactors?.buildingCost + siteWorkFactors?.siteWorkCost) *
+          0.18841,
       };
       const sumForGeneralFactors = Object.values(generalFactors).reduce(
         (acc, currentValue) => acc + currentValue,
@@ -192,11 +217,35 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         siteWorkFactors.siteWorkCost +
         buildingFactors.buildingCost;
 
+      if (!totalSqFt)
+        totalSqFt =
+          (kingStudioQuantity * 348 +
+            kingOneQuantity * 539 +
+            doubleQueenQuantity * 437 +
+            adaQuantity * 575) *
+          1.43;
+
       const projectFactors = [
-        { id: 1, name: 'Total Project Cost', cost: totalProjectCost },
-        { id: 2, name: 'Cost Per Key', cost: '$121,776' },
-        { id: 3, name: 'Cost Per Square Foot', cost: '$262' },
-        { id: 4, name: 'Build Time', cost: '14_Months' },
+        {
+          id: 1,
+          name: 'Build Time',
+          cost: Math.round(rooms / 8.33 + (rooms + (rooms > 100 ? 6 : 5))),
+        },
+        {
+          id: 2,
+          name: 'Cost Per Key',
+          cost: Math.round(totalProjectCost / rooms),
+        },
+        {
+          id: 3,
+          name: 'Cost Per Square Foot',
+          cost: Math.round(totalProjectCost / totalSqFt),
+        },
+        {
+          id: 4,
+          name: 'Total Project Cost',
+          cost: Math.trunc(totalProjectCost),
+        },
       ];
 
       return {
