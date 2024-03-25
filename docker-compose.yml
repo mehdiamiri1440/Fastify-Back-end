@@ -10,6 +10,13 @@ services:
       - raap-postgresql
     env_file:
       - ./.env
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3003/health']
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 5s
 
   raap-postgresql:
     image: postgres:latest
@@ -17,6 +24,7 @@ services:
     ports:
       - '5432:5432'
     environment:
-      POSTGRES_USER: user
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: postgres
+    restart: unless-stopped

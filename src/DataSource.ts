@@ -12,15 +12,16 @@ const AppDataSource = new DataSource({
   url: DB_URL,
   synchronize: false,
   logging: DB_ENABLE_LOGGING === 'true',
-  // dropSchema: DB_DROP_SCHEMA === 'true',
+  dropSchema: DB_DROP_SCHEMA === 'true',
   entities: models,
   subscribers: [],
-  ssl: {
-    rejectUnauthorized: false, // You may want to change this to true in production
-  },
+  ssl: true,
+  // ssl: {
+  //   rejectUnauthorized: false, // You may want to change this to true in production
+  // },
   migrations: ['migrations/*.ts'],
   namingStrategy: new SnakeNamingStrategy(),
-  connectTimeoutMS: 10000,
+  connectTimeoutMS: 1000000,
 });
 
 export default AppDataSource;
