@@ -61,24 +61,22 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         'doubleQueenQuantity',
         'adaQuantity',
         'floors',
-        'storyHeight',
-        'primeter',
+        'perimeter',
         'totalSqFt',
       ]),
     },
     async handler(req) {
       const {
-        rooms,
+        rooms = 28,
         zipCode,
         kingStudioQuantity = 125,
         kingOneQuantity = 5,
         doubleQueenQuantity = 20,
         adaQuantity = 9,
         floors = 4,
-        storyHeight = 10,
       } = req.body;
 
-      let { totalSqFt, primeter } = req.body;
+      let { totalSqFt, perimeter } = req.body;
 
       let factor = (
         await Locations.findOne({
@@ -92,25 +90,105 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
       factor = factor / 100;
 
-      const concrete = (226849 + 1521 * rooms) * factor;
-      const masonry = (24124 + 885 * rooms) * factor;
-      const metal = (23809 + 1073 * rooms) * factor;
-      const woodAndPlastic = (271590 + 17845 * rooms) * factor;
-      const thermalAndMoisture = (271317 + 4396 * rooms) * factor;
-      const openings = (156429 + 5587 * rooms) * factor;
-      const finishes = (390178 + 14040 * rooms) * factor;
-      const specialites = (0 + 1872 * rooms) * factor;
-      const equipment = 14000 * factor;
-      const furnishing = (50000 + 4522 * rooms) * factor;
-      const specialConstruction = 36460 * factor;
-      const conveyingEquipment = 248468 * factor;
-      const fire = (70156 + 1865 * rooms) * factor;
-      const plumbing = (173031 + 10637 * rooms) * factor;
-      const HVAC = (333066 + 3500 * rooms) * factor;
-      const electrical = (253168 + 9530 * rooms) * factor;
-      const earthWork = (378261 + 152 * rooms) * factor;
-      const exteriorImprovements = 537776 * factor;
-      const utilities = 548407 * factor;
+      if (!totalSqFt || totalSqFt === 0)
+        totalSqFt =
+          (kingStudioQuantity * 348 +
+            kingOneQuantity * 539 +
+            doubleQueenQuantity * 437 +
+            adaQuantity * 575) *
+          1.43;
+
+      if (!perimeter) perimeter = (totalSqFt / floors) * 0.0428;
+      const concrete =
+        (-24617.88 -
+          341.03 * rooms -
+          2524.81 * floors +
+          4.51 * totalSqFt +
+          426.32 * perimeter) *
+        factor;
+      const masonry = (4445.41 + 341.95 * rooms + 22543 * floors) * factor;
+      const metal = 2.82 * totalSqFt * factor;
+      const woodAndPlastic =
+        (-735068.73 -
+          50789.21 * rooms -
+          336022.34 * floors +
+          171.58 * totalSqFt +
+          346.92 * perimeter) *
+        factor;
+      const thermalAndMoisture =
+        (-84076.81 -
+          1042.58 * rooms +
+          14297.25 * floors +
+          11.98 * totalSqFt +
+          473.33 * perimeter) *
+        factor;
+      const openings =
+        (115717.36 +
+          2829.97 * rooms +
+          3221.5 * floors +
+          4.91 * totalSqFt +
+          1.65 * perimeter) *
+        factor;
+
+      const finishes =
+        (-1444106.64 -
+          101008.92 * rooms -
+          697637.08 * floors +
+          290.09 * totalSqFt +
+          433.06 * perimeter) *
+        factor;
+
+      const specialites = 2196.52 * rooms * factor;
+
+      const equipment = 16607.17 * factor;
+
+      const furnishing = (47801.15 + 4927.26 * rooms) * factor;
+      const specialConstruction = 42866.14 * factor;
+
+      const conveyingEquipment = 263503.21 * factor;
+
+      const fire =
+        (10254.2 -
+          75.09 * rooms +
+          3176.98 * floors +
+          4.83 * totalSqFt +
+          32.18 * perimeter) *
+        factor;
+
+      const plumbing =
+        (153521.31 +
+          8761.87 * rooms -
+          2484.54 * floors +
+          6.81 * totalSqFt +
+          0.82 * perimeter) *
+        factor;
+
+      const HVAC = (403530.82 + 3909.31 * rooms) * factor;
+
+      const electrical =
+        (106136.19 + 2790.83 * rooms + 18.06 * totalSqFt) * factor;
+      const earthWork =
+        (-145700.47 -
+          2018.41 * rooms -
+          14943.03 * floors +
+          5.13 * totalSqFt +
+          935.03 * perimeter) *
+        factor;
+
+      const exteriorImprovements =
+        (-191269.25 -
+          2649.68 * rooms -
+          19616.56 * floors +
+          6.74 * totalSqFt +
+          1135.46 * perimeter) *
+        factor;
+      const utilities =
+        (-195050.35 -
+          2702.06 * rooms -
+          20004.35 * floors +
+          6.87 * totalSqFt +
+          1157.9 * perimeter) *
+        factor;
       const generalRequirements =
         (0.064 +
           (concrete +
@@ -216,14 +294,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         siteWorkFactors.siteWorkCost +
         buildingFactors.buildingCost;
 
-      if (!totalSqFt)
-        totalSqFt =
-          (kingStudioQuantity * 348 +
-            kingOneQuantity * 539 +
-            doubleQueenQuantity * 437 +
-            adaQuantity * 575) *
-          1.43;
-
       const projectFactors = [
         {
           id: 1,
@@ -247,7 +317,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         },
       ];
 
-      if (!primeter) primeter = (totalSqFt / floors) * 0.0428;
+      if (!perimeter) perimeter = (totalSqFt / floors) * 0.0428;
 
       return {
         buildingFactors,
