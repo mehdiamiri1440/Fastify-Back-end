@@ -27,9 +27,14 @@ const app: FastifyPluginAsync<Options> = async (
   await fastify.register(import('./infra/error-handlers/typeorm'));
 
   await fastify.register(import('@fastify/cors'), {
-    origin: 'https://raap-portal.pages.dev', // Allow requests only from this origin
+    origin: '*', // Allow requests only from this origin
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Define the allowed HTTP methods
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Access-Control-Allow-Origin',
+    ],
     optionsSuccessStatus: 200,
     maxAge: 3600, // cache for 1 hour
     exposedHeaders: ['Content-Disposition'],
