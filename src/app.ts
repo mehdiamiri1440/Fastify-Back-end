@@ -27,7 +27,7 @@ const app: FastifyPluginAsync<Options> = async (
   await fastify.register(import('./infra/error-handlers/typeorm'));
 
   await fastify.register(import('@fastify/cors'), {
-    origin: '*', // Allow requests only from this origin
+    origin: '*',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Define the allowed HTTP methods
     allowedHeaders: [

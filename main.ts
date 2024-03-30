@@ -11,7 +11,8 @@ async function main() {
   });
 
   const port = process.env.PORT ? Number(process.env.PORT) : 3003;
-  const appUrl = process.env.APP_URL ?? `http://localhost:${port}`;
+
+  const appUrl = process.env.APP_URL ?? 'http://aws.raapbuilders.com';
 
   await fastify.register(import('./src/app'), {
     url: appUrl,
