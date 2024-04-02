@@ -68,7 +68,6 @@ const app: FastifyPluginAsync<Options> = async (
   await fastify.register(import('@fastify/jwt'), {
     secret: JWT_SECRET,
   });
-
   await fastify.register(import('$src/infra/authorization'));
   await fastify.register(import('$src/infra/RouteValidator'));
 

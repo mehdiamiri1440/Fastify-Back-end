@@ -36,9 +36,6 @@ export class User implements Static<typeof UserSchemaWithoutRelations> {
   @ManyToOne(() => Role, { nullable: false })
   role!: Relation<Role>;
 
-  @Column({ nullable: false })
-  nif!: string;
-
   @Column({ unique: true, nullable: false })
   email!: string;
 
@@ -51,9 +48,6 @@ export class User implements Static<typeof UserSchemaWithoutRelations> {
 
   @Column({ nullable: false })
   password!: string;
-
-  @Column({ type: 'text', nullable: true })
-  position?: string | null;
 
   @Column({ nullable: false })
   isActive!: boolean;
