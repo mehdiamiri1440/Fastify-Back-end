@@ -5,6 +5,7 @@ import { SwaggerTheme } from 'swagger-themes';
 import permissions from './permissions';
 import { join } from 'path';
 import { readFileSync } from 'fs';
+import { FastifyReply, FastifyRequest } from 'fastify';
 
 export interface Options {
   /**
@@ -68,6 +69,16 @@ const app: FastifyPluginAsync<Options> = async (
   await fastify.register(import('@fastify/jwt'), {
     secret: JWT_SECRET,
   });
+  fastify.decorate(
+    'authenticate',
+    async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+      try {
+        await request.jwtVerify();
+      } catch (error) {
+        reply.send(error);
+      }
+    },
+  );
   await fastify.register(import('$src/infra/authorization'));
   await fastify.register(import('$src/infra/RouteValidator'));
 

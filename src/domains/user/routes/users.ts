@@ -13,6 +13,7 @@ import { Type } from '@sinclair/typebox';
 import bcrypt from 'bcrypt';
 import { Role } from '../../user/models/Role';
 import { User } from '../../user/models/User';
+import { JwtPayload } from '$src/infra/authorization';
 
 const plugin: FastifyPluginAsyncTypebox = async function (app) {
   app.register(ResponseShape);
@@ -186,6 +187,27 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       await Users.update({ id }, { isActive });
     },
   });
+
+  //made by mehdi. this part till down was not in the main structure by Erfan.
+
+  app.route({
+    method: 'POST',
+    url: '/login',
+    schema: {
+      body: Type.Pick(UserSchema, ['email', 'password']),
+    },
+    async handler(req, reply) {
+      const user = await Users.findOneBy({ email: req.body.email });
+      if (!user) throw new Error('Invalid data');
+      if (user.password !== req.body.password) throw new Error('Invalid data');
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
+      const token = app.jwt.sign({ user });
+      reply.code(200).send({ token });
+    },
+  });
 };
 
 export default plugin;
+
+//,market hype and investors sentiments and founder data
