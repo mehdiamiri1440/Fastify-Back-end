@@ -77,7 +77,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       } = req.body;
 
       let { totalSqFt, perimeter } = req.body;
-
       let factor = (
         await Locations.findOne({
           where: {
@@ -255,6 +254,23 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         equipment,
       };
 
+      interface BuildingFactors {
+        [key: string]: number; // Add index signature allowing indexing with a string
+        // Define other properties and their types if needed
+      }
+      interface SiteWorkFactors {
+        [key: string]: number; // Add index signature allowing indexing with a string
+        // Define other properties and their types if needed
+      }
+      interface GeneralFactors {
+        [key: string]: number; // Add index signature allowing indexing with a string
+        // Define other properties and their types if needed
+      }
+
+      for (const key in buildingFactors) {
+        buildingFactors[key] = parseInt(buildingFactors[key].toFixed(0));
+      }
+
       const sumForBuilding: number = Object.values(buildingFactors).reduce(
         (acc, currentValue) => acc + currentValue,
         0,
@@ -275,6 +291,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
       siteWorkFactors.siteWorkCost = sumForSiteWork;
 
+      for (const key in siteWorkFactors) {
+        siteWorkFactors[key] = parseInt(siteWorkFactors[key].toFixed(0));
+      }
+
       const generalFactors: GeneralFactors = {
         'GC Charges':
           (buildingFactors?.buildingCost + siteWorkFactors?.siteWorkCost) *
@@ -288,6 +308,10 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       generalFactors.generalFactorsCost =
         (buildingFactors?.buildingCost + siteWorkFactors?.siteWorkCost) *
         0.18841;
+
+      for (const key in generalFactors) {
+        generalFactors[key] = parseInt(generalFactors[key].toFixed(0));
+      }
 
       const totalProjectCost =
         generalFactors.generalFactorsCost +

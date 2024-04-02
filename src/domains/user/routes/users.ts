@@ -209,5 +209,3 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 };
 
 export default plugin;
-
-//,market hype and investors sentiments and founder data
