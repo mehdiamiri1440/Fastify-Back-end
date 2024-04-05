@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class LocationTable1711328575998 implements MigrationInterface {
-  name = 'LocationTable1711328575998';
+export class ChangeLocation1712264355254 implements MigrationInterface {
+  name = 'ChangeLocation1712264355254';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -19,7 +19,7 @@ export class LocationTable1711328575998 implements MigrationInterface {
       ],
     );
     await queryRunner.query(
-      `CREATE TABLE "user" ("id" SERIAL NOT NULL, "first_name" character varying NOT NULL, "last_name" character varying NOT NULL, "full_name" character varying GENERATED ALWAYS AS ("first_name" || ' ' || "last_name") STORED NOT NULL, "nif" character varying NOT NULL, "email" character varying NOT NULL, "phone_number" text, "password" character varying NOT NULL, "position" text, "is_active" boolean NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now(), "deleted_at" TIMESTAMP, "role_id" integer NOT NULL, "creator_id" integer, CONSTRAINT "UQ_e12875dfb3b1d92d7d7c5377e22" UNIQUE ("email"), CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "user" ("id" SERIAL NOT NULL, "first_name" character varying NOT NULL, "last_name" character varying NOT NULL, "full_name" character varying GENERATED ALWAYS AS ("first_name" || ' ' || "last_name") STORED NOT NULL, "email" character varying NOT NULL, "phone_number" text, "password" character varying NOT NULL, "is_active" boolean NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now(), "deleted_at" TIMESTAMP, "role_id" integer NOT NULL, "creator_id" integer, CONSTRAINT "UQ_e12875dfb3b1d92d7d7c5377e22" UNIQUE ("email"), CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE UNIQUE INDEX "IDX_1981220360b22b4b6bf36c591e" ON "user" ("phone_number") WHERE (phone_number IS NOT NULL)`,
