@@ -67,7 +67,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
     },
     async handler(req) {
       const {
-        rooms = 28,
+        rooms = 100,
         zipCode,
         kingStudioQuantity = 125,
         kingOneQuantity = 5,
@@ -322,7 +322,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         {
           id: 1,
           name: 'Build Time',
-          cost: Math.round(rooms / 8.33 + (rooms + (rooms > 100 ? 6 : 5))),
+          cost: Math.round(rooms / 8.33 + (rooms > 100 ? 6 : 5)),
         },
         {
           id: 2,
