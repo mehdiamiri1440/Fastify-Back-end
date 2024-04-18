@@ -1,5 +1,5 @@
 {
-  "name": "inventory-backend",
+  "name": "inventory-backend-main",
   "description": "",
   "main": "src/app.ts",
   "type": "commonjs",
