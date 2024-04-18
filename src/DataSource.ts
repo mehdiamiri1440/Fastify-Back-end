@@ -16,9 +16,9 @@ const AppDataSource = new DataSource({
   entities: models,
   subscribers: [],
   //ssl: true,
-  // ssl: {
-  //   rejectUnauthorized: false, // You may want to change this to true in production
-  // },
+  ssl: {
+    rejectUnauthorized: false, // You may want to change this to true in production
+  },
   migrations: ['migrations/*.ts'],
   namingStrategy: new SnakeNamingStrategy(),
   connectTimeoutMS: 1000000,
