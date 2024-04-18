@@ -144,7 +144,7 @@ const app: FastifyPluginAsync<Options> = async (
       );
     },
     {
-      prefix: '/api/v1',
+      prefix: '/test/api/v1',
     },
   );
 };
