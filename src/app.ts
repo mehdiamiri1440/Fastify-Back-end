@@ -21,7 +21,7 @@ const app: FastifyPluginAsync<Options> = async (
   fastify,
   { url, appVersion },
 ) => {
-  const { JWT_SECRET, SWAGGER_UI_VALIDATOR_URL } = process.env;
+  const { JWT_SECRET, SWAGGER_UI_VALIDATOR_URL, URL_PREFIX } = process.env;
   assert(JWT_SECRET, 'JWT_SECRET env var not provided');
 
   await fastify.register(import('./databases/typeorm'));
@@ -144,7 +144,7 @@ const app: FastifyPluginAsync<Options> = async (
       );
     },
     {
-      prefix: '/test/api/v1',
+      prefix: `${URL_PREFIX}`,
     },
   );
 };
