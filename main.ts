@@ -9,7 +9,7 @@ async function main() {
     pluginTimeout: 60000,
     ajv: ajvOptions,
   });
-  const port = process.env.PORT ? Number(process.env.PORT) : 3004;
+  const port = Number(process.env.APP_PORT);
 
   const appUrl = process.env.APP_URL ?? 'https://aws.raapbuilders.com';
 
