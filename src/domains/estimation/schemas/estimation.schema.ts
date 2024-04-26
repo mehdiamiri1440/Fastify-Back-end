@@ -8,6 +8,7 @@ export const EstimationSchema = Type.Object({
   kingStudioQuantity: Type.Optional(Type.Integer()),
   kingOneQuantity: Type.Optional(Type.Integer()),
   adaQuantity: Type.Optional(Type.Integer()),
+  userInputDoubleQueenQuantity: Type.Optional(Type.Integer()),
   doubleQueenQuantity: Type.Optional(Type.Integer()),
   floors: Type.Optional(Type.Integer()),
   perimeter: Type.Optional(Type.Integer()),
