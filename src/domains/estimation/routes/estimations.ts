@@ -63,14 +63,12 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         'floors',
         'perimeter',
         'totalSqFt',
-        'userInputDoubleQueenQuantity',
       ]),
     },
     async handler(req) {
       const {
         rooms = 100,
         zipCode,
-        userInputDoubleQueenQuantity = 0,
         // kingStudioQuantity = 125,
         // kingOneQuantity = 5,
         // doubleQueenQuantity = 20,
@@ -81,11 +79,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
       let {
         floors,
         kingOneQuantity,
-        doubleQueenQuantity = 0,
+        doubleQueenQuantity,
         kingStudioQuantity,
         adaQuantity,
       } = req.body;
-      let serverDoubleQuantity = 0;
+
       let { totalSqFt, perimeter } = req.body;
       let factor = (
         await Locations.findOne({
@@ -100,16 +98,7 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
 
       floors = Math.ceil(rooms / 28);
       kingOneQuantity = floors * 2;
-
       doubleQueenQuantity = (floors - 1) * 5 + 1;
-      serverDoubleQuantity = doubleQueenQuantity;
-      if (
-        userInputDoubleQueenQuantity !== doubleQueenQuantity &&
-        userInputDoubleQueenQuantity !== 0
-      ) {
-        doubleQueenQuantity = userInputDoubleQueenQuantity;
-      }
-
       kingStudioQuantity = rooms - doubleQueenQuantity - kingOneQuantity;
       adaQuantity = floors * 2 - 1;
 
@@ -387,8 +376,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         factor,
         'total sq ft--->',
         totalSqFt,
-        'server queen',
-        serverDoubleQuantity,
         'double queen',
         doubleQueenQuantity,
         'king one',
@@ -412,7 +399,6 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         kingStudioQuantity,
         perimeter,
         doubleQueenQuantity,
-        serverDoubleQuantity,
         totalSqFt,
         adaQuantity,
         buildingFactors,
