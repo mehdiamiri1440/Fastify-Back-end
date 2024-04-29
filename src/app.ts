@@ -97,7 +97,7 @@ const app: FastifyPluginAsync<Options> = async (
           validatorUrl: SWAGGER_UI_VALIDATOR_URL || null,
         },
         theme: {
-          title: `Raap API v${appVersion}`,
+          title: `RaaP API v${appVersion}`,
           css: [
             {
               filename: 'theme.css',

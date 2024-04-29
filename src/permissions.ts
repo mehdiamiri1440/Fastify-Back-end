@@ -168,4 +168,10 @@ export default {
 
   // statistic
   'statistics@counts::view': 'with this permission you can see the statistics',
+
+  //estimation
+  'estimation@estimation::view':
+    'with this permission you can see the estimations',
+  'estimation@estimation::update':
+    'with this permission you can edit the estimations',
 };
