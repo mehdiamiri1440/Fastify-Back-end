@@ -47,7 +47,7 @@ pipeline {
                     // Use SSH key authentication instead
 
                     sh """
-                    scp -r ./dist ubuntu@52.53.221.101:/home/ubuntu/pipeline-test/Fastify-Back-end
+                    scp -r .
                     ssh ubuntu@52.53.221.101 'bash /home/ubuntu/pipeline-test/Fastify-Back-end/deploy.sh'  // Assuming you have a deploy.sh script
                     """
                 }
