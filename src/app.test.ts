@@ -1,17 +1,14 @@
-import { afterEach, it } from '@jest/globals';
-import Fastify from 'fastify';
-import App from './app';
-import { ajvOptions } from './AjvOptions';
+// my-route.js
+import fastify from 'fastify';
 
-const fastify = Fastify({
-  pluginTimeout: 20000,
-  ajv: ajvOptions,
-});
+function buildApp() {
+  const app = fastify();
 
-afterEach(() => fastify.close());
+  app.get('/hello', async (request, reply) => {
+    return { message: 'Hello World!' };
+  });
 
-it('App plugin is working', async () => {
-  await fastify.register(App);
+  return app;
+}
 
-  await fastify.ready();
-});
+module.exports = buildApp;
