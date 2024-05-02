@@ -1,14 +1,15 @@
-// my-route.js
-import fastify from 'fastify';
+// Simple Jest Test
+import 'reflect-metadata';
+import { afterAll, beforeAll, expect, it, describe, test } from '@jest/globals';
 
-function buildApp() {
-  const app = fastify();
+test('adds 1 + 2 to equal 3', () => {
+  // Arrange
+  const a = 1;
+  const b = 2;
 
-  app.get('/hello', async (request, reply) => {
-    return { message: 'Hello World!' };
-  });
+  // Act
+  const result = a + b;
 
-  return app;
-}
-
-module.exports = buildApp;
+  // Assert
+  expect(result).toBe(3);
+});
