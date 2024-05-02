@@ -64,6 +64,11 @@ const plugin: FastifyPluginAsyncTypebox = async function (app) {
         'perimeter',
         'totalSqFt',
       ]),
+      security: [
+        {
+          OAuth2: ['estimation@estimation::view'],
+        },
+      ],
     },
     async handler(req) {
       const {

@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', credentialsId: 'a500315e-1307-45fc-a4e6-eeda0e5c7e11', url: 'https://github.com/mehdiamiri1440/Fastify-Back-end.git'
+            }
+        }
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install' // Installs project dependencies from package.json
+            }
+        }
+        stage('Type Checking (Optional)') {
+            when {
+                expression { // Run only if a 'check' script exists in package.json
+                    return sh script: 'npm list scripts | grep check', returnStdout: true
+                }
+            }
+            steps {
+                sh 'npm run check' // Runs type checking (if applicable)
+            }
+        }
+        stage('Build') {
+            steps {
+                // Assuming you don't have a dedicated build script
+                // sh 'npm run dev'  // Remove this line
+                
+                // Replace with your actual build command (if you have one)
+                // Example: Build with Typescript and Fastify CLI
+                sh 'tsc && fastify build'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'npm test' // Runs your test suite
+            }
+        }
+        stage('Deploy (Optional)') {
+            steps {
+                script {
+                    // **Security:** Avoid storing SSH credentials directly in Jenkinsfile
+                    // def serverIp = 'ec2-52-53-221-101.us-west-1.compute.amazonaws.com'
+                    // def username = 'ubuntu'
+                    
+                    // Use SSH key authentication instead
+
+                    sh """
+                    scp -r ./dist ubuntu@52.53.221.101:/home/ubuntu/pipeline-test/Fastify-Back-end
+                    ssh ubuntu@52.53.221.101 'bash /home/ubuntu/pipeline-test/Fastify-Back-end/deploy.sh'  // Assuming you have a deploy.sh script
+                    """
+                }
+            }
+        }
+    }
+}
