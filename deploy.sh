@@ -6,8 +6,6 @@ cd /home/ubuntu/pipeline-test/Fastify-Back-end
 # Stop the existing application (if running) - adapt this command if needed
 pm2 stop my-app-name
 
-# Copy the new application files from the deployed directory (replace if different)
-cp -r ./dist/* .
 
 # Install dependencies (if needed, adjust based on your project setup)
 npm install
