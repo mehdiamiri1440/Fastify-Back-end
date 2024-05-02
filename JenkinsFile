@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', credentialsId: 'a500315e-1307-45fc-a4e6-eeda0e5c7e11', url: 'https://github.com/mehdiamiri1440/Fastify-Back-end.git'
+                git branch: 'ci/cd', credentialsId: 'a500315e-1307-45fc-a4e6-eeda0e5c7e11', url: 'https://github.com/mehdiamiri1440/Fastify-Back-end.git'
             }
         }
         stage('Install Dependencies') {
