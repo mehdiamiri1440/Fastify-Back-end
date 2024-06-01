@@ -1,57 +1,52 @@
 pipeline {
-    agent any
+  agent any
 
-    stages {
-        stage('Checkout Code') {
-            steps {
-                git branch: 'ci/cd', credentialsId: 'a500315e-1307-45fc-a4e6-eeda0e5c7e11', url: 'https://github.com/mehdiamiri1440/Fastify-Back-end.git'
-            }
-        }
-        stage('Install Dependencies') {
-            steps {
-                sh 'npm install' // Installs project dependencies from package.json
-            }
-        }
-        stage('Type Checking (Optional)') {
-            when {
-                expression { // Run only if a 'check' script exists in package.json
-                    return sh script: 'npm list scripts | grep check', returnStdout: true
-                }
-            }
-            steps {
-                sh 'npm run check' // Runs type checking (if applicable)
-            }
-        }
-        stage('Build') {
-            steps {
-                // Assuming you don't have a dedicated build script
-                // sh 'npm run dev'  // Remove this line
-                
-                // Replace with your actual build command (if you have one)
-                // Example: Build with Typescript and Fastify CLI
-                sh 'tsc && fastify build'
-            }
-        }
-        stage('Test') {
-            steps {
-                sh 'npm test' // Runs your test suite
-            }
-        }
-        stage('Deploy (Optional)') {
-            steps {
-                script {
-                    // **Security:** Avoid storing SSH credentials directly in Jenkinsfile
-                    // def serverIp = 'ec2-52-53-221-101.us-west-1.compute.amazonaws.com'
-                    // def username = 'ubuntu'
-                    
-                    // Use SSH key authentication instead
-
-                    sh """
-                    scp -r .
-                    ssh ubuntu@52.53.221.101 'bash /home/ubuntu/pipeline-test/Fastify-Back-end/deploy.sh'  // Assuming you have a deploy.sh script
-                    """
-                }
-            }
-        }
+  stages {
+    stage('Checkout Code') {
+      steps {
+        // Use SSH URL format with credentials ID for your SSH private key
+        git branch: 'ci/cd', credentialsId: '39d76136-c4a2-4364-87c2-92883fecb6cd', url: 'https://github.com/mehdiamiri1440/Fastify-Back-end.git'
+      }
     }
+    stage('Install Dependencies') {
+      steps {
+        sh 'npm install' // Installs project dependencies from package.json
+      }
+    }
+
+    stage('Build') {
+      steps {
+        // Assuming you don't have a dedicated build script
+        // sh 'npm run dev' // Remove this line
+
+        // Replace with your actual build command (if you have one)
+        // Example: Build with Typescript and Fastify CLI
+        sh 'npm run dev'
+      }
+    }
+    stage('Test') {
+      steps {
+        sh 'npm test' // Runs your test suite
+      }
+    }
+    stage('Deploy (Optional)') {
+      steps {
+        script {
+          // **Security:** Avoid storing SSH credentials directly in Jenkinsfile
+          // **Configuration:** Make sure your SSH private key is configured
+          //   using a credential plugin (e.g., Credentials Plugin or SSH Credentials Plugin)
+          //   with ID 'your_ssh_credential_id'
+
+          // Change "." to specify the directory or files you want to copy
+         withCredentials([usernamePassword(credentialsId: '39d76136-c4a2-4364-87c2-92883fecb6cd', usernameVariable: 'SSH_USERNAME', passwordVariable: 'SSH_PASSWORD')]) {
+    sh """
+    scp -r -i /home/mehdi/.ssh/id_rsa.pub /home/mehdi/Desktop/projects/Fastify-Back-end ubuntu@ec2-52-53-221-101.us-west-1.compute.amazonaws.com:/home/ubuntu/pipeline-test/Fastify-Back-end/
+    ssh -i /home/mehdi/.ssh/id_rsa.pub ubuntu@ec2-52-53-221-101.us-west-1.compute.amazonaws.com 'bash /home/ubuntu/pipeline-test/Fastify-Back-end/deploy.sh' // Assuming you have a deploy.sh script
+    """
+}
+
+        }
+      }
+    }
+  }
 }
