@@ -1,22 +1,55 @@
-version: '3'
+# version: '3'
+# services:
+#   fastify-back-end_fastify-app_1:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     ports:
+#       - '3003:3003'
+#     depends_on:
+#       - raap-postgresql
+#     env_file:
+#       - ./.env
+#     restart: unless-stopped
+#     healthcheck:
+#       test: ['CMD', 'curl', '-f', 'http://localhost:3003/health']
+#       interval: 10s
+#       retries: 5
+#       start_period: 30s
+#       timeout: 5s
+
+#   raap-postgresql:
+#     image: postgres:latest
+#     container_name: raap-postgresql
+#     ports:
+#       - '5432:5432'
+#     environment:
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: password
+#       POSTGRES_DB: postgres
+#     restart: unless-stopped
+version: '3.8'
+
 services:
   fastify-back-end_fastify-app_1:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - '3003:3003'
+      - '3004:3004' # Ensure the port matches the port your Fastify app is listening on
     depends_on:
       - raap-postgresql
     env_file:
       - ./.env
     restart: unless-stopped
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:3003/health']
+      test: ['CMD', 'curl', '-f', 'http://localhost:3004/health']
       interval: 10s
       retries: 5
       start_period: 30s
       timeout: 5s
+    networks:
+      - fastify-back-end_default
 
   raap-postgresql:
     image: postgres:latest
@@ -24,7 +57,12 @@ services:
     ports:
       - '5432:5432'
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: rj@123
       POSTGRES_DB: postgres
-    restart: unless-stopped
+    networks:
+      - fastify-back-end_default
+
+networks:
+  fastify-back-end_default:
+    driver: bridge

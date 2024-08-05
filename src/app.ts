@@ -6,6 +6,9 @@ import permissions from './permissions';
 import { join } from 'path';
 import { readFileSync } from 'fs';
 import { FastifyReply, FastifyRequest } from 'fastify';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 export interface Options {
   /**
